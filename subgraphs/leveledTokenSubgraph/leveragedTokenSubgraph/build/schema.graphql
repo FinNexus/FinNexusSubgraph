@@ -1,0 +1,8 @@
+type LeveragedTokenPriceEntity @entity {
+  id: ID!
+  poolAddress:Bytes!
+  uptokenprice: BigInt!
+  downtokenprice: BigInt!
+  timestamp: BigInt!
+  network:String!
+}

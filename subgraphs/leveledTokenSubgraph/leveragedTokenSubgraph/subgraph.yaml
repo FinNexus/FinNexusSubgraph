@@ -1,0 +1,68 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: leveragedpool
+    network: rinkeby
+    source:
+      address: "0xb86ded607497fe38a36b26f7b5c3dfdca30ef955"
+      abi: leveragedpool
+      startBlock: 8571600
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - LeveragedTokenPriceEntity
+      abis:
+        - name: leveragedpool
+          file: ./abis/leveragedpool.json
+      eventHandlers:
+        - event: BuyHedge(indexed address,indexed address,uint256,uint256)
+          handler: handleBuyHedge
+        - event: BuyLeverage(indexed address,indexed address,uint256,uint256)
+          handler: handleBuyLeverage
+        - event: Liquidate(indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleLiquidate
+        - event: OperatorTransferred(indexed address,indexed address,indexed uint256)
+          handler: handleOperatorTransferred
+        - event: OriginTransferred(indexed address,indexed address)
+          handler: handleOriginTransferred
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: Rebalance(indexed address,indexed address,uint256,uint256)
+          handler: handleRebalance
+        - event: Redeem(indexed address,indexed address,uint256)
+          handler: handleRedeem
+        - event: SellHedge(indexed address,uint256,uint256)
+          handler: handleSellHedge
+        - event: SellLeverage(indexed address,uint256,uint256)
+          handler: handleSellLeverage
+        - event: Swap(indexed address,indexed address,uint256,uint256)
+          handler: handleSwap
+      blockHandlers:
+        - handler: handleBlock
+      file: ./src/rinkebymapping.ts
+  - kind: ethereum/contract
+    name: fnxoracle
+    network: rinkeby
+    source:
+      address: "0xdae742f9675b5dfa932ce4b1cd0a9f0d089b7b4d"
+      abi: fnxoracle
+      startBlock: 8571600
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - LeveragedTokenPriceEntity
+      abis:
+        - name: fnxoracle
+          file: ./abis/fnxoracle.json
+
+      blockHandlers:
+        - handler: handleBlock
+
+      file: ./src/rinkebymapping.ts
+
