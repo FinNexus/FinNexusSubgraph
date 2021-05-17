@@ -8,7 +8,7 @@ var app = express();
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/34b6f08707964087bea0eb7571fdae41"));
 
 //const sushuchef = new web3.eth.Contract(sushichefabi, sushichefaddress);
-
+//npm i --save lokka lokka-transport-http
 const Lokka = require('lokka').Lokka;
 const Transport = require('lokka-transport-http').Transport;
 
@@ -29,40 +29,39 @@ client.query(`
    // console.log(result);
 });
 
-let networkname = "rinkeby"
-let timeBegin = 1620921600
-let timeEnd = 1621008000
-//let poolAddress = "0xb86ded607497fe38a36b26f7b5c3dfdca30ef955";
-let poolAddress = "0x91c7edbebde88fbc6f4aa2480f9f4e261ba6c6ea"
-
-let querystr = `
-    {
-      leveragedTokenPriceEntities(where: {network:\"`
-        + networkname
-        + `\",timestamp_gte:\"` + timeBegin + '\"'
-        + `,timestamp_lt:\"` + timeEnd + `\"`
-        +`,poolAddress:\"` + poolAddress +`\"`
-        +`}) {
-        poolAddress
-        uptokenprice
-        downtokenprice
-        timestamp
-      }
-    }`
-
-console.log(querystr)
-
-client.query(querystr).then(result => {
-    //console.log(result);
-});
+// //let networkname = "rinkeby"
+// //let timeBegin = 1620921600
+// //let timeEnd = 1621008000
+// //let poolAddress = "0xb86ded607497fe38a36b26f7b5c3dfdca30ef955";
+// let poolAddress = "0x91c7edbebde88fbc6f4aa2480f9f4e261ba6c6ea"
+//
+// let querystr = `
+//     {
+//       leveragedTokenPriceEntities(where: {network:\"`
+//         + networkname
+//         + `\",timestamp_gte:\"` + timeBegin + '\"'
+//         + `,timestamp_lt:\"` + timeEnd + `\"`
+//         +`,poolAddress:\"` + poolAddress +`\"`
+//         +`}) {
+//         poolAddress
+//         uptokenprice
+//         downtokenprice
+//         timestamp
+//       }
+//     }`
+//
+// console.log(querystr)
+//
+// client.query(querystr).then(result => {
+//     //console.log(result);
+// });
 
 let basicUpPrices = new Map()
 let basicDownPrices = new Map()
 async function getBasicPriceData(networkname,timeBegin,timeEnd,poolAddress) {
-
     let querystr = `
     {
-      leveragedTokenPriceEntities(where: {network:\"`
+      leveragedTokenPriceEntities(first:1000,orderBy:timestamp, orderDirection:desc,where: {network:\"`
         + networkname
         + `\",timestamp_gte:\"` + timeBegin + '\"'
         + `,timestamp_lt:\"` + timeEnd + `\"`
@@ -75,26 +74,42 @@ async function getBasicPriceData(networkname,timeBegin,timeEnd,poolAddress) {
       }
     }`
 
+    console.log(querystr)
+
     let result = await client.query(querystr)
     let ltpes = result.leveragedTokenPriceEntities;
+  //  console.log(result)
     for(let i=0;i<ltpes.length;i++) {
          let item = ltpes[i]
-         basicUpPrices[item.timestamp] = item.uptokenprice;
-         basicDownPrices[item.timestamp] = item.downtokenprice;
+         basicUpPrices[item.timestamp] = item.uptokenprice.toString();
+         basicDownPrices[item.timestamp] = item.downtokenprice.toString();
     }
 
-    return {upprices:basicDownPrices,downprices:basicDownPrices}
+    return {upprices:basicUpPrices,downprices:basicDownPrices}
 }
 
 async function getprices() {
-    let res = await getBasicPriceData("rinkeby", 1620921600, 1621008000, "0xb86ded607497fe38a36b26f7b5c3dfdca30ef955")
+    let res = await getBasicPriceData("rinkeby", 1620921600,1621222954, "0xb86ded607497fe38a36b26f7b5c3dfdca30ef955")
     //console.log(res)
-     console.log("uptokenprice", res.upprices)
-     console.log("-----------------------------------------")
-     console.log("downtokenprice", res.downprices)
+    console.log("uptokenprice", res.upprices)
+    console.log("-----------------------------------------")
+    console.log("downtokenprice", res.downprices)
 }
 
 getprices()
+// client.query(`
+//     {
+//       leveragedTokenPriceEntities(where: {network: "rinkeby"}) {
+//         poolAddress
+//         uptokenprice
+//         downtokenprice
+//         timestamp
+//       }
+//     }
+// `).then(result => {
+//     console.log(result);
+// });
+
 
 exports.getBasicPriceData = getBasicPriceData
 
