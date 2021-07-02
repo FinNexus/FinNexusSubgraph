@@ -6,3 +6,61 @@ type LeveragedTokenPriceEntity @entity {
   timestamp: BigInt!
   network:String!
 }
+
+type LeveragedToken @entity {
+  id: ID!
+  name: String!
+  underlyingAddress: Bytes!
+  underlyingName: String!
+  type: String!
+}
+
+type LeverageTokenBuilder @entity {
+  id: ID!
+}
+
+type TradeItem @entity {
+  id: ID!
+  timestamp: BigInt!
+  status: String!
+  undetlying: String!
+  leveragetype: String!
+  value: BigInt!
+  price: BigInt!
+  amount: BigInt!
+  chain:  String!
+}
+
+type TVL @entity {
+  id: ID!
+  timestamp: BigInt!
+  token: Bytes!
+  amount: BigInt!
+  value: BigInt!
+}
+
+type InterestAPY @entity {
+  id: ID!
+  timestamp: BigInt!
+  token:  Bytes!
+  amount: BigInt!
+  value:  BigInt!
+  apy:  BigInt!
+}
+
+type TradeVol @entity {
+  id: ID!
+  timestamp: BigInt!
+  leveragetoken:  Bytes!
+  amount: BigInt!
+  value: BigInt!
+}
+
+type Fee @entity {
+  id: ID!
+  timestamp: BigInt!
+  feetoken:  Bytes!
+  amount: BigInt!
+  value: BigInt!
+}
+
