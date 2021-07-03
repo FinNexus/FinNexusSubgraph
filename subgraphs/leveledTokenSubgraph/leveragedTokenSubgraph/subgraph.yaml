@@ -3,21 +3,41 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: leveragedpool
-    network: rinkeby
+    name:
+    network: mainnet
     source:
-      address: "0xb86ded607497fe38a36b26f7b5c3dfdca30ef955"
-      abi: leveragedpool
-      startBlock: 8571600
+      address: '0xe4f089a68e30224ef6f13db821fcb510f544e865'
+      abi: leverageFactory
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - LeveragedTokenPriceEntity
+        - leverageFactory
       abis:
-        - name: leveragedpool
-          file: ./abis/leveragedpool.json
+        - name: leverageFactory
+          file: ./abis/leverageFactory.json
+      eventHandlers:
+      - event: LeverageCreated(indexed address,indexed address,indexed address)
+        handler: handleLeverageCreated
+      file: ./src/mapping.ts
+
+  templates:
+    - kind: ethereum/contract
+      name: LeveragedToken
+      network: mainnet
+      source:
+        abi: leveragedPool
+      mapping:
+        kind: ethereum/events
+        apiVersion: 0.0.4
+        language: wasm/assemblyscript
+        file: ./src/mapping.ts
+        entities:
+          - leveragedPool
+        abis:
+          - name: leveragedPool
+            file: ./abis/leveragedPool.json
       eventHandlers:
         - event: BuyHedge(indexed address,indexed address,uint256,uint256)
           handler: handleBuyHedge
@@ -25,12 +45,6 @@ dataSources:
           handler: handleBuyLeverage
         - event: Liquidate(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleLiquidate
-        - event: OperatorTransferred(indexed address,indexed address,indexed uint256)
-          handler: handleOperatorTransferred
-        - event: OriginTransferred(indexed address,indexed address)
-          handler: handleOriginTransferred
-        - event: OwnershipTransferred(indexed address,indexed address)
-          handler: handleOwnershipTransferred
         - event: Rebalance(indexed address,indexed address,uint256,uint256)
           handler: handleRebalance
         - event: Redeem(indexed address,indexed address,uint256)
@@ -41,28 +55,25 @@ dataSources:
           handler: handleSellLeverage
         - event: Swap(indexed address,indexed address,uint256,uint256)
           handler: handleSwap
-      blockHandlers:
-        - handler: handleBlock
-      file: ./src/rinkebymapping.ts
-  - kind: ethereum/contract
-    name: fnxoracle
-    network: rinkeby
-    source:
-      address: "0xdae742f9675b5dfa932ce4b1cd0a9f0d089b7b4d"
-      abi: fnxoracle
-      startBlock: 8571600
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
+
+    - kind: ethereum/contract
+      name: fnxoracle
+      network: mainnet
+      source:
+        address: "0xdae742f9675b5dfa932ce4b1cd0a9f0d089b7b4d"
+        abi: fnxoracle
+        startBlock: 8571600
+      mapping:
+        kind: ethereum/events
+        apiVersion: 0.0.4
+        language: wasm/assemblyscript
+        entities:
         - LeveragedTokenPriceEntity
-      abis:
+        abis:
         - name: fnxoracle
           file: ./abis/fnxoracle.json
-
-      blockHandlers:
+        blockHandlers:
         - handler: handleBlock
+        file: ./src/mapping.ts
 
-      file: ./src/rinkebymapping.ts
 
