@@ -17,21 +17,37 @@ import {
 import {
     fnxoracle
 }  from "../generated/fnxoracle/fnxoracle"
-import {LeveragedTokenPriceEntity} from "../generated/schema"
+import {LeveragedTokenPriceEntity,
+        leveragedPool,
+        leverageFactory,
+        TradeItem,
+        TVL,
+        InterestAPY,
+        TradeVol,
+        Fee
+} from "../generated/schema"
 
 export function handleBuyHedge(event: BuyHedge): void {
+
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  // let entity = ExampleEntity.load(event.transaction.from.toHex())
-  //
+  let entity = TradeItem.load(event.transaction.from.toHex())
+
   // // Entities only exist after they have been saved to the store;
   // // `null` checks allow to create entities on demand
-  // if (entity == null) {
-  //   entity = new ExampleEntity(event.transaction.from.toHex())
-  //
-  //   // Entity fields can be set using simple assignments
-  //   entity.count = BigInt.fromI32(0)
-  // }
+  if (entity == null) {
+     let contract = leveragedpool.bind(event.address);
+     let info = contract.getLeverageInfo();
+
+     entity = new TradeItem(event.transaction.from.toHex());
+     entity.timestamp = event.block.timestamp;
+     entity.status = "Buying";
+     entity.leveragetype = "Bear";
+     entity.undetlying = info[0];
+     entity.value =
+     entity.price =
+     entity.amount =
+  }
   //
   // // BigInt and BigDecimal math are supported
   // entity.count = entity.count + BigInt.fromI32(1)
@@ -41,7 +57,7 @@ export function handleBuyHedge(event: BuyHedge): void {
   // entity.Coin = event.params.Coin
   //
   // // Entities can be written to the store with `.save()`
-  // entity.save()
+  entity.save()
 
   // Note: If a handler doesn't require existing field values, it is faster
   // _not_ to load the entity from the store. Instead, create it fresh with
@@ -145,3 +161,66 @@ export function handleBlock(block: ethereum.Block): void {
 
 }
 
+//export function handleBuyHedge(event: BuyHedge): void {
+
+    // Entities can be loaded from the store using a string ID; this ID
+    // needs to be unique across all entities of the same type
+   // let entity = TradeItem.load(event.transaction.from.toHex())
+
+    // // Entities only exist after they have been saved to the store;
+    // // `null` checks allow to create entities on demand
+    // if (entity == null) {
+    //     entity = new TradeItem(event.transaction.from.toHex())
+    //     // Entity fields can be set using simple assignments
+    //     entity = BigInt.fromI32(0)
+    // }
+    //
+    // // BigInt and BigDecimal math are supported
+    // entity.count = entity.count + BigInt.fromI32(1)
+    //
+    // // Entity fields can be set based on event parameters
+    // entity.from = event.params.from
+    // entity.Coin = event.params.Coin
+    //
+    // // Entities can be written to the store with `.save()`
+    //entity.save()
+
+    // Note: If a handler doesn't require existing field values, it is faster
+    // _not_ to load the entity from the store. Instead, create it fresh with
+    // `new Entity(...)`, set the fields that should be updated and save the
+    // entity back to the store. Fields that were not set or unset remain
+    // unchanged, allowing for partial updates to be applied.
+
+    // It is also possible to access smart contracts from mappings. For
+    // example, the contract that has emitted the event can be connected to
+    // with:
+    //
+    // let contract = Contract.bind(event.address)
+    //
+    // The following functions can then be called on this contract to access
+    // state variables and other data:
+    //
+    // - contract.buyFee(...)log
+    // - contract.buyPrices(...)
+    // - contract.defaultLeverageRatio(...)
+    // - contract.defaultRebalanceWorth(...)
+    // - contract.feeAddress(...)
+    // - contract.getCurrentLeverageRate(...)
+    // - contract.getEnableRebalanceAndLiquidate(...)
+    // - contract.getHedgeInfo(...)
+    // - contract.getLeverageFee(...)
+    // - contract.getLeverageInfo(...)
+    // - contract.getLeverageRebase(...)
+    // - contract.getOperator(...)
+    // - contract.getOracleAddress(...)
+    // - contract.getTokenNetworths(...)
+    // - contract.getTotalworths(...)
+    // - contract.implementationVersion(...)
+    // - contract.isOwner(...)
+    // - contract.liquidateThreshold(...)
+    // - contract.owner(...)
+    // - contract.rebalanceFee(...)
+    // - contract.rebalancePrices(...)
+    // - contract.rebaseThreshold(...)
+    // - contract.sellFee(...)
+//}
