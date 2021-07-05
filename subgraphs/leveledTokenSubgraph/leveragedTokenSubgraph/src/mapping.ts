@@ -18,8 +18,8 @@ import {
     fnxoracle
 }  from "../generated/fnxoracle/fnxoracle"
 import {LeveragedTokenPriceEntity,
-        leveragedPool,
-        leverageFactory,
+        LeveragedPool,
+        LeverageFactory,
         TradeItem,
         TVL,
         InterestAPY,
@@ -36,7 +36,7 @@ export function handleBuyHedge(event: BuyHedge): void {
   // // Entities only exist after they have been saved to the store;
   // // `null` checks allow to create entities on demand
   if (entity == null) {
-     let contract = leveragedpool.bind(event.address);
+     let contract = LeveragedPool.bind(event.address);
      let info = contract.getLeverageInfo();
 
      entity = new TradeItem(event.transaction.from.toHex());
@@ -47,6 +47,7 @@ export function handleBuyHedge(event: BuyHedge): void {
      entity.value =
      entity.price =
      entity.amount =
+     entity.save()
   }
   //
   // // BigInt and BigDecimal math are supported
@@ -57,7 +58,7 @@ export function handleBuyHedge(event: BuyHedge): void {
   // entity.Coin = event.params.Coin
   //
   // // Entities can be written to the store with `.save()`
-  entity.save()
+
 
   // Note: If a handler doesn't require existing field values, it is faster
   // _not_ to load the entity from the store. Instead, create it fresh with
@@ -118,6 +119,43 @@ export function handleSellHedge(event: SellHedge): void {}
 export function handleSellLeverage(event: SellLeverage): void {}
 
 export function handleSwap(event: Swap): void {}
+
+export function handleLeverageCreated(event: LeverageCreated): void {
+    log.warning('PrizePoolCreated `event.address`:, {}', [event.address.toHex()])
+
+    let leverageFactory = LeverageFactory.load(event.address.toHex())
+
+    if (!prizePoolBuilder) {
+        prizePoolBuilder = new PrizePoolBuilder(event.address.toHex())
+        prizePoolBuilder.save()
+    }
+
+    let prizePoolModuleManager = PrizePoolModuleManager.load(event.params.moduleManager.toHex())
+
+    if (!prizePoolModuleManager) {
+        prizePoolModuleManager = new PrizePoolModuleManager(event.params.moduleManager.toHex())
+        const boundPrizePoolModuleManager = PrizePoolModuleManagerContract.bind(event.params.moduleManager)
+
+        log.warning('PrizePoolAddress!, {}', [boundPrizePoolModuleManager.prizePool().toHexString()])
+
+        log.warning('Here ! address?, {}', [boundPrizePoolModuleManager.prizePool().toHexString()])
+
+        // Store Dynamically generated contracts
+        PeriodicPrizePoolTemplate.create(boundPrizePoolModuleManager.prizePool())
+        // let context = new DataSourceContext()
+        // context.setBytes("prizePoolModuleManager", event.params.moduleManager)
+        // PeriodicPrizePool.createWithContext(boundPrizePoolModuleManager.prizePool(), context)
+
+        const prizePool = new PeriodicPrizePool(boundPrizePoolModuleManager.prizePool().toHex())
+        prizePool.prizePoolModuleManager = event.params.moduleManager.toHex()
+        prizePool.number = BigInt.fromI32(2)
+        prizePool.save()
+
+        prizePoolModuleManager.prizePoolBuilder = event.address.toHex()
+        prizePoolModuleManager.save()
+        log.warning('Saved! Saved! Saved! Saved! , {}', [boundPrizePoolModuleManager.prizePool().toHexString()])
+    }
+}
 
 let INTERVALSECONDS = BigInt.fromI32(600);
 let POOL_ADDRESSES:Array<string>=["0xb86ded607497fe38a36b26f7b5c3dfdca30ef955",

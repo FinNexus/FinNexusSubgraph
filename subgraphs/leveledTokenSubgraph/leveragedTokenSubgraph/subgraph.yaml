@@ -13,7 +13,8 @@ dataSources:
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - leverageFactory
+        - LeverageFactory
+        - LeveragedPool
       abis:
         - name: leverageFactory
           file: ./abis/leverageFactory.json
@@ -34,7 +35,8 @@ dataSources:
         language: wasm/assemblyscript
         file: ./src/mapping.ts
         entities:
-          - leveragedPool
+          - LeveragedPool
+          - TradeItem
         abis:
           - name: leveragedPool
             file: ./abis/leveragedPool.json
