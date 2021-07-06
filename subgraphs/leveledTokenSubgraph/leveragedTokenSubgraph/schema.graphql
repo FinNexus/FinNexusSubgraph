@@ -7,14 +7,18 @@ type LeveragedTokenPriceEntity @entity {
   network:String!
 }
 
+<<<<<<< HEAD
 type leveragePool @entity {
+=======
+type LeveragedPool @entity {
+>>>>>>> d0fcf85d9a2c03e214e1724e4f2a98898a6b94f5
   id: ID!
   name: String!
   underlyingAddress: Bytes!
   underlyingName: String!
 }
 
-type leverageFactory @entity {
+type LeverageFactory @entity {
   id: ID!
 }
 
@@ -22,12 +26,11 @@ type TradeItem @entity {
   id: ID!
   timestamp: BigInt!
   status: String!
-  undetlying: String!
+  undetlying: Bytes!
   leveragetype: String!
   value: BigInt!
   price: BigInt!
   amount: BigInt!
-  chain:  String!
 }
 
 type TVL @entity {

@@ -107,7 +107,6 @@ export function handleCreateStakePool(event: CreateStakePool): void {
         stakePoolTemplate.create(event.params.stakePool)
     }
 
-
 }
 
 
@@ -132,6 +131,7 @@ export function handleBuyHedge(event: BuyHedge): void {
      entity.value = entity.price.times(entity.amount);
      entity.save()
   }
+
 }
 
 export function handleBuyLeverage(event: BuyLeverage): void {}
@@ -153,6 +153,43 @@ export function handleSellHedge(event: SellHedge): void {}
 export function handleSellLeverage(event: SellLeverage): void {}
 
 export function handleSwap(event: Swap): void {}
+
+export function handleLeverageCreated(event: LeverageCreated): void {
+    log.warning('PrizePoolCreated `event.address`:, {}', [event.address.toHex()])
+
+    let leverageFactory = LeverageFactory.load(event.address.toHex())
+
+    if (!prizePoolBuilder) {
+        prizePoolBuilder = new PrizePoolBuilder(event.address.toHex())
+        prizePoolBuilder.save()
+    }
+
+    let prizePoolModuleManager = PrizePoolModuleManager.load(event.params.moduleManager.toHex())
+
+    if (!prizePoolModuleManager) {
+        prizePoolModuleManager = new PrizePoolModuleManager(event.params.moduleManager.toHex())
+        const boundPrizePoolModuleManager = PrizePoolModuleManagerContract.bind(event.params.moduleManager)
+
+        log.warning('PrizePoolAddress!, {}', [boundPrizePoolModuleManager.prizePool().toHexString()])
+
+        log.warning('Here ! address?, {}', [boundPrizePoolModuleManager.prizePool().toHexString()])
+
+        // Store Dynamically generated contracts
+        PeriodicPrizePoolTemplate.create(boundPrizePoolModuleManager.prizePool())
+        // let context = new DataSourceContext()
+        // context.setBytes("prizePoolModuleManager", event.params.moduleManager)
+        // PeriodicPrizePool.createWithContext(boundPrizePoolModuleManager.prizePool(), context)
+
+        const prizePool = new PeriodicPrizePool(boundPrizePoolModuleManager.prizePool().toHex())
+        prizePool.prizePoolModuleManager = event.params.moduleManager.toHex()
+        prizePool.number = BigInt.fromI32(2)
+        prizePool.save()
+
+        prizePoolModuleManager.prizePoolBuilder = event.address.toHex()
+        prizePoolModuleManager.save()
+        log.warning('Saved! Saved! Saved! Saved! , {}', [boundPrizePoolModuleManager.prizePool().toHexString()])
+    }
+}
 
 let INTERVALSECONDS = BigInt.fromI32(600);
 let POOL_ADDRESSES:Array<string>=["0xb86ded607497fe38a36b26f7b5c3dfdca30ef955",
