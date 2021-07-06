@@ -2,78 +2,131 @@ specVersion: 0.0.2
 schema:
   file: ./schema.graphql
 dataSources:
-  - kind: ethereum/contract
-    name:
-    network: mainnet
-    source:
-      address: '0xe4f089a68e30224ef6f13db821fcb510f544e865'
-      abi: leverageFactory
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
-        - leverageFactory
-      abis:
-        - name: leverageFactory
-          file: ./abis/leverageFactory.json
-      eventHandlers:
-      - event: LeverageCreated(indexed address,indexed address,indexed address)
-        handler: handleLeverageCreated
-      file: ./src/mapping.ts
+- kind: ethereum/contract
+  name: leverageFactory
+  network: rinkeby
+  source:
+    address: '0xdb6136017fe722044a332df2f2ffee7c26b06d75'
+    abi: leverageFactory
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.4
+    language: wasm/assemblyscript
+    entities:
+    - leverageFactory
+    abis:
+    - name: leverageFactory
+      file: ./abis/leverageFactory.json
+    eventHandlers:
+    - event: CreateLeveragePool(indexed address,indexed address,indexed address,uint256,uint256)
+      handler: handleCreateLeveragePool
+    - event: CreateStakePool(indexed address,indexed address,uint256)
+      handler: handleCreateStakePool
+    file: ./src/mapping.ts
 
-  templates:
-    - kind: ethereum/contract
-      name: LeveragedToken
-      network: mainnet
-      source:
-        abi: leveragedPool
-      mapping:
-        kind: ethereum/events
-        apiVersion: 0.0.4
-        language: wasm/assemblyscript
-        file: ./src/mapping.ts
-        entities:
-          - leveragedPool
-        abis:
-          - name: leveragedPool
-            file: ./abis/leveragedPool.json
-      eventHandlers:
-        - event: BuyHedge(indexed address,indexed address,uint256,uint256)
-          handler: handleBuyHedge
-        - event: BuyLeverage(indexed address,indexed address,uint256,uint256)
-          handler: handleBuyLeverage
-        - event: Liquidate(indexed address,indexed address,uint256,uint256,uint256)
-          handler: handleLiquidate
-        - event: Rebalance(indexed address,indexed address,uint256,uint256)
-          handler: handleRebalance
-        - event: Redeem(indexed address,indexed address,uint256)
-          handler: handleRedeem
-        - event: SellHedge(indexed address,uint256,uint256)
-          handler: handleSellHedge
-        - event: SellLeverage(indexed address,uint256,uint256)
-          handler: handleSellLeverage
-        - event: Swap(indexed address,indexed address,uint256,uint256)
-          handler: handleSwap
+- kind: ethereum/contract
+  name:	fnxoracle
+  network: rinkeby
+  source:
+    address: "0xdae742f9675b5dfa932ce4b1cd0a9f0d089b7b4d"
+    abi: fnxoracle
+    startBlock: 8571600
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.4
+    language: wasm/assemblyscript
+    entities:
+    - LeveragedTokenPriceEntity
+    abis:
+    - name: fnxoracle
+      file: ./abis/fnxoracle.json
+    blockHandlers:
+    - handler: handleBlock
+    file: ./src/mapping.ts
 
-    - kind: ethereum/contract
-      name: fnxoracle
-      network: mainnet
-      source:
-        address: "0xdae742f9675b5dfa932ce4b1cd0a9f0d089b7b4d"
-        abi: fnxoracle
-        startBlock: 8571600
-      mapping:
-        kind: ethereum/events
-        apiVersion: 0.0.4
-        language: wasm/assemblyscript
-        entities:
-        - LeveragedTokenPriceEntity
-        abis:
-        - name: fnxoracle
-          file: ./abis/fnxoracle.json
-        blockHandlers:
-        - handler: handleBlock
-        file: ./src/mapping.ts
+templates:
+- kind: ethereum/contract
+  name: leveragePool
+  network: rinkeby
+  source:
+    abi: leveragePool
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.4
+    language: wasm/assemblyscript
+    file: ./src/mapping.ts
+    entities:
+    - leveragePool
+    abis:
+    - name: leveragePool
+      file: ./abis/leveragePool.json
+    eventHandlers:
+    - event: BuyHedge(indexed address,indexed address,uint256,uint256,uint256)
+      handler: handleBuyHedge
+    - event: BuyLeverage(indexed address,indexed address,uint256,uint256,uint256)
+      handler: handleBuyLeverage
+    - event: Liquidate(indexed address,indexed address,uint256,uint256,uint256)
+      handler: handleLiquidate
+    - event: OperatorTransferred(indexed address,indexed address,indexed uint256)
+      handler: handleOperatorTransferred
+    - event: OriginTransferred(indexed address,indexed address)
+      handler: handleOriginTransferred
+    - event: OwnershipTransferred(indexed address,indexed address)
+      handler: handleOwnershipTransferred
+    - event: Rebalance(indexed address,indexed address,uint256,uint256)
+      handler: handleRebalance
+    - event: Redeem(indexed address,indexed address,uint256)
+      handler: handleRedeem
+    - event: SellHedge(indexed address,indexed address,uint256,uint256,uint256)
+      handler: handleSellHedge
+    - event: SellLeverage(indexed address,indexed address,uint256,uint256,uint256)
+      handler: handleSellLeverage
+    - event: Swap(indexed address,indexed address,uint256,uint256)
+      handler: handleSwap
 
-
+- kind: ethereum/contract
+  name: stakePool
+  network: rinkeby
+  source:
+    abi: stakePool
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.4
+    language: wasm/assemblyscript
+    file: ./src/mapping.ts
+    entities:
+    - stakePool
+    abis:
+    - name: stakePool
+      file: ./abis/stakePool.json
+    eventHandlers:
+    - event: Borrow(indexed address,indexed address,uint256,uint256)
+      handler: handleBorrow
+    - event: Interest(indexed address,indexed address,uint256)
+      handler: handleInterest
+    - event: Redeem(indexed address,indexed address,uint256)
+      handler: handleRedeem
+    - event: Repay(indexed address,indexed address,uint256,uint256)
+      handler: handleRepay
+    - event: Stake(indexed address,indexed address,uint256,uint256)
+      handler: handleStake
+    - event: Unstake(indexed address,indexed address,uint256,uint256)
+      handler: handleUnstake
+- kind: ethereum/contract
+  name: erc20
+  network: rinkeby
+  source:
+    abi: erc20
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.4
+    language: wasm/assemblyscript
+    file: ./src/mapping.ts
+    entities:
+    - stakePool
+    abis:
+    - name: erc20
+      file: ./abis/erc20token.json
+    eventHandlers:
+    - event: Transfer(indexed address,indexed address,uint256)
+      handler: handleTransfer

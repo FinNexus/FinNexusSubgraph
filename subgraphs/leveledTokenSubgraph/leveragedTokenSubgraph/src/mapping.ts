@@ -1,6 +1,5 @@
 import { BigInt,ethereum,Address,log} from "@graphprotocol/graph-ts"
 import {
-  leveragedpool,
   BuyHedge,
   BuyLeverage,
   Liquidate,
@@ -12,23 +11,107 @@ import {
   SellHedge,
   SellLeverage,
   Swap
-} from "../generated/leveragedpool/leveragedpool"
+} from "../generated/templates/leveragePool/leveragePool"
+
+import {
+ leverageFactory,
+ CreateLeveragePool,
+ CreateStakePool
+} from "../generated/leverageFactory/leverageFactory"
+
+import {
+    leveragePool as leveragePoolTemplate,
+    stakePool as stakePoolTemplate
+} from "../generated/templates"
+
+import {
+    leveragePool as leveragePoolSc,
+} from "../generated/templates/leveragePool/leveragePool"
+
+import {
+    stakePool as stakePoolSc,
+} from "../generated/templates/stakePool/stakePool"
+
+import {
+    erc20,
+    Transfer,
+} from "../generated/templates/erc20/erc20"
+
+import {
+    Borrow,
+    Interest,
+    Redeem,
+    Repay,
+    Stake,
+    Unstake
+} from "../generated/templates/stakePool/stakePool"
 
 import {
     fnxoracle
 }  from "../generated/fnxoracle/fnxoracle"
+
 import {LeveragedTokenPriceEntity,
-        leveragedPool,
+        leveragePool,
         leverageFactory,
         TradeItem,
         TVL,
         InterestAPY,
         TradeVol,
-        Fee
+        Fee,
+        stakePool
 } from "../generated/schema"
 
-export function handleBuyHedge(event: BuyHedge): void {
+export function handleCreateLeveragePool(event: CreateLeveragePool): void {
+    // Store Dynamically generated contracts
+    let factoryEntity = leverageFactory.load(event.address.toHex())
+    if(factoryEntity==null) {
+        factoryEntity = new leverageFactory(event.address.toHex())
+        factoryEntity.save();
+    }
 
+    let poolEntity = leveragePool.load(event.params.leveragePool.toHex())
+    if (poolEntity == null){
+        let leveragesc = leveragePoolSc.bind(event.params.leveragePool);
+        poolEntity = new leveragePool(event.params.leveragePool.toHex());
+        let tk = erc20.bind(event.params.tokenB);
+        poolEntity.underlyingAddress = event.params.tokenB
+        poolEntity.underlyingName = tk.symbol();
+
+        let info = leveragesc.getHedgeInfo();
+        let rk = erc20.bind(info[2]);
+        poolEntity.name = rk.name();
+        poolEntity.save();
+
+        //begin monitor pool event
+        leveragePoolTemplate.create(event.params.leveragePool);
+    }
+
+
+}
+
+export function handleCreateStakePool(event: CreateStakePool): void {
+    let factoryEntity = leverageFactory.load(event.address.toHex());
+    if(factoryEntity==null) {
+        factoryEntity = new leverageFactory(event.address.toHex());
+        factoryEntity.save();
+    }
+
+    let poolEntity = stakePool.load(event.params.stakePool.toHex())
+    if (poolEntity == null){
+        poolEntity = new stakePool(event.params.stakePool.toHex());
+        poolEntity.underlyingAddress = event.params.token;
+        let tk = erc20.bind(event.params.token);
+        poolEntity.underlyingName = tk.symbol();
+        poolEntity.interestrate = event.params.interestrate;
+        poolEntity.save();
+        stakePoolTemplate.create(event.params.stakePool)
+    }
+
+
+}
+
+
+export function handleBuyHedge(event: BuyHedge): void {
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
   let entity = TradeItem.load(event.transaction.from.toHex())
@@ -36,7 +119,7 @@ export function handleBuyHedge(event: BuyHedge): void {
   // // Entities only exist after they have been saved to the store;
   // // `null` checks allow to create entities on demand
   if (entity == null) {
-     let contract = leveragedpool.bind(event.address);
+     let contract = leveragePool.bind(event.address);
      let info = contract.getLeverageInfo();
 
      entity = new TradeItem(event.transaction.from.toHex());
@@ -44,59 +127,11 @@ export function handleBuyHedge(event: BuyHedge): void {
      entity.status = "Buying";
      entity.leveragetype = "Bear";
      entity.undetlying = info[0];
-     entity.value =
-     entity.price =
-     entity.amount =
+     entity.price = event.params.tokenPrice;
+     entity.amount = event.params.hedgeAmount;
+     entity.value = entity.price.times(entity.amount);
+     entity.save()
   }
-  //
-  // // BigInt and BigDecimal math are supported
-  // entity.count = entity.count + BigInt.fromI32(1)
-  //
-  // // Entity fields can be set based on event parameters
-  // entity.from = event.params.from
-  // entity.Coin = event.params.Coin
-  //
-  // // Entities can be written to the store with `.save()`
-  entity.save()
-
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
-
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.buyFee(...)log
-  // - contract.buyPrices(...)
-  // - contract.defaultLeverageRatio(...)
-  // - contract.defaultRebalanceWorth(...)
-  // - contract.feeAddress(...)
-  // - contract.getCurrentLeverageRate(...)
-  // - contract.getEnableRebalanceAndLiquidate(...)
-  // - contract.getHedgeInfo(...)
-  // - contract.getLeverageFee(...)
-  // - contract.getLeverageInfo(...)
-  // - contract.getLeverageRebase(...)
-  // - contract.getOperator(...)
-  // - contract.getOracleAddress(...)
-  // - contract.getTokenNetworths(...)
-  // - contract.getTotalworths(...)
-  // - contract.implementationVersion(...)
-  // - contract.isOwner(...)
-  // - contract.liquidateThreshold(...)
-  // - contract.owner(...)
-  // - contract.rebalanceFee(...)
-  // - contract.rebalancePrices(...)
-  // - contract.rebaseThreshold(...)
-  // - contract.sellFee(...)
 }
 
 export function handleBuyLeverage(event: BuyLeverage): void {}
@@ -161,66 +196,4 @@ export function handleBlock(block: ethereum.Block): void {
 
 }
 
-//export function handleBuyHedge(event: BuyHedge): void {
-
-    // Entities can be loaded from the store using a string ID; this ID
-    // needs to be unique across all entities of the same type
-   // let entity = TradeItem.load(event.transaction.from.toHex())
-
-    // // Entities only exist after they have been saved to the store;
-    // // `null` checks allow to create entities on demand
-    // if (entity == null) {
-    //     entity = new TradeItem(event.transaction.from.toHex())
-    //     // Entity fields can be set using simple assignments
-    //     entity = BigInt.fromI32(0)
-    // }
-    //
-    // // BigInt and BigDecimal math are supported
-    // entity.count = entity.count + BigInt.fromI32(1)
-    //
-    // // Entity fields can be set based on event parameters
-    // entity.from = event.params.from
-    // entity.Coin = event.params.Coin
-    //
-    // // Entities can be written to the store with `.save()`
-    //entity.save()
-
-    // Note: If a handler doesn't require existing field values, it is faster
-    // _not_ to load the entity from the store. Instead, create it fresh with
-    // `new Entity(...)`, set the fields that should be updated and save the
-    // entity back to the store. Fields that were not set or unset remain
-    // unchanged, allowing for partial updates to be applied.
-
-    // It is also possible to access smart contracts from mappings. For
-    // example, the contract that has emitted the event can be connected to
-    // with:
-    //
-    // let contract = Contract.bind(event.address)
-    //
-    // The following functions can then be called on this contract to access
-    // state variables and other data:
-    //
-    // - contract.buyFee(...)log
-    // - contract.buyPrices(...)
-    // - contract.defaultLeverageRatio(...)
-    // - contract.defaultRebalanceWorth(...)
-    // - contract.feeAddress(...)
-    // - contract.getCurrentLeverageRate(...)
-    // - contract.getEnableRebalanceAndLiquidate(...)
-    // - contract.getHedgeInfo(...)
-    // - contract.getLeverageFee(...)
-    // - contract.getLeverageInfo(...)
-    // - contract.getLeverageRebase(...)
-    // - contract.getOperator(...)
-    // - contract.getOracleAddress(...)
-    // - contract.getTokenNetworths(...)
-    // - contract.getTotalworths(...)
-    // - contract.implementationVersion(...)
-    // - contract.isOwner(...)
-    // - contract.liquidateThreshold(...)
-    // - contract.owner(...)
-    // - contract.rebalanceFee(...)
-    // - contract.rebalancePrices(...)
-    // - contract.rebaseThreshold(...)
-    // - contract.sellFee(...)
-//}
+export function handleTransfer(event: Transfer): void {}

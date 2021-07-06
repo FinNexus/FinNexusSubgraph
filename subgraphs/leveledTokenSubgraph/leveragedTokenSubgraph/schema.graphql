@@ -7,12 +7,11 @@ type LeveragedTokenPriceEntity @entity {
   network:String!
 }
 
-type leveragedPool @entity {
+type leveragePool @entity {
   id: ID!
   name: String!
   underlyingAddress: Bytes!
   underlyingName: String!
-  type: String!
 }
 
 type leverageFactory @entity {
@@ -54,6 +53,13 @@ type TradeVol @entity {
   leveragetoken:  Bytes!
   amount: BigInt!
   value: BigInt!
+}
+
+type stakePool @entity {
+  id: ID!
+  underlyingAddress: Bytes!
+  underlyingName: String!
+  interestrate: BigInt!
 }
 
 type Fee @entity {
