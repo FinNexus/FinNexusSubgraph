@@ -25,11 +25,11 @@ dataSources:
     file: ./src/mapping.ts
 
 - kind: ethereum/contract
-  name:	fnxoracle
+  name: phxoracle
   network: rinkeby
   source:
     address: "0xdae742f9675b5dfa932ce4b1cd0a9f0d089b7b4d"
-    abi: fnxoracle
+    abi: phxoracle
     startBlock: 8571600
   mapping:
     kind: ethereum/events
@@ -38,8 +38,9 @@ dataSources:
     entities:
     - LeveragedTokenPriceEntity
     abis:
-    - name: fnxoracle
-      file: ./abis/fnxoracle.json
+    - name: phxoracle
+      file: ./abis/phxoracle.json
+
     blockHandlers:
     - handler: handleBlock
     file: ./src/mapping.ts

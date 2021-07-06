@@ -152,7 +152,7 @@ export class leveragePool extends Entity {
   }
 }
 
-export class leverageFactory extends Entity {
+export class LeverageFactory extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -160,17 +160,17 @@ export class leverageFactory extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save leverageFactory entity without an ID");
+    assert(id !== null, "Cannot save LeverageFactory entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save leverageFactory entity with non-string ID. " +
+      "Cannot save LeverageFactory entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("leverageFactory", id.toString(), this);
+    store.set("LeverageFactory", id.toString(), this);
   }
 
-  static load(id: string): leverageFactory | null {
-    return store.get("leverageFactory", id) as leverageFactory | null;
+  static load(id: string): LeverageFactory | null {
+    return store.get("LeverageFactory", id) as LeverageFactory | null;
   }
 
   get id(): string {
@@ -213,6 +213,15 @@ export class TradeItem extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get from(): Bytes {
+    let value = this.get("from");
+    return value.toBytes();
+  }
+
+  set from(value: Bytes) {
+    this.set("from", Value.fromBytes(value));
+  }
+
   get timestamp(): BigInt {
     let value = this.get("timestamp");
     return value.toBigInt();
@@ -231,13 +240,13 @@ export class TradeItem extends Entity {
     this.set("status", Value.fromString(value));
   }
 
-  get undetlying(): string {
-    let value = this.get("undetlying");
-    return value.toString();
+  get underlying(): Bytes {
+    let value = this.get("underlying");
+    return value.toBytes();
   }
 
-  set undetlying(value: string) {
-    this.set("undetlying", Value.fromString(value));
+  set underlying(value: Bytes) {
+    this.set("underlying", Value.fromBytes(value));
   }
 
   get leveragetype(): string {
@@ -274,15 +283,6 @@ export class TradeItem extends Entity {
 
   set amount(value: BigInt) {
     this.set("amount", Value.fromBigInt(value));
-  }
-
-  get chain(): string {
-    let value = this.get("chain");
-    return value.toString();
-  }
-
-  set chain(value: string) {
-    this.set("chain", Value.fromString(value));
   }
 }
 
@@ -323,6 +323,15 @@ export class TVL extends Entity {
 
   set timestamp(value: BigInt) {
     this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get poolAddress(): Bytes {
+    let value = this.get("poolAddress");
+    return value.toBytes();
+  }
+
+  set poolAddress(value: Bytes) {
+    this.set("poolAddress", Value.fromBytes(value));
   }
 
   get token(): Bytes {
@@ -392,6 +401,15 @@ export class InterestAPY extends Entity {
     this.set("timestamp", Value.fromBigInt(value));
   }
 
+  get poolAddress(): Bytes {
+    let value = this.get("poolAddress");
+    return value.toBytes();
+  }
+
+  set poolAddress(value: Bytes) {
+    this.set("poolAddress", Value.fromBytes(value));
+  }
+
   get token(): Bytes {
     let value = this.get("token");
     return value.toBytes();
@@ -399,24 +417,6 @@ export class InterestAPY extends Entity {
 
   set token(value: Bytes) {
     this.set("token", Value.fromBytes(value));
-  }
-
-  get amount(): BigInt {
-    let value = this.get("amount");
-    return value.toBigInt();
-  }
-
-  set amount(value: BigInt) {
-    this.set("amount", Value.fromBigInt(value));
-  }
-
-  get value(): BigInt {
-    let value = this.get("value");
-    return value.toBigInt();
-  }
-
-  set value(value: BigInt) {
-    this.set("value", Value.fromBigInt(value));
   }
 
   get apy(): BigInt {
@@ -468,31 +468,81 @@ export class TradeVol extends Entity {
     this.set("timestamp", Value.fromBigInt(value));
   }
 
-  get leveragetoken(): Bytes {
-    let value = this.get("leveragetoken");
+  get pool(): Bytes {
+    let value = this.get("pool");
     return value.toBytes();
   }
 
-  set leveragetoken(value: Bytes) {
-    this.set("leveragetoken", Value.fromBytes(value));
+  set pool(value: Bytes) {
+    this.set("pool", Value.fromBytes(value));
   }
 
-  get amount(): BigInt {
-    let value = this.get("amount");
-    return value.toBigInt();
+  get buyamount(): BigInt | null {
+    let value = this.get("buyamount");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set amount(value: BigInt) {
-    this.set("amount", Value.fromBigInt(value));
+  set buyamount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("buyamount");
+    } else {
+      this.set("buyamount", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get value(): BigInt {
-    let value = this.get("value");
-    return value.toBigInt();
+  get buyvalue(): BigInt | null {
+    let value = this.get("buyvalue");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set value(value: BigInt) {
-    this.set("value", Value.fromBigInt(value));
+  set buyvalue(value: BigInt | null) {
+    if (value === null) {
+      this.unset("buyvalue");
+    } else {
+      this.set("buyvalue", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get sellamount(): BigInt | null {
+    let value = this.get("sellamount");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set sellamount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("sellamount");
+    } else {
+      this.set("sellamount", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get sellvalue(): BigInt | null {
+    let value = this.get("sellvalue");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set sellvalue(value: BigInt | null) {
+    if (value === null) {
+      this.unset("sellvalue");
+    } else {
+      this.set("sellvalue", Value.fromBigInt(value as BigInt));
+    }
   }
 }
 
@@ -593,13 +643,13 @@ export class Fee extends Entity {
     this.set("timestamp", Value.fromBigInt(value));
   }
 
-  get feetoken(): Bytes {
-    let value = this.get("feetoken");
+  get token(): Bytes {
+    let value = this.get("token");
     return value.toBytes();
   }
 
-  set feetoken(value: Bytes) {
-    this.set("feetoken", Value.fromBytes(value));
+  set token(value: Bytes) {
+    this.set("token", Value.fromBytes(value));
   }
 
   get amount(): BigInt {

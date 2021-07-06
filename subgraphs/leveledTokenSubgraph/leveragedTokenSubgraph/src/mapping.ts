@@ -14,7 +14,7 @@ import {
 } from "../generated/templates/leveragePool/leveragePool"
 
 import {
- leverageFactory,
+ leverageFactory as leverageFactorysc,
  CreateLeveragePool,
  CreateStakePool
 } from "../generated/leverageFactory/leverageFactory"
@@ -25,12 +25,16 @@ import {
 } from "../generated/templates"
 
 import {
-    leveragePool as leveragePoolSc,
+    leveragePool as leveragePoolSc
 } from "../generated/templates/leveragePool/leveragePool"
 
 import {
-    stakePool as stakePoolSc,
+    stakePool as stakePoolSc
 } from "../generated/templates/stakePool/stakePool"
+
+import {
+    phxoracle as phxoraclesc
+} from "../generated/phxoracle/phxoracle"
 
 import {
     erc20,
@@ -46,13 +50,9 @@ import {
     Unstake
 } from "../generated/templates/stakePool/stakePool"
 
-import {
-    fnxoracle
-}  from "../generated/fnxoracle/fnxoracle"
-
 import {LeveragedTokenPriceEntity,
         leveragePool,
-        leverageFactory,
+        LeverageFactory,
         TradeItem,
         TVL,
         InterestAPY,
@@ -61,11 +61,14 @@ import {LeveragedTokenPriceEntity,
         stakePool
 } from "../generated/schema"
 
+let ONE_DAY_SECONDS = 3600*24;
+//need to modify according to production
+let FACTORY_ADDRESS = "0xdb6136017fe722044a332df2f2ffee7c26b06d75";
 export function handleCreateLeveragePool(event: CreateLeveragePool): void {
     // Store Dynamically generated contracts
-    let factoryEntity = leverageFactory.load(event.address.toHex())
+    let factoryEntity = LeverageFactory.load(event.address.toHex());
     if(factoryEntity==null) {
-        factoryEntity = new leverageFactory(event.address.toHex())
+        factoryEntity = new LeverageFactory(event.address.toHex())
         factoryEntity.save();
     }
 
@@ -85,8 +88,6 @@ export function handleCreateLeveragePool(event: CreateLeveragePool): void {
         //begin monitor pool event
         leveragePoolTemplate.create(event.params.leveragePool);
     }
-
-
 }
 
 export function handleCreateStakePool(event: CreateStakePool): void {
@@ -109,7 +110,6 @@ export function handleCreateStakePool(event: CreateStakePool): void {
 
 }
 
-
 export function handleBuyHedge(event: BuyHedge): void {
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
@@ -122,115 +122,181 @@ export function handleBuyHedge(event: BuyHedge): void {
      let info = contract.getLeverageInfo();
 
      entity = new TradeItem(event.transaction.from.toHex());
+     entity.from = event.params.from;
      entity.timestamp = event.block.timestamp;
      entity.status = "Buying";
      entity.leveragetype = "Bear";
-     entity.undetlying = info[0];
+     entity.underlying = info[0];
      entity.price = event.params.tokenPrice;
      entity.amount = event.params.hedgeAmount;
      entity.value = entity.price.times(entity.amount);
      entity.save()
   }
-
 }
 
-export function handleBuyLeverage(event: BuyLeverage): void {}
+export function handleBuyLeverage(event: BuyLeverage): void {
+    // Entities can be loaded from the store using a string ID; this ID
+    // needs to be unique across all entities of the same type
+    let entity = TradeItem.load(event.transaction.from.toHex());
+
+    // // Entities only exist after they have been saved to the store;
+    // // `null` checks allow to create entities on demand
+    if (entity == null) {
+        let contract = leveragePool.bind(event.address);
+        let info = contract.getLeverageInfo();
+        entity = new TradeItem(event.transaction.from.toHex());
+        entity.from = event.params.from;
+        entity.timestamp = event.block.timestamp;
+
+        entity.status = "Buying";
+        entity.leveragetype = "Bull";
+        entity.underlying = info[0];
+        entity.price = event.params.tokenPrice;
+        entity.amount = event.params.leverageAmount;
+        entity.value = entity.price.times(entity.amount);
+        entity.save()
+    }
+}
+
+export function handleSellHedge(event: SellHedge): void {
+    // Entities can be loaded from the store using a string ID; this ID
+    // needs to be unique across all entities of the same type
+    let entity = TradeItem.load(event.transaction.from.toHex());
+
+    // // Entities only exist after they have been saved to the store;
+    // // `null` checks allow to create entities on demand
+    if (entity == null) {
+        let contract = leveragePool.bind(event.address);
+        let info = contract.getLeverageInfo();
+        entity = new TradeItem(event.transaction.from.toHex());
+        entity.from = event.params.from;
+        entity.timestamp = event.block.timestamp;
+
+        entity.status = "Selling";
+        entity.leveragetype = "Bear";
+        entity.underlying = info[0];
+        entity.price = event.params.tokenPrice;
+        entity.amount = event.params.hedgeAmount;
+        entity.value = entity.price.times(entity.amount);
+        entity.save()
+
+        let trdid = event.address + event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS));
+        let tradevolentity = TradeVol.load(trdid);
+        if(tradevolentity==null) {
+            return;
+        } else {
+            tradevolentity.sellamount = tradevolentity.sellamount.plus()
+        }
+    }
+}
+
+export function handleSellLeverage(event: SellLeverage): void {
+    // Entities can be loaded from the store using a string ID; this ID
+    // needs to be unique across all entities of the same type
+    let entity = TradeItem.load(event.transaction.from.toHex());
+
+    // // Entities only exist after they have been saved to the store;
+    // // `null` checks allow to create entities on demand
+    if (entity == null) {
+        let contract = leveragePool.bind(event.address);
+        let info = contract.getLeverageInfo();
+        entity = new TradeItem(event.transaction.from.toHex());
+        entity.from = event.params.from;
+        entity.timestamp = event.block.timestamp;
+
+        entity.status = "Selling";
+        entity.leveragetype = "Bull";
+        entity.underlying = info[0];
+        entity.price = event.params.tokenPrice;
+        entity.amount = event.params.leverageAmount;
+        entity.value = entity.price.times(entity.amount);
+        entity.save()
+    }
+}
+
+export function handleBlock(block: ethereum.Block): void {
+    let id = block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))
+    let apyentity;
+    let tradevolentity;
+    let feeentity;
+    let tvlentity = TVL.load(id.toHex())
+    if(tvlentity==null){
+        let factorysc = leverageFactorysc.bind(Address.fromString(FACTORY_ADDRESS));
+        let oracleaddr = factorysc.phxOracle();
+        let oracelsc = phxoraclesc.bind(oracleaddr);
+
+        let stakepools = factorysc.getAllStakePool();
+        for (var pool in stakepools) {
+            let stkpool = stakePoolSc.bind(Address.fromString(pool))
+
+            tvlentity = new TVL(pool + id.toHex());
+            tvlentity.timestamp = block.timestamp;
+            tvlentity.amount = stkpool.totalSupply();
+            tvlentity.poolAddress = Address.fromString(pool);
+            tvlentity.token = stkpool.poolToken();
+            let tkprice = oracelsc.getPrice(tvlentity.token);
+            tvlentity.value = tvlentity.amount.times(tkprice);
+            tvlentity.save();
+
+            apyentity = new InterestAPY(id.toHex());
+            apyentity.timestamp = block.timestamp;
+            apyentity.apy = stkpool.poolInterest().times(BigInt.fromI32(365));
+            apyentity.token = stkpool.poolToken();
+            apyentity.save();
+        }
+
+        let leveragepools = factorysc.getAllLeveragePool();
+        for (var pool in leveragepools) {
+            tradevolentity = TradeVol.load(pool+id);
+            if(tradevolentity==null) {
+              tradevolentity = new TradeVol(pool+id);
+              tradevolentity.timestamp = block.timestamp;
+              tradevolentity.pool = pool;
+              tradevolentity.save();
+            }
+
+            let lpsc = leveragePoolSc.bind(Address.fromString(pool));
+            let leverinfo = lpsc.getLeverageInfo();
+            let feeToken = leverinfo[0];
+            let feeid = feeToken+id;
+            //index 0,token position
+            feeentity = Fee.load(feeid);
+            if(feeentity==null) {
+                feeentity = new Fee(feeid);
+                feeentity.timestamp = block.timestamp;
+                feeentity.token = feeToken;
+                let tk = erc20.bind(feeToken);
+                let feercvr = lpsc.feeAddress();
+                feeentity.amount = tk.balanceOf(feercvr);
+                let tkprice = oracelsc.getPrice(feeToken);
+                feeentity.value = feeentity.amount.times(tkprice);
+            }
+
+            let hedgeinfo = lpsc.getHedgeInfo();
+            feeToken = hedgeinfo[0];
+            feeid = feeToken+id;
+            //index 0,token position
+            feeentity = Fee.load(feeid);
+            if(feeentity==null) {
+                feeentity = new Fee(feeid);
+                feeentity.timestamp = block.timestamp;
+                feeentity.token = feeToken;
+                let tk = erc20.bind(feeToken);
+                let feercvr = lpsc.feeAddress();
+                feeentity.amount = tk.balanceOf(feercvr);
+                let tkprice = oracelsc.getPrice(feeToken);
+                feeentity.value = feeentity.amount.times(tkprice);
+            }
+        }
+    }
+}
 
 export function handleLiquidate(event: Liquidate): void {}
-
-export function handleOperatorTransferred(event: OperatorTransferred): void {}
-
-export function handleOriginTransferred(event: OriginTransferred): void {}
-
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {}
 
 export function handleRebalance(event: Rebalance): void {}
 
 export function handleRedeem(event: Redeem): void {}
 
-export function handleSellHedge(event: SellHedge): void {}
-
-export function handleSellLeverage(event: SellLeverage): void {}
-
 export function handleSwap(event: Swap): void {}
-
-export function handleLeverageCreated(event: LeverageCreated): void {
-    log.warning('PrizePoolCreated `event.address`:, {}', [event.address.toHex()])
-
-    let leverageFactory = LeverageFactory.load(event.address.toHex())
-
-    if (!prizePoolBuilder) {
-        prizePoolBuilder = new PrizePoolBuilder(event.address.toHex())
-        prizePoolBuilder.save()
-    }
-
-    let prizePoolModuleManager = PrizePoolModuleManager.load(event.params.moduleManager.toHex())
-
-    if (!prizePoolModuleManager) {
-        prizePoolModuleManager = new PrizePoolModuleManager(event.params.moduleManager.toHex())
-        const boundPrizePoolModuleManager = PrizePoolModuleManagerContract.bind(event.params.moduleManager)
-
-        log.warning('PrizePoolAddress!, {}', [boundPrizePoolModuleManager.prizePool().toHexString()])
-
-        log.warning('Here ! address?, {}', [boundPrizePoolModuleManager.prizePool().toHexString()])
-
-        // Store Dynamically generated contracts
-        PeriodicPrizePoolTemplate.create(boundPrizePoolModuleManager.prizePool())
-        // let context = new DataSourceContext()
-        // context.setBytes("prizePoolModuleManager", event.params.moduleManager)
-        // PeriodicPrizePool.createWithContext(boundPrizePoolModuleManager.prizePool(), context)
-
-        const prizePool = new PeriodicPrizePool(boundPrizePoolModuleManager.prizePool().toHex())
-        prizePool.prizePoolModuleManager = event.params.moduleManager.toHex()
-        prizePool.number = BigInt.fromI32(2)
-        prizePool.save()
-
-        prizePoolModuleManager.prizePoolBuilder = event.address.toHex()
-        prizePoolModuleManager.save()
-        log.warning('Saved! Saved! Saved! Saved! , {}', [boundPrizePoolModuleManager.prizePool().toHexString()])
-    }
-}
-
-let INTERVALSECONDS = BigInt.fromI32(600);
-let POOL_ADDRESSES:Array<string>=["0xb86ded607497fe38a36b26f7b5c3dfdca30ef955",
-                                  "0x91c7edbebde88fbc6f4aa2480f9f4e261ba6c6ea"
-                                 ]
-
-let ORACEL_ADDRESS = '0xdae742f9675b5dfa932ce4b1cd0a9f0d089b7b4d';
-let WBTC_ADDRESS = '0xb4b84C26D25b65A6d8c3cf1196634fC9302722Ae';
-let WETH_ADDRESS = '0xB469E9048eB0304B3479a526cAF442EC779e1e07';
-
-export function handleBlock(block: ethereum.Block): void {
-        let blktime = block.timestamp
-        let curtime = blktime.div(INTERVALSECONDS).times(INTERVALSECONDS);
-
-        for(let i=0;i<POOL_ADDRESSES.length;i++) {
-            let poolAddress = POOL_ADDRESSES[i]
-            let key = (poolAddress.toString() + curtime.toString())
-            let entity = LeveragedTokenPriceEntity.load(key)
-            log.info('load entity to check:{}', [poolAddress])
-
-            if (entity == null) {
-                let poolContract = leveragedpool.bind(Address.fromString(poolAddress))
-                let oracleContract = fnxoracle.bind(Address.fromString(ORACEL_ADDRESS))
-                log.info('create entity {}', [block.number.toHex()])
-                entity = new LeveragedTokenPriceEntity(key)
-                entity.network = "rinkeby"
-                entity.timestamp = curtime
-                log.info('1',[])
-                let prices = poolContract.getTokenNetworths()
-                log.info('2',[])
-                entity.uptokenprice  = prices.value0
-                entity.downtokenprice = prices.value1
-
-                entity.poolAddress = Address.fromString(poolAddress)
-                log.info('3',[])
-
-                entity.save()
-
-            }
-        }
-
-}
 
 export function handleTransfer(event: Transfer): void {}
