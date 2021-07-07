@@ -477,8 +477,8 @@ export class TradeVol extends Entity {
     this.set("pool", Value.fromBytes(value));
   }
 
-  get buyamount(): BigInt | null {
-    let value = this.get("buyamount");
+  get buyLeverAmount(): BigInt | null {
+    let value = this.get("buyLeverAmount");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -486,16 +486,16 @@ export class TradeVol extends Entity {
     }
   }
 
-  set buyamount(value: BigInt | null) {
+  set buyLeverAmount(value: BigInt | null) {
     if (value === null) {
-      this.unset("buyamount");
+      this.unset("buyLeverAmount");
     } else {
-      this.set("buyamount", Value.fromBigInt(value as BigInt));
+      this.set("buyLeverAmount", Value.fromBigInt(value as BigInt));
     }
   }
 
-  get buyvalue(): BigInt | null {
-    let value = this.get("buyvalue");
+  get buyLeverValue(): BigInt | null {
+    let value = this.get("buyLeverValue");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -503,16 +503,16 @@ export class TradeVol extends Entity {
     }
   }
 
-  set buyvalue(value: BigInt | null) {
+  set buyLeverValue(value: BigInt | null) {
     if (value === null) {
-      this.unset("buyvalue");
+      this.unset("buyLeverValue");
     } else {
-      this.set("buyvalue", Value.fromBigInt(value as BigInt));
+      this.set("buyLeverValue", Value.fromBigInt(value as BigInt));
     }
   }
 
-  get sellamount(): BigInt | null {
-    let value = this.get("sellamount");
+  get sellLeverAmount(): BigInt | null {
+    let value = this.get("sellLeverAmount");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -520,16 +520,16 @@ export class TradeVol extends Entity {
     }
   }
 
-  set sellamount(value: BigInt | null) {
+  set sellLeverAmount(value: BigInt | null) {
     if (value === null) {
-      this.unset("sellamount");
+      this.unset("sellLeverAmount");
     } else {
-      this.set("sellamount", Value.fromBigInt(value as BigInt));
+      this.set("sellLeverAmount", Value.fromBigInt(value as BigInt));
     }
   }
 
-  get sellvalue(): BigInt | null {
-    let value = this.get("sellvalue");
+  get sellLeverValue(): BigInt | null {
+    let value = this.get("sellLeverValue");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -537,11 +537,79 @@ export class TradeVol extends Entity {
     }
   }
 
-  set sellvalue(value: BigInt | null) {
+  set sellLeverValue(value: BigInt | null) {
     if (value === null) {
-      this.unset("sellvalue");
+      this.unset("sellLeverValue");
     } else {
-      this.set("sellvalue", Value.fromBigInt(value as BigInt));
+      this.set("sellLeverValue", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get buyHedgeAmount(): BigInt | null {
+    let value = this.get("buyHedgeAmount");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set buyHedgeAmount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("buyHedgeAmount");
+    } else {
+      this.set("buyHedgeAmount", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get buyHedgeValue(): BigInt | null {
+    let value = this.get("buyHedgeValue");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set buyHedgeValue(value: BigInt | null) {
+    if (value === null) {
+      this.unset("buyHedgeValue");
+    } else {
+      this.set("buyHedgeValue", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get sellHedgeAmount(): BigInt | null {
+    let value = this.get("sellHedgeAmount");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set sellHedgeAmount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("sellHedgeAmount");
+    } else {
+      this.set("sellHedgeAmount", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get sellHedgeValue(): BigInt | null {
+    let value = this.get("sellHedgeValue");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set sellHedgeValue(value: BigInt | null) {
+    if (value === null) {
+      this.unset("sellHedgeValue");
+    } else {
+      this.set("sellHedgeValue", Value.fromBigInt(value as BigInt));
     }
   }
 }

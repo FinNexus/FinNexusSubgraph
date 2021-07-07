@@ -52,10 +52,14 @@ type TradeVol @entity {
   id: ID!
   timestamp: BigInt!
   pool: Bytes!
-  buyLeveramount: BigInt
-  buyLevervalue: BigInt
-  sellLeveramount: BigInt
-  sellLevervalue: BigInt
+  buyLeverAmount: BigInt
+  buyLeverValue: BigInt
+  sellLeverAmount: BigInt
+  sellLeverValue: BigInt
+  buyHedgeAmount: BigInt
+  buyHedgeValue: BigInt
+  sellHedgeAmount: BigInt
+  sellHedgeValue: BigInt
 }
 
 type stakePool @entity {

@@ -91,9 +91,9 @@ export function handleCreateLeveragePool(event: CreateLeveragePool): void {
 }
 
 export function handleCreateStakePool(event: CreateStakePool): void {
-    let factoryEntity = leverageFactory.load(event.address.toHex());
+    let factoryEntity = LeverageFactory.load(event.address.toHex());
     if(factoryEntity==null) {
-        factoryEntity = new leverageFactory(event.address.toHex());
+        factoryEntity = new LeverageFactory(event.address.toHex());
         factoryEntity.save();
     }
 
@@ -105,6 +105,7 @@ export function handleCreateStakePool(event: CreateStakePool): void {
         poolEntity.underlyingName = tk.symbol();
         poolEntity.interestrate = event.params.interestrate;
         poolEntity.save();
+
         stakePoolTemplate.create(event.params.stakePool)
     }
 
@@ -130,7 +131,18 @@ export function handleBuyHedge(event: BuyHedge): void {
      entity.price = event.params.tokenPrice;
      entity.amount = event.params.hedgeAmount;
      entity.value = entity.price.times(entity.amount);
-     entity.save()
+     entity.save();
+
+     let trdid = event.address + event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS));
+     let tradevolentity = TradeVol.load(trdid);
+     if(tradevolentity==null) {
+        return;
+     } else {
+        tradevolentity.buyHedgeAmount = tradevolentity.buyHedgeAmount.plus(entity.amount);
+        tradevolentity.buyHedgeValue = tradevolentity.buyHedgeValue.plus(entity.value);
+        tradevolentity.save();
+     }
+
   }
 }
 
@@ -154,7 +166,17 @@ export function handleBuyLeverage(event: BuyLeverage): void {
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.leverageAmount;
         entity.value = entity.price.times(entity.amount);
-        entity.save()
+        entity.save();
+
+        let trdid = event.address + event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS));
+        let tradevolentity = TradeVol.load(trdid);
+        if(tradevolentity==null) {
+            return;
+        } else {
+            tradevolentity.buyLeverAmount = tradevolentity.buyLeverAmount.plus(entity.amount);
+            tradevolentity.buyLeverValue = tradevolentity.buyLeverValue.plus(entity.value);
+            tradevolentity.save();
+        }
     }
 }
 
@@ -178,14 +200,16 @@ export function handleSellHedge(event: SellHedge): void {
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.hedgeAmount;
         entity.value = entity.price.times(entity.amount);
-        entity.save()
+        entity.save();
 
         let trdid = event.address + event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS));
         let tradevolentity = TradeVol.load(trdid);
         if(tradevolentity==null) {
             return;
         } else {
-            tradevolentity.sellamount = tradevolentity.sellamount.plus()
+            tradevolentity.sellHedgeAmount = tradevolentity.sellHedgeAmount.plus(entity.amount);
+            tradevolentity.sellHedgeValue = tradevolentity.sellHedgeValue.plus(entity.value);
+            tradevolentity.save();
         }
     }
 }
@@ -210,7 +234,18 @@ export function handleSellLeverage(event: SellLeverage): void {
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.leverageAmount;
         entity.value = entity.price.times(entity.amount);
-        entity.save()
+        entity.save();
+
+
+        let trdid = event.address + event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS));
+        let tradevolentity = TradeVol.load(trdid);
+        if(tradevolentity==null) {
+            return;
+        } else {
+            tradevolentity.sellLeverAmount = tradevolentity.sellLeverAmount.plus(entity.amount);
+            tradevolentity.sellLeverValue = tradevolentity.sellLeverValue.plus(entity.value);
+            tradevolentity.save();
+        }
     }
 }
 
