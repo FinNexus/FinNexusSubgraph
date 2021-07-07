@@ -3,9 +3,6 @@ import {
   BuyHedge,
   BuyLeverage,
   Liquidate,
-  OperatorTransferred,
-  OriginTransferred,
-  OwnershipTransferred,
   Rebalance,
   Redeem,
   SellHedge,
@@ -78,7 +75,7 @@ export function handleCreateLeveragePool(event: CreateLeveragePool): void {
         let leveragesc = leveragePoolSc.bind(event.params.leveragePool);
         poolEntity = new leveragePool(event.params.leveragePool.toHex());
         let tk = erc20.bind(event.params.tokenB);
-        poolEntity.underlyingAddress = event.params.tokenB
+        poolEntity.underlyingAddress = event.params.tokenB;
         poolEntity.underlyingName = tk.symbol();
 
         let info = leveragesc.getHedgeInfo();
