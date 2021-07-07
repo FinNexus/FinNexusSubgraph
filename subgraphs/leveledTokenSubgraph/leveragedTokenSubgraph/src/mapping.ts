@@ -251,7 +251,6 @@ export function handleSellLeverage(event: SellLeverage): void {
 }
 
 export function handleBlock(block: ethereum.Block): void {
-
     let id = block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))
     let apyentity;
     let tradevolentity;
@@ -304,8 +303,10 @@ export function handleBlock(block: ethereum.Block): void {
             let leverinfo = lpsc.getLeverageInfo();
             let feeToken = leverinfo[0];
             let feeid = feeToken+id;
+            let prefeeid = feeToken + id.minus(BigInt.fromI32(1));
             //index 0,token position
             feeentity = Fee.load(feeid);
+            let prefeeentity = Fee.load(prefeeid);
             if(feeentity==null) {
                 feeentity = new Fee(feeid);
                 feeentity.timestamp = block.timestamp;
@@ -313,6 +314,14 @@ export function handleBlock(block: ethereum.Block): void {
                 let tk = erc20.bind(feeToken);
                 let feercvr = lpsc.feeAddress();
                 feeentity.amount = tk.balanceOf(feercvr);
+                if(prefeeentity!=null)  {
+                  let diff = tk.balanceOf(feercvr).minus(prefeeentity.amount);
+                  if(diff.gt(BigInt.fromI32(0))) {
+                      //get today's fee income
+                      feeentity.amount = diff;
+                  }
+                }
+
                 let tkprice = oracelsc.getPrice(feeToken);
                 feeentity.value = feeentity.amount.times(tkprice);
             }
@@ -320,8 +329,10 @@ export function handleBlock(block: ethereum.Block): void {
             let hedgeinfo = lpsc.getHedgeInfo();
             feeToken = hedgeinfo[0];
             feeid = feeToken+id;
+            prefeeid = feeToken + id.minus(BigInt.fromI32(1));
             //index 0,token position
             feeentity = Fee.load(feeid);
+            prefeeentity = Fee.load(prefeeid);
             if(feeentity==null) {
                 feeentity = new Fee(feeid);
                 feeentity.timestamp = block.timestamp;
@@ -329,6 +340,13 @@ export function handleBlock(block: ethereum.Block): void {
                 let tk = erc20.bind(feeToken);
                 let feercvr = lpsc.feeAddress();
                 feeentity.amount = tk.balanceOf(feercvr);
+                if(prefeeentity!=null)  {
+                    let diff = tk.balanceOf(feercvr).minus(prefeeentity.amount);
+                    if(diff.gt(BigInt.fromI32(0))) {
+                        //get today's fee income
+                        feeentity.amount = diff;
+                    }
+                }
                 let tkprice = oracelsc.getPrice(feeToken);
                 feeentity.value = feeentity.amount.times(tkprice);
             }
