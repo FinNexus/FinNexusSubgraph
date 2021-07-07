@@ -58,7 +58,8 @@ import {LeveragedTokenPriceEntity,
         InterestAPY,
         TradeVol,
         Fee,
-        stakePool
+        stakePool,
+        TotalTVL,
 } from "../generated/schema"
 
 let ONE_DAY_SECONDS = 3600*24;
@@ -250,15 +251,20 @@ export function handleSellLeverage(event: SellLeverage): void {
 }
 
 export function handleBlock(block: ethereum.Block): void {
+
     let id = block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))
     let apyentity;
     let tradevolentity;
     let feeentity;
-    let tvlentity = TVL.load(id.toHex())
-    if(tvlentity==null){
+    let tvlentity;
+    let totalTvlentity = TotalTVL.load(id.toHex())
+    if(totalTvlentity==null){
         let factorysc = leverageFactorysc.bind(Address.fromString(FACTORY_ADDRESS));
         let oracleaddr = factorysc.phxOracle();
         let oracelsc = phxoraclesc.bind(oracleaddr);
+
+        totalTvlentity = new TotalTVL(id.toHex());
+        totalTvlentity.timestamp = block.timestamp;
 
         let stakepools = factorysc.getAllStakePool();
         for (var pool in stakepools) {
@@ -273,12 +279,16 @@ export function handleBlock(block: ethereum.Block): void {
             tvlentity.value = tvlentity.amount.times(tkprice);
             tvlentity.save();
 
-            apyentity = new InterestAPY(id.toHex());
+            totalTvlentity.value = totalTvlentity.value.plus(tvlentity.value);
+
+            apyentity = new InterestAPY(pool + id.toHex());
             apyentity.timestamp = block.timestamp;
             apyentity.apy = stkpool.poolInterest().times(BigInt.fromI32(365));
             apyentity.token = stkpool.poolToken();
             apyentity.save();
         }
+
+        totalTvlentity.save()
 
         let leveragepools = factorysc.getAllLeveragePool();
         for (var pool in leveragepools) {

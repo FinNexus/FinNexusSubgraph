@@ -31,6 +31,12 @@ type TradeItem @entity {
   amount: BigInt!
 }
 
+type TotalTVL @entity {
+  id: ID!
+  timestamp: BigInt!
+  value: BigInt!
+}
+
 type TVL @entity {
   id: ID!
   timestamp: BigInt!
