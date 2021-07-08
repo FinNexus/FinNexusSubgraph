@@ -27,11 +27,11 @@ import {
 } from "../generated/templates/leveragePool/leveragePool"
 
 import {
-    stakePool as stakePoolSc
+    stakePool
 } from "../generated/templates/stakePool/stakePool"
 
 import {
-    phxoracle as phxoraclesc
+    phxoracle
 } from "../generated/phxoracle/phxoracle"
 
 import {
@@ -48,23 +48,24 @@ import {
     Unstake
 } from "../generated/templates/stakePool/stakePool"
 
-import {LeveragedTokenPriceEntity,
-        leveragePool,
-        LeverageFactory,
-        TradeItem,
-        TVL,
-        InterestAPY,
-        TradeVol,
-        Fee,
-        stakePool,
-        TotalTVL,
+import {EntityLeveragedTokenPrice,
+        EntityLeveragePool,
+        EntityLeverageFactory,
+        EntityTradeItem,
+        EntityTVL,
+        EntityInterestAPY,
+        EntityTradeVol,
+        EntityFee,
+        EntityStakePool,
+        EntityTotalTVL,
 } from "../generated/schema"
 
 //let ONE_DAY_SECONDS = 3600*24;
 let ONE_DAY_SECONDS = 3600;
 //need to modify according to production
-let FACTORY_ADDRESS = "0xdb6136017fe722044a332df2f2ffee7c26b06d75";
+//let FACTORY_ADDRESS = '0xdb6136017fe722044a332df2f2ffee7c26b06d75';
 export function handleCreateLeveragePool(event: CreateLeveragePool): void {
+    /*
     // Store Dynamically generated contracts
     let factoryEntity = LeverageFactory.load(event.address.toHex());
     if(factoryEntity==null) {
@@ -88,9 +89,11 @@ export function handleCreateLeveragePool(event: CreateLeveragePool): void {
         //begin monitor pool event
         leveragePoolTemplate.create(event.params.leveragePool);
     }
+    */
 }
 
 export function handleCreateStakePool(event: CreateStakePool): void {
+/*
     let factoryEntity = LeverageFactory.load(event.address.toHex());
     if(factoryEntity==null) {
         factoryEntity = new LeverageFactory(event.address.toHex());
@@ -108,10 +111,11 @@ export function handleCreateStakePool(event: CreateStakePool): void {
 
         stakePoolTemplate.create(event.params.stakePool)
     }
-
+*/
 }
 
 export function handleBuyHedge(event: BuyHedge): void {
+/*
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
   let entity = TradeItem.load(event.transaction.from.toHex())
@@ -144,9 +148,11 @@ export function handleBuyHedge(event: BuyHedge): void {
      }
 
   }
+*/
 }
 
 export function handleBuyLeverage(event: BuyLeverage): void {
+/*
     // Entities can be loaded from the store using a string ID; this ID
     // needs to be unique across all entities of the same type
     let entity = TradeItem.load(event.transaction.from.toHex());
@@ -178,9 +184,11 @@ export function handleBuyLeverage(event: BuyLeverage): void {
             tradevolentity.save();
         }
     }
+*/
 }
 
 export function handleSellHedge(event: SellHedge): void {
+/*
     // Entities can be loaded from the store using a string ID; this ID
     // needs to be unique across all entities of the same type
     let entity = TradeItem.load(event.transaction.from.toHex());
@@ -212,9 +220,11 @@ export function handleSellHedge(event: SellHedge): void {
             tradevolentity.save();
         }
     }
+*/
 }
 
 export function handleSellLeverage(event: SellLeverage): void {
+/*
     // Entities can be loaded from the store using a string ID; this ID
     // needs to be unique across all entities of the same type
     let entity = TradeItem.load(event.transaction.from.toHex());
@@ -247,31 +257,46 @@ export function handleSellLeverage(event: SellLeverage): void {
             tradevolentity.save();
         }
     }
+*/
 }
 
 export function handleBlock(block: ethereum.Block): void {
-    let id = block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))
-    let apyentity = InterestAPY.load(id.toHex());
-    let tradevolentity = TradeVol.load(id.toHex());
-    let feeentity = Fee.load(id.toHex());
-    let tvlentity = TVL.load(id.toHex());
-    let totalTvlentity = TotalTVL.load(id.toHex())
-    if(totalTvlentity==null){
-        let factorysc = leverageFactorysc.bind(Address.fromString(FACTORY_ADDRESS));
-        let oracleaddr = factorysc.phxOracle();
-        let oracelsc = phxoraclesc.bind(oracleaddr);
 
-        totalTvlentity = new TotalTVL(id.toHex());
+    let id = block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))
+    let apyentity = EntityInterestAPY.load(id.toHex());
+    let tradevolentity = EntityTradeVol.load(id.toHex());
+    let feeentity = EntityFee.load(id.toHex());
+    let tvlentity = EntityTVL.load(id.toHex());
+    let totalTvlentity = EntityTotalTVL.load(id.toHex());
+   // log.error("step 1",[]);
+
+    if(totalTvlentity==null){
+        let factorysc = leverageFactorysc.bind(dataSource.address());
+        let oracleaddr = factorysc.phxOracle();
+        if (oracleaddr==Address.fromString("0x0000000000000000000000000000000000000000")) {
+            return;
+        }
+
+        let oracelsc = phxoracle.bind(oracleaddr);
+
+        totalTvlentity = new EntityTotalTVL(id.toHex());
         totalTvlentity.timestamp = block.timestamp;
 
         let stakepools = factorysc.getAllStakePool();
         for (let i=0;i<stakepools.length;i++) {
+
             let pool = stakepools[i];
-            let stkpool = stakePoolSc.bind(pool);
-            tvlentity = new TVL(pool.toHex() + id.toHex());
+            let stkpool = stakePool.bind(pool);
+
+            tvlentity = new EntityTVL(pool.toHex() + id.toHex());
             tvlentity.timestamp = block.timestamp;
+            log.error("step 1-1 {}",[pool.toHex()]);
+
             tvlentity.amount = stkpool.totalSupply();
+
+            /*
             tvlentity.poolAddress = pool;
+
             tvlentity.token = stkpool.poolToken();
             let tkprice = oracelsc.getPrice(stkpool.poolToken());
             tvlentity.value = tvlentity.amount.times(tkprice);
@@ -279,27 +304,30 @@ export function handleBlock(block: ethereum.Block): void {
 
             totalTvlentity.value = totalTvlentity.value.plus(tvlentity.value);
 
-            apyentity = new InterestAPY(pool.toHex() + id.toHex());
+            apyentity = new EntityInterestAPY(pool.toHex() + id.toHex());
             apyentity.timestamp = block.timestamp;
             apyentity.apy = stkpool.poolInterest().times(BigInt.fromI32(365));
             apyentity.token = stkpool.poolToken();
             apyentity.save();
+
+            totalTvlentity.save()
+            */
         }
 
-        totalTvlentity.save()
-
+/*
+        log.error("step 2",[]);
         let leveragepools = factorysc.getAllLeveragePool();
         for (let i=0;i<leveragepools.length;i++) {
             let pool = leveragepools[i];
-            tradevolentity = TradeVol.load(pool.toHex()+id.toHex());
+            tradevolentity = EntityTradeVol.load(pool.toHex()+id.toHex());
             if(tradevolentity==null) {
-              tradevolentity = new TradeVol(pool.toHex()+id.toHex());
+              tradevolentity = new EntityTradeVol(pool.toHex()+id.toHex());
               tradevolentity.timestamp = block.timestamp;
               tradevolentity.pool = pool;
               tradevolentity.save();
             }
 
-            let lpsc = leveragePoolSc.bind(pool);
+            let lpsc = leveragePool.bind(pool);
             let leverinfo = lpsc.getLeverageInfo();
             let feeToken = leverinfo.value0;
             let feeid = feeToken.toHex() + id.toHex();
@@ -324,6 +352,7 @@ export function handleBlock(block: ethereum.Block): void {
 
                 let tkprice = oracelsc.getPrice(feeToken);
                 feeentity.value = feeentity.amount.times(tkprice);
+                feeentity.save();
             }
 
             let hedgeinfo = lpsc.getHedgeInfo();
@@ -349,8 +378,13 @@ export function handleBlock(block: ethereum.Block): void {
                 }
                 let tkprice = oracelsc.getPrice(feeToken);
                 feeentity.value = feeentity.amount.times(tkprice);
+                feeentity.save();
             }
-        }
+
+
+        }*/
+
+
     }
 }
 
@@ -363,3 +397,5 @@ export function handleRedeem(event: Redeem): void {}
 export function handleSwap(event: Swap): void {}
 
 export function handleTransfer(event: Transfer): void {}
+
+export function oracleHandleBlock(block: ethereum.Block): void {}
