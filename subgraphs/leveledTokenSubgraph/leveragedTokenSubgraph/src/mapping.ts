@@ -1,4 +1,5 @@
-import { BigInt,ethereum,Address,log} from "@graphprotocol/graph-ts"
+import { BigInt,ethereum,Address,log,dataSource} from "@graphprotocol/graph-ts"
+
 import {
   BuyHedge,
   BuyLeverage,
@@ -59,7 +60,8 @@ import {LeveragedTokenPriceEntity,
         TotalTVL,
 } from "../generated/schema"
 
-let ONE_DAY_SECONDS = 3600*24;
+//let ONE_DAY_SECONDS = 3600*24;
+let ONE_DAY_SECONDS = 3600;
 //need to modify according to production
 let FACTORY_ADDRESS = "0xdb6136017fe722044a332df2f2ffee7c26b06d75";
 export function handleCreateLeveragePool(event: CreateLeveragePool): void {
@@ -79,7 +81,7 @@ export function handleCreateLeveragePool(event: CreateLeveragePool): void {
         poolEntity.underlyingName = tk.symbol();
 
         let info = leveragesc.getHedgeInfo();
-        let rk = erc20.bind(info[2]);
+        let rk = erc20.bind(info.value2);
         poolEntity.name = rk.name();
         poolEntity.save();
 
@@ -117,7 +119,7 @@ export function handleBuyHedge(event: BuyHedge): void {
   // // Entities only exist after they have been saved to the store;
   // // `null` checks allow to create entities on demand
   if (entity == null) {
-     let contract = leveragePool.bind(event.address);
+     let contract = leveragePoolSc.bind(event.address);
      let info = contract.getLeverageInfo();
 
      entity = new TradeItem(event.transaction.from.toHex());
@@ -125,13 +127,13 @@ export function handleBuyHedge(event: BuyHedge): void {
      entity.timestamp = event.block.timestamp;
      entity.status = "Buying";
      entity.leveragetype = "Bear";
-     entity.underlying = info[0];
+     entity.underlying = info.value0;
      entity.price = event.params.tokenPrice;
      entity.amount = event.params.hedgeAmount;
      entity.value = entity.price.times(entity.amount);
      entity.save();
 
-     let trdid = event.address + event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS));
+     let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
      let tradevolentity = TradeVol.load(trdid);
      if(tradevolentity==null) {
         return;
@@ -152,7 +154,7 @@ export function handleBuyLeverage(event: BuyLeverage): void {
     // // Entities only exist after they have been saved to the store;
     // // `null` checks allow to create entities on demand
     if (entity == null) {
-        let contract = leveragePool.bind(event.address);
+        let contract = leveragePoolSc.bind(event.address);
         let info = contract.getLeverageInfo();
         entity = new TradeItem(event.transaction.from.toHex());
         entity.from = event.params.from;
@@ -160,13 +162,13 @@ export function handleBuyLeverage(event: BuyLeverage): void {
 
         entity.status = "Buying";
         entity.leveragetype = "Bull";
-        entity.underlying = info[0];
+        entity.underlying = info.value0;
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.leverageAmount;
         entity.value = entity.price.times(entity.amount);
         entity.save();
 
-        let trdid = event.address + event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS));
+        let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
         let tradevolentity = TradeVol.load(trdid);
         if(tradevolentity==null) {
             return;
@@ -186,7 +188,7 @@ export function handleSellHedge(event: SellHedge): void {
     // // Entities only exist after they have been saved to the store;
     // // `null` checks allow to create entities on demand
     if (entity == null) {
-        let contract = leveragePool.bind(event.address);
+        let contract = leveragePoolSc.bind(event.address);
         let info = contract.getLeverageInfo();
         entity = new TradeItem(event.transaction.from.toHex());
         entity.from = event.params.from;
@@ -194,13 +196,13 @@ export function handleSellHedge(event: SellHedge): void {
 
         entity.status = "Selling";
         entity.leveragetype = "Bear";
-        entity.underlying = info[0];
+        entity.underlying = info.value0;
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.hedgeAmount;
         entity.value = entity.price.times(entity.amount);
         entity.save();
 
-        let trdid = event.address + event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS));
+        let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
         let tradevolentity = TradeVol.load(trdid);
         if(tradevolentity==null) {
             return;
@@ -220,7 +222,7 @@ export function handleSellLeverage(event: SellLeverage): void {
     // // Entities only exist after they have been saved to the store;
     // // `null` checks allow to create entities on demand
     if (entity == null) {
-        let contract = leveragePool.bind(event.address);
+        let contract = leveragePoolSc.bind(event.address);
         let info = contract.getLeverageInfo();
         entity = new TradeItem(event.transaction.from.toHex());
         entity.from = event.params.from;
@@ -228,14 +230,14 @@ export function handleSellLeverage(event: SellLeverage): void {
 
         entity.status = "Selling";
         entity.leveragetype = "Bull";
-        entity.underlying = info[0];
+        entity.underlying = info.value0;
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.leverageAmount;
         entity.value = entity.price.times(entity.amount);
         entity.save();
 
 
-        let trdid = event.address + event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS));
+        let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
         let tradevolentity = TradeVol.load(trdid);
         if(tradevolentity==null) {
             return;
@@ -249,10 +251,10 @@ export function handleSellLeverage(event: SellLeverage): void {
 
 export function handleBlock(block: ethereum.Block): void {
     let id = block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))
-    let apyentity;
-    let tradevolentity;
-    let feeentity;
-    let tvlentity;
+    let apyentity = InterestAPY.load(id.toHex());
+    let tradevolentity = TradeVol.load(id.toHex());
+    let feeentity = Fee.load(id.toHex());
+    let tvlentity = TVL.load(id.toHex());
     let totalTvlentity = TotalTVL.load(id.toHex())
     if(totalTvlentity==null){
         let factorysc = leverageFactorysc.bind(Address.fromString(FACTORY_ADDRESS));
@@ -263,21 +265,21 @@ export function handleBlock(block: ethereum.Block): void {
         totalTvlentity.timestamp = block.timestamp;
 
         let stakepools = factorysc.getAllStakePool();
-        for (var pool in stakepools) {
-            let stkpool = stakePoolSc.bind(Address.fromString(pool))
-
-            tvlentity = new TVL(pool + id.toHex());
+        for (let i=0;i<stakepools.length;i++) {
+            let pool = stakepools[i];
+            let stkpool = stakePoolSc.bind(pool);
+            tvlentity = new TVL(pool.toHex() + id.toHex());
             tvlentity.timestamp = block.timestamp;
             tvlentity.amount = stkpool.totalSupply();
-            tvlentity.poolAddress = Address.fromString(pool);
+            tvlentity.poolAddress = pool;
             tvlentity.token = stkpool.poolToken();
-            let tkprice = oracelsc.getPrice(tvlentity.token);
+            let tkprice = oracelsc.getPrice(stkpool.poolToken());
             tvlentity.value = tvlentity.amount.times(tkprice);
             tvlentity.save();
 
             totalTvlentity.value = totalTvlentity.value.plus(tvlentity.value);
 
-            apyentity = new InterestAPY(pool + id.toHex());
+            apyentity = new InterestAPY(pool.toHex() + id.toHex());
             apyentity.timestamp = block.timestamp;
             apyentity.apy = stkpool.poolInterest().times(BigInt.fromI32(365));
             apyentity.token = stkpool.poolToken();
@@ -287,20 +289,21 @@ export function handleBlock(block: ethereum.Block): void {
         totalTvlentity.save()
 
         let leveragepools = factorysc.getAllLeveragePool();
-        for (var pool in leveragepools) {
-            tradevolentity = TradeVol.load(pool+id);
+        for (let i=0;i<leveragepools.length;i++) {
+            let pool = leveragepools[i];
+            tradevolentity = TradeVol.load(pool.toHex()+id.toHex());
             if(tradevolentity==null) {
-              tradevolentity = new TradeVol(pool+id);
+              tradevolentity = new TradeVol(pool.toHex()+id.toHex());
               tradevolentity.timestamp = block.timestamp;
               tradevolentity.pool = pool;
               tradevolentity.save();
             }
 
-            let lpsc = leveragePoolSc.bind(Address.fromString(pool));
+            let lpsc = leveragePoolSc.bind(pool);
             let leverinfo = lpsc.getLeverageInfo();
-            let feeToken = leverinfo[0];
-            let feeid = feeToken+id;
-            let prefeeid = feeToken + id.minus(BigInt.fromI32(1));
+            let feeToken = leverinfo.value0;
+            let feeid = feeToken.toHex() + id.toHex();
+            let prefeeid = feeToken.toHex() + id.minus(BigInt.fromI32(1)).toHex();
             //index 0,token position
             feeentity = Fee.load(feeid);
             let prefeeentity = Fee.load(prefeeid);
@@ -324,9 +327,9 @@ export function handleBlock(block: ethereum.Block): void {
             }
 
             let hedgeinfo = lpsc.getHedgeInfo();
-            feeToken = hedgeinfo[0];
-            feeid = feeToken+id;
-            prefeeid = feeToken + id.minus(BigInt.fromI32(1));
+            feeToken = hedgeinfo.value0;
+            feeid = feeToken.toHex() + id.toHex();
+            prefeeid = feeToken.toHex() + id.minus(BigInt.fromI32(1)).toHex();
             //index 0,token position
             feeentity = Fee.load(feeid);
             prefeeentity = Fee.load(prefeeid);
