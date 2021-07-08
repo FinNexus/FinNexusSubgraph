@@ -456,31 +456,55 @@ export class EntityInterestAPY extends Entity {
     this.set("timestamp", Value.fromBigInt(value));
   }
 
-  get poolAddress(): Bytes {
+  get poolAddress(): Bytes | null {
     let value = this.get("poolAddress");
-    return value.toBytes();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
   }
 
-  set poolAddress(value: Bytes) {
-    this.set("poolAddress", Value.fromBytes(value));
+  set poolAddress(value: Bytes | null) {
+    if (value === null) {
+      this.unset("poolAddress");
+    } else {
+      this.set("poolAddress", Value.fromBytes(value as Bytes));
+    }
   }
 
-  get token(): Bytes {
+  get token(): Bytes | null {
     let value = this.get("token");
-    return value.toBytes();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
   }
 
-  set token(value: Bytes) {
-    this.set("token", Value.fromBytes(value));
+  set token(value: Bytes | null) {
+    if (value === null) {
+      this.unset("token");
+    } else {
+      this.set("token", Value.fromBytes(value as Bytes));
+    }
   }
 
-  get apy(): BigInt {
+  get apy(): BigInt | null {
     let value = this.get("apy");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set apy(value: BigInt) {
-    this.set("apy", Value.fromBigInt(value));
+  set apy(value: BigInt | null) {
+    if (value === null) {
+      this.unset("apy");
+    } else {
+      this.set("apy", Value.fromBigInt(value as BigInt));
+    }
   }
 }
 

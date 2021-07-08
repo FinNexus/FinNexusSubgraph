@@ -29,6 +29,15 @@ dataSources:
     abis:
     - name: leverageFactory
       file: ./abis/leverageFactory.json
+    - name: phxoracle
+      file: ./abis/phxoracle.json
+    - name: leveragePool
+      file: ./abis/leveragePool.json
+    - name: stakePool
+      file: ./abis/stakePool.json
+    - name: erc20
+      file: ./abis/erc20token.json
+
     eventHandlers:
     - event: CreateLeveragePool(indexed address,indexed address,indexed address,uint256,uint256)
       handler: handleCreateLeveragePool

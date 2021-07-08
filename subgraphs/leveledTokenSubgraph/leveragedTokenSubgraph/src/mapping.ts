@@ -281,6 +281,7 @@ export function handleBlock(block: ethereum.Block): void {
 
         totalTvlentity = new EntityTotalTVL(id.toHex());
         totalTvlentity.timestamp = block.timestamp;
+        totalTvlentity.value = BigInt.fromI32(0)
 
         let stakepools = factorysc.getAllStakePool();
         for (let i=0;i<stakepools.length;i++) {
@@ -288,13 +289,10 @@ export function handleBlock(block: ethereum.Block): void {
             let pool = stakepools[i];
             let stkpool = stakePool.bind(pool);
 
-            tvlentity = new EntityTVL(pool.toHex() + id.toHex());
+            tvlentity = new EntityTVL(pool.toHex() + id.toHex().substr(2));
             tvlentity.timestamp = block.timestamp;
-            log.error("step 1-1 {}",[pool.toHex()]);
 
             tvlentity.amount = stkpool.totalSupply();
-
-            /*
             tvlentity.poolAddress = pool;
 
             tvlentity.token = stkpool.poolToken();
@@ -304,14 +302,15 @@ export function handleBlock(block: ethereum.Block): void {
 
             totalTvlentity.value = totalTvlentity.value.plus(tvlentity.value);
 
-            apyentity = new EntityInterestAPY(pool.toHex() + id.toHex());
+            apyentity = new EntityInterestAPY(pool.toHex() + id.toHex().substr(2));
             apyentity.timestamp = block.timestamp;
+            apyentity.poolAddress = pool;
             apyentity.apy = stkpool.poolInterest().times(BigInt.fromI32(365));
             apyentity.token = stkpool.poolToken();
             apyentity.save();
 
-            totalTvlentity.save()
-            */
+            totalTvlentity.save();
+
         }
 
 /*

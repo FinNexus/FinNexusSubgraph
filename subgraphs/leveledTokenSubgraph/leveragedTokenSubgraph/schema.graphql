@@ -49,9 +49,9 @@ type EntityTVL @entity {
 type EntityInterestAPY @entity {
   id: ID!
   timestamp: BigInt!
-  poolAddress: Bytes!
-  token:  Bytes!
-  apy:  BigInt!
+  poolAddress: Bytes
+  token:  Bytes
+  apy:  BigInt
 }
 
 type EntityTradeVol @entity {
