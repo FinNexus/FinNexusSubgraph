@@ -8,6 +8,7 @@ dataSources:
   source:
     address: '0xdb6136017fe722044a332df2f2ffee7c26b06d75'
     abi: leverageFactory
+    startBlock: 8878482
   mapping:
     kind: ethereum/events
     apiVersion: 0.0.4
@@ -30,7 +31,7 @@ dataSources:
   source:
     address: "0xdae742f9675b5dfa932ce4b1cd0a9f0d089b7b4d"
     abi: phxoracle
-    startBlock: 8571600
+    startBlock: 8878482
   mapping:
     kind: ethereum/events
     apiVersion: 0.0.4
