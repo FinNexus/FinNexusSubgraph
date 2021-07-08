@@ -112,18 +112,18 @@ export function handleCreateStakePool(event: CreateStakePool): void {
 }
 
 export function handleBuyHedge(event: BuyHedge): void {
-/*
+
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  let entity = TradeItem.load(event.transaction.from.toHex())
+  let entity = EntityTradeItem.load(event.transaction.from.toHex())
 
   // // Entities only exist after they have been saved to the store;
   // // `null` checks allow to create entities on demand
   if (entity == null) {
-     let contract = leveragePoolSc.bind(event.address);
+     let contract = leveragePool.bind(event.address);
      let info = contract.getLeverageInfo();
 
-     entity = new TradeItem(event.transaction.from.toHex());
+     entity = new EntityTradeItem(event.transaction.from.toHex());
      entity.from = event.params.from;
      entity.timestamp = event.block.timestamp;
      entity.status = "Buying";
@@ -135,7 +135,7 @@ export function handleBuyHedge(event: BuyHedge): void {
      entity.save();
 
      let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
-     let tradevolentity = TradeVol.load(trdid);
+     let tradevolentity = EntityTradeVol.load(trdid);
      if(tradevolentity==null) {
         return;
      } else {
@@ -143,23 +143,21 @@ export function handleBuyHedge(event: BuyHedge): void {
         tradevolentity.buyHedgeValue = tradevolentity.buyHedgeValue.plus(entity.value);
         tradevolentity.save();
      }
-
   }
-*/
 }
 
 export function handleBuyLeverage(event: BuyLeverage): void {
-/*
+
     // Entities can be loaded from the store using a string ID; this ID
     // needs to be unique across all entities of the same type
-    let entity = TradeItem.load(event.transaction.from.toHex());
+    let entity = EntityTradeItem.load(event.transaction.from.toHex());
 
     // // Entities only exist after they have been saved to the store;
     // // `null` checks allow to create entities on demand
     if (entity == null) {
-        let contract = leveragePoolSc.bind(event.address);
+        let contract = leveragePool.bind(event.address);
         let info = contract.getLeverageInfo();
-        entity = new TradeItem(event.transaction.from.toHex());
+        entity = new EntityTradeItem(event.transaction.from.toHex());
         entity.from = event.params.from;
         entity.timestamp = event.block.timestamp;
 
@@ -172,7 +170,7 @@ export function handleBuyLeverage(event: BuyLeverage): void {
         entity.save();
 
         let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
-        let tradevolentity = TradeVol.load(trdid);
+        let tradevolentity = EntityTradeVol.load(trdid);
         if(tradevolentity==null) {
             return;
         } else {
@@ -181,21 +179,21 @@ export function handleBuyLeverage(event: BuyLeverage): void {
             tradevolentity.save();
         }
     }
-*/
+
 }
 
 export function handleSellHedge(event: SellHedge): void {
-/*
+
     // Entities can be loaded from the store using a string ID; this ID
     // needs to be unique across all entities of the same type
-    let entity = TradeItem.load(event.transaction.from.toHex());
+    let entity = EntityTradeItem.load(event.transaction.from.toHex());
 
     // // Entities only exist after they have been saved to the store;
     // // `null` checks allow to create entities on demand
     if (entity == null) {
-        let contract = leveragePoolSc.bind(event.address);
+        let contract = leveragePool.bind(event.address);
         let info = contract.getLeverageInfo();
-        entity = new TradeItem(event.transaction.from.toHex());
+        entity = new EntityTradeItem(event.transaction.from.toHex());
         entity.from = event.params.from;
         entity.timestamp = event.block.timestamp;
 
@@ -208,7 +206,7 @@ export function handleSellHedge(event: SellHedge): void {
         entity.save();
 
         let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
-        let tradevolentity = TradeVol.load(trdid);
+        let tradevolentity = EntityTradeVol.load(trdid);
         if(tradevolentity==null) {
             return;
         } else {
@@ -217,21 +215,21 @@ export function handleSellHedge(event: SellHedge): void {
             tradevolentity.save();
         }
     }
-*/
+
 }
 
 export function handleSellLeverage(event: SellLeverage): void {
-/*
+
     // Entities can be loaded from the store using a string ID; this ID
     // needs to be unique across all entities of the same type
-    let entity = TradeItem.load(event.transaction.from.toHex());
+    let entity = EntityTradeItem.load(event.transaction.from.toHex());
 
     // // Entities only exist after they have been saved to the store;
     // // `null` checks allow to create entities on demand
     if (entity == null) {
-        let contract = leveragePoolSc.bind(event.address);
+        let contract = leveragePool.bind(event.address);
         let info = contract.getLeverageInfo();
-        entity = new TradeItem(event.transaction.from.toHex());
+        entity = new EntityTradeItem(event.transaction.from.toHex());
         entity.from = event.params.from;
         entity.timestamp = event.block.timestamp;
 
@@ -245,7 +243,7 @@ export function handleSellLeverage(event: SellLeverage): void {
 
 
         let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
-        let tradevolentity = TradeVol.load(trdid);
+        let tradevolentity = EntityTradeVol.load(trdid);
         if(tradevolentity==null) {
             return;
         } else {
@@ -254,7 +252,7 @@ export function handleSellLeverage(event: SellLeverage): void {
             tradevolentity.save();
         }
     }
-*/
+
 }
 
 export function handleBlock(block: ethereum.Block): void {
