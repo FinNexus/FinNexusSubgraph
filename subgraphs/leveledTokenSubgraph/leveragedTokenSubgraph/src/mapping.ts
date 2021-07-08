@@ -91,25 +91,24 @@ export function handleCreateLeveragePool(event: CreateLeveragePool): void {
 }
 
 export function handleCreateStakePool(event: CreateStakePool): void {
-/*
-    let factoryEntity = LeverageFactory.load(event.address.toHex());
+    stakePoolTemplate.create(event.params.stakePool);
+
+    let factoryEntity = EntityLeverageFactory.load(event.address.toHex());
     if(factoryEntity==null) {
-        factoryEntity = new LeverageFactory(event.address.toHex());
+        factoryEntity = new EntityLeverageFactory(event.address.toHex());
         factoryEntity.save();
     }
 
-    let poolEntity = stakePool.load(event.params.stakePool.toHex())
+    let poolEntity = EntityStakePool.load(event.params.stakePool.toHex())
     if (poolEntity == null){
-        poolEntity = new stakePool(event.params.stakePool.toHex());
+        poolEntity = new EntityStakePool(event.params.stakePool.toHex());
         poolEntity.underlyingAddress = event.params.token;
         let tk = erc20.bind(event.params.token);
         poolEntity.underlyingName = tk.symbol();
         poolEntity.interestrate = event.params.interestrate;
         poolEntity.save();
-
-        stakePoolTemplate.create(event.params.stakePool)
     }
-*/
+
 }
 
 export function handleBuyHedge(event: BuyHedge): void {
