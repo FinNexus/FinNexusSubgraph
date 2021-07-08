@@ -23,7 +23,7 @@ import {
 } from "../generated/templates"
 
 import {
-    leveragePool as leveragePoolSc
+    leveragePool
 } from "../generated/templates/leveragePool/leveragePool"
 
 import {
@@ -313,14 +313,12 @@ export function handleBlock(block: ethereum.Block): void {
 
         }
 
-/*
-        log.error("step 2",[]);
         let leveragepools = factorysc.getAllLeveragePool();
         for (let i=0;i<leveragepools.length;i++) {
             let pool = leveragepools[i];
-            tradevolentity = EntityTradeVol.load(pool.toHex()+id.toHex());
+            tradevolentity = EntityTradeVol.load(pool.toHex()+id.toHex().substr(2));
             if(tradevolentity==null) {
-              tradevolentity = new EntityTradeVol(pool.toHex()+id.toHex());
+              tradevolentity = new EntityTradeVol(pool.toHex()+id.toHex().substr(2));
               tradevolentity.timestamp = block.timestamp;
               tradevolentity.pool = pool;
               tradevolentity.save();
@@ -329,13 +327,13 @@ export function handleBlock(block: ethereum.Block): void {
             let lpsc = leveragePool.bind(pool);
             let leverinfo = lpsc.getLeverageInfo();
             let feeToken = leverinfo.value0;
-            let feeid = feeToken.toHex() + id.toHex();
-            let prefeeid = feeToken.toHex() + id.minus(BigInt.fromI32(1)).toHex();
+            let feeid = feeToken.toHex() + id.toHex().substr(2);
+            let prefeeid = feeToken.toHex() + id.minus(BigInt.fromI32(1)).toHex().substr(2);
             //index 0,token position
-            feeentity = Fee.load(feeid);
-            let prefeeentity = Fee.load(prefeeid);
+            feeentity = EntityFee.load(feeid);
+            let prefeeentity = EntityFee.load(prefeeid);
             if(feeentity==null) {
-                feeentity = new Fee(feeid);
+                feeentity = new EntityFee(feeid);
                 feeentity.timestamp = block.timestamp;
                 feeentity.token = feeToken;
                 let tk = erc20.bind(feeToken);
@@ -356,13 +354,13 @@ export function handleBlock(block: ethereum.Block): void {
 
             let hedgeinfo = lpsc.getHedgeInfo();
             feeToken = hedgeinfo.value0;
-            feeid = feeToken.toHex() + id.toHex();
-            prefeeid = feeToken.toHex() + id.minus(BigInt.fromI32(1)).toHex();
+            feeid = feeToken.toHex() + id.toHex().substr(2);
+            prefeeid = feeToken.toHex() + id.minus(BigInt.fromI32(1)).toHex().substr(2);
             //index 0,token position
-            feeentity = Fee.load(feeid);
-            prefeeentity = Fee.load(prefeeid);
+            feeentity = EntityFee.load(feeid);
+            prefeeentity = EntityFee.load(prefeeid);
             if(feeentity==null) {
-                feeentity = new Fee(feeid);
+                feeentity = new EntityFee(feeid);
                 feeentity.timestamp = block.timestamp;
                 feeentity.token = feeToken;
                 let tk = erc20.bind(feeToken);
@@ -380,9 +378,7 @@ export function handleBlock(block: ethereum.Block): void {
                 feeentity.save();
             }
 
-
-        }*/
-
+        }
 
     }
 }
