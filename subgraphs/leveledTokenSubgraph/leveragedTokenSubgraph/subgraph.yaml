@@ -15,28 +15,28 @@ dataSources:
     language: wasm/assemblyscript
     entities:
     - EntityLeverageFactory
-    - CreateLeveragePool,
-    - CreateStakePool
-    - BuyHedge,
-    - BuyLeverage,
-    - SellHedge,
-    - SellLeverage,
     - EntityLeveragePool
     - EntityStakePool
-    - phxoracle
-    - leveragePool
-    - stakePool
+    - EntityTradeItem
+    - EntityTotalTVL
+    - EntityTVL
+    - EntityInterestAPY
+    - EntityTradeVol
+    - EntityStakePool
+    - EntityFee
+    - CreateLeveragePool
+    - CreateStakePool
     abis:
     - name: leverageFactory
       file: ./abis/leverageFactory.json
-    - name: phxoracle
-      file: ./abis/phxoracle.json
     - name: leveragePool
       file: ./abis/leveragePool.json
     - name: stakePool
       file: ./abis/stakePool.json
     - name: erc20
       file: ./abis/erc20token.json
+    - name: phxoracle
+      file: ./abis/phxoracle.json
 
     eventHandlers:
     - event: CreateLeveragePool(indexed address,indexed address,indexed address,uint256,uint256)
@@ -59,7 +59,9 @@ dataSources:
     apiVersion: 0.0.4
     language: wasm/assemblyscript
     entities:
-    - LeveragedTokenPriceEntity
+    - EntityLeverageFactory
+    - EntityLeveragePool
+    - EntityStakePool
     abis:
     - name: phxoracle
       file: ./abis/phxoracle.json
@@ -79,19 +81,33 @@ templates:
     language: wasm/assemblyscript
     file: ./src/mapping.ts
     entities:
-    - leverageFactory
-    - CreateLeveragePool,
-    - CreateStakePool
-    - BuyHedge,
-    - BuyLeverage,
-    - SellHedge,
-    - SellLeverage,
-    - leveragePool
-    - stakePool
-    - phxoracle
+    - EntityLeverageFactory
+    - EntityLeveragePool
+    - EntityStakePool
+    - EntityTradeItem
+    - EntityTotalTVL
+    - EntityTVL
+    - EntityInterestAPY
+    - EntityTradeVol
+    - EntityStakePool
+    - EntityFee
+    - BuyHedge
+    - BuyLeverage
+    - Liquidate
+    - Rebalance
+    - Redeem
+    - SellHedge
+    - SellLeverage
+    - Swap
     abis:
     - name: leveragePool
       file: ./abis/leveragePool.json
+    - name: stakePool
+      file: ./abis/stakePool.json
+    - name: erc20
+      file: ./abis/erc20token.json
+    - name: phxoracle
+      file: ./abis/phxoracle.json
     eventHandlers:
     - event: BuyHedge(indexed address,indexed address,uint256,uint256,uint256)
       handler: handleBuyHedge
@@ -99,12 +115,6 @@ templates:
       handler: handleBuyLeverage
     - event: Liquidate(indexed address,indexed address,uint256,uint256,uint256)
       handler: handleLiquidate
-    - event: OperatorTransferred(indexed address,indexed address,indexed uint256)
-      handler: handleOperatorTransferred
-    - event: OriginTransferred(indexed address,indexed address)
-      handler: handleOriginTransferred
-    - event: OwnershipTransferred(indexed address,indexed address)
-      handler: handleOwnershipTransferred
     - event: Rebalance(indexed address,indexed address,uint256,uint256)
       handler: handleRebalance
     - event: Redeem(indexed address,indexed address,uint256)
@@ -128,18 +138,24 @@ templates:
     file: ./src/mapping.ts
     entities:
     - EntityLeverageFactory
-    - CreateLeveragePool,
-    - CreateStakePool
-    - BuyHedge,
-    - BuyLeverage,
-    - SellHedge,
-    - SellLeverage,
     - EntityLeveragePool
     - EntityStakePool
-    - phxoracle
+    - EntityTradeItem
+    - EntityTotalTVL
+    - EntityTVL
+    - EntityInterestAPY
+    - EntityTradeVol
+    - EntityStakePool
+    - EntityFee
     abis:
     - name: stakePool
       file: ./abis/stakePool.json
+    - name: stakePool
+      file: ./abis/stakePool.json
+    - name: erc20
+      file: ./abis/erc20token.json
+    - name: phxoracle
+      file: ./abis/phxoracle.json
     eventHandlers:
     - event: Borrow(indexed address,indexed address,uint256,uint256)
       handler: handleBorrow

@@ -1,18 +1,17 @@
-type EntityLeveragedTokenPrice @entity {
-  id: ID!
-  poolAddress:Bytes!
-  uptokenprice: BigInt!
-  downtokenprice: BigInt!
-  timestamp: BigInt!
-  network:String!
-}
-
+#type EntityLeveragedTokenPrice @entity {
+#  id: ID!
+#  poolAddress:Bytes!
+#  uptokenprice: BigInt!
+#  downtokenprice: BigInt!
+#  timestamp: BigInt!
+#  network:String!
+#}
 
 type EntityLeveragePool @entity {
   id: ID!
-  name: String!
-  underlyingAddress: Bytes!
-  underlyingName: String!
+  name: String
+  underlyingAddress: Bytes
+  underlyingName: String
 }
 
 type EntityLeverageFactory @entity {

@@ -12,88 +12,6 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
-export class EntityLeveragedTokenPrice extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(
-      id !== null,
-      "Cannot save EntityLeveragedTokenPrice entity without an ID"
-    );
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save EntityLeveragedTokenPrice entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("EntityLeveragedTokenPrice", id.toString(), this);
-  }
-
-  static load(id: string): EntityLeveragedTokenPrice | null {
-    return store.get(
-      "EntityLeveragedTokenPrice",
-      id
-    ) as EntityLeveragedTokenPrice | null;
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get poolAddress(): Bytes {
-    let value = this.get("poolAddress");
-    return value.toBytes();
-  }
-
-  set poolAddress(value: Bytes) {
-    this.set("poolAddress", Value.fromBytes(value));
-  }
-
-  get uptokenprice(): BigInt {
-    let value = this.get("uptokenprice");
-    return value.toBigInt();
-  }
-
-  set uptokenprice(value: BigInt) {
-    this.set("uptokenprice", Value.fromBigInt(value));
-  }
-
-  get downtokenprice(): BigInt {
-    let value = this.get("downtokenprice");
-    return value.toBigInt();
-  }
-
-  set downtokenprice(value: BigInt) {
-    this.set("downtokenprice", Value.fromBigInt(value));
-  }
-
-  get timestamp(): BigInt {
-    let value = this.get("timestamp");
-    return value.toBigInt();
-  }
-
-  set timestamp(value: BigInt) {
-    this.set("timestamp", Value.fromBigInt(value));
-  }
-
-  get network(): string {
-    let value = this.get("network");
-    return value.toString();
-  }
-
-  set network(value: string) {
-    this.set("network", Value.fromString(value));
-  }
-}
-
 export class EntityLeveragePool extends Entity {
   constructor(id: string) {
     super();
@@ -124,31 +42,55 @@ export class EntityLeveragePool extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get name(): string {
+  get name(): string | null {
     let value = this.get("name");
-    return value.toString();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
   }
 
-  set name(value: string) {
-    this.set("name", Value.fromString(value));
+  set name(value: string | null) {
+    if (value === null) {
+      this.unset("name");
+    } else {
+      this.set("name", Value.fromString(value as string));
+    }
   }
 
-  get underlyingAddress(): Bytes {
+  get underlyingAddress(): Bytes | null {
     let value = this.get("underlyingAddress");
-    return value.toBytes();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
   }
 
-  set underlyingAddress(value: Bytes) {
-    this.set("underlyingAddress", Value.fromBytes(value));
+  set underlyingAddress(value: Bytes | null) {
+    if (value === null) {
+      this.unset("underlyingAddress");
+    } else {
+      this.set("underlyingAddress", Value.fromBytes(value as Bytes));
+    }
   }
 
-  get underlyingName(): string {
+  get underlyingName(): string | null {
     let value = this.get("underlyingName");
-    return value.toString();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
   }
 
-  set underlyingName(value: string) {
-    this.set("underlyingName", Value.fromString(value));
+  set underlyingName(value: string | null) {
+    if (value === null) {
+      this.unset("underlyingName");
+    } else {
+      this.set("underlyingName", Value.fromString(value as string));
+    }
   }
 }
 

@@ -48,8 +48,7 @@ import {
     Unstake
 } from "../generated/templates/stakePool/stakePool"
 
-import {EntityLeveragedTokenPrice,
-        EntityLeveragePool,
+import {EntityLeveragePool,
         EntityLeverageFactory,
         EntityTradeItem,
         EntityTVL,
@@ -62,34 +61,33 @@ import {EntityLeveragedTokenPrice,
 
 //let ONE_DAY_SECONDS = 3600*24;
 let ONE_DAY_SECONDS = 3600;
-//need to modify according to production
-//let FACTORY_ADDRESS = '0xdb6136017fe722044a332df2f2ffee7c26b06d75';
+
 export function handleCreateLeveragePool(event: CreateLeveragePool): void {
-    /*
-    // Store Dynamically generated contracts
-    let factoryEntity = LeverageFactory.load(event.address.toHex());
+    //begin monitor pool event
+    leveragePoolTemplate.create(event.params.leveragePool);
+    log.info("created pool address,{}",[event.params.leveragePool.toHex()]);
+    let factoryEntity = EntityLeverageFactory.load(event.address.toHex());
     if(factoryEntity==null) {
-        factoryEntity = new LeverageFactory(event.address.toHex())
+        factoryEntity = new EntityLeverageFactory(event.address.toHex());
         factoryEntity.save();
     }
 
-    let poolEntity = leveragePool.load(event.params.leveragePool.toHex())
+    let poolEntity = EntityLeveragePool.load(event.params.leveragePool.toHex());
     if (poolEntity == null){
-        let leveragesc = leveragePoolSc.bind(event.params.leveragePool);
-        poolEntity = new leveragePool(event.params.leveragePool.toHex());
-        let tk = erc20.bind(event.params.tokenB);
-        poolEntity.underlyingAddress = event.params.tokenB;
-        poolEntity.underlyingName = tk.symbol();
+         let leveragesc = leveragePool.bind(event.params.leveragePool);
+         poolEntity = new EntityLeveragePool(event.params.leveragePool.toHex());
+         let tk = erc20.bind(event.params.tokenB);
 
-        let info = leveragesc.getHedgeInfo();
-        let rk = erc20.bind(info.value2);
-        poolEntity.name = rk.name();
-        poolEntity.save();
+         poolEntity.underlyingAddress = event.params.tokenB;
+         poolEntity.underlyingName = tk.symbol();
 
-        //begin monitor pool event
-        leveragePoolTemplate.create(event.params.leveragePool);
+         let info = leveragesc.getHedgeInfo();
+         let rk = erc20.bind(info.value2);
+         poolEntity.name = rk.name();
+
+         poolEntity.save();
     }
-    */
+
 }
 
 export function handleCreateStakePool(event: CreateStakePool): void {
@@ -390,7 +388,5 @@ export function handleRebalance(event: Rebalance): void {}
 export function handleRedeem(event: Redeem): void {}
 
 export function handleSwap(event: Swap): void {}
-
-export function handleTransfer(event: Transfer): void {}
 
 export function oracleHandleBlock(block: ethereum.Block): void {}
