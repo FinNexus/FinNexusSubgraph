@@ -134,7 +134,7 @@ export function handleBuyHedge(event: BuyHedge): void {
      entity.value = entity.price.times(entity.amount);
      entity.save();
 
-     let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
+     let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex().substr(2);
      let tradevolentity = EntityTradeVol.load(trdid);
      if(tradevolentity==null) {
         return;
@@ -169,7 +169,7 @@ export function handleBuyLeverage(event: BuyLeverage): void {
         entity.value = entity.price.times(entity.amount);
         entity.save();
 
-        let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
+        let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex().substr(2);
         let tradevolentity = EntityTradeVol.load(trdid);
         if(tradevolentity==null) {
             return;
@@ -205,7 +205,7 @@ export function handleSellHedge(event: SellHedge): void {
         entity.value = entity.price.times(entity.amount);
         entity.save();
 
-        let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
+        let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex().substr(2);
         let tradevolentity = EntityTradeVol.load(trdid);
         if(tradevolentity==null) {
             return;
@@ -242,7 +242,7 @@ export function handleSellLeverage(event: SellLeverage): void {
         entity.save();
 
 
-        let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex();
+        let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex().substr(2);
         let tradevolentity = EntityTradeVol.load(trdid);
         if(tradevolentity==null) {
             return;
