@@ -927,6 +927,15 @@ export class EntityPrice extends Entity {
     }
   }
 
+  get pool(): Bytes {
+    let value = this.get("pool");
+    return value.toBytes();
+  }
+
+  set pool(value: Bytes) {
+    this.set("pool", Value.fromBytes(value));
+  }
+
   get leverageprice(): BigInt {
     let value = this.get("leverageprice");
     return value.toBigInt();

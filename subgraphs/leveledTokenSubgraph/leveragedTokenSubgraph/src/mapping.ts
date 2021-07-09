@@ -377,11 +377,12 @@ export function handleBlock(block: ethereum.Block): void {
             }
 
             let prices = lpsc.buyPrices();
-            let priceEntity = new EntityPrice(id.toHex());
+            let priceEntity = new EntityPrice(pool.toHex()+id.toHex().substr(2));
             priceEntity.timestamp = block.timestamp;
+            priceEntity.pool = pool
             priceEntity.leverageprice = prices.value0;
             priceEntity.hedgeprice = prices.value1;
-
+            priceEntity.save();
         }
 
     }

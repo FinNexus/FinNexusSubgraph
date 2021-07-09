@@ -76,6 +76,7 @@ type EntityFee @entity {
 type EntityPrice @entity {
   id: ID!
   timestamp: BigInt
+  pool: Bytes!
   leverageprice: BigInt!
   hedgeprice: BigInt!
 }
