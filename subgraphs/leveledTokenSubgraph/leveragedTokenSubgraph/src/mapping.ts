@@ -57,10 +57,11 @@ import {EntityLeveragePool,
         EntityFee,
         EntityStakePool,
         EntityTotalTVL,
+        EntityPrice
 } from "../generated/schema"
 
-//let ONE_DAY_SECONDS = 3600*24;
-let ONE_DAY_SECONDS = 3600;
+let ONE_DAY_SECONDS = 3600*24;
+//let ONE_DAY_SECONDS = 3600;
 
 export function handleCreateLeveragePool(event: CreateLeveragePool): void {
     //begin monitor pool event
@@ -144,6 +145,7 @@ export function handleBuyHedge(event: BuyHedge): void {
         tradevolentity.save();
      }
   }
+
 }
 
 export function handleBuyLeverage(event: BuyLeverage): void {
@@ -321,6 +323,7 @@ export function handleBlock(block: ethereum.Block): void {
 
             let lpsc = leveragePool.bind(pool);
             let leverinfo = lpsc.getLeverageInfo();
+
             let feeToken = leverinfo.value0;
             let feeid = feeToken.toHex() + id.toHex().substr(2);
             let prefeeid = feeToken.toHex() + id.minus(BigInt.fromI32(1)).toHex().substr(2);
@@ -372,6 +375,12 @@ export function handleBlock(block: ethereum.Block): void {
                 feeentity.value = feeentity.amount.times(tkprice);
                 feeentity.save();
             }
+
+            let prices = lpsc.buyPrices();
+            let priceEntity = new EntityPrice(id.toHex());
+            priceEntity.timestamp = block.timestamp;
+            priceEntity.leverageprice = prices.value0;
+            priceEntity.hedgeprice = prices.value1;
 
         }
 

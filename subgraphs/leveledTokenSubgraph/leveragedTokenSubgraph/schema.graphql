@@ -1,12 +1,3 @@
-#type EntityLeveragedTokenPrice @entity {
-#  id: ID!
-#  poolAddress:Bytes!
-#  uptokenprice: BigInt!
-#  downtokenprice: BigInt!
-#  timestamp: BigInt!
-#  network:String!
-#}
-
 type EntityLeveragePool @entity {
   id: ID!
   name: String
@@ -22,9 +13,9 @@ type EntityTradeItem @entity {
   id: ID!
   from: Bytes!
   timestamp: BigInt!
-  status: String!
-  underlying: Bytes!
-  leveragetype: String!
+  status: String
+  underlying: Bytes
+  leveragetype: String
   value: BigInt!
   price: BigInt!
   amount: BigInt!
@@ -32,22 +23,22 @@ type EntityTradeItem @entity {
 
 type EntityTotalTVL @entity {
   id: ID!
-  timestamp: BigInt!
+  timestamp: BigInt
   value: BigInt!
 }
 
 type EntityTVL @entity {
   id: ID!
-  timestamp: BigInt!
-  poolAddress: Bytes!
-  token: Bytes!
+  timestamp: BigInt
+  poolAddress: Bytes
+  token: Bytes
   amount: BigInt!
   value: BigInt!
 }
 
 type EntityInterestAPY @entity {
   id: ID!
-  timestamp: BigInt!
+  timestamp: BigInt
   poolAddress: Bytes
   token:  Bytes
   apy:  BigInt
@@ -55,8 +46,8 @@ type EntityInterestAPY @entity {
 
 type EntityTradeVol @entity {
   id: ID!
-  timestamp: BigInt!
-  pool: Bytes!
+  timestamp: BigInt
+  pool: Bytes
   buyLeverAmount: BigInt
   buyLeverValue: BigInt
   sellLeverAmount: BigInt
@@ -69,17 +60,25 @@ type EntityTradeVol @entity {
 
 type EntityStakePool @entity {
   id: ID!
-  underlyingAddress: Bytes!
-  underlyingName: String!
-  interestrate: BigInt!
+  underlyingAddress: Bytes
+  underlyingName: String
+  interestrate: BigInt
 }
 
 type EntityFee @entity {
   id: ID!
-  timestamp: BigInt!
-  token: Bytes!
+  timestamp: BigInt
+  token: Bytes
   amount: BigInt!
   value: BigInt!
 }
+
+type EntityPrice @entity {
+  id: ID!
+  timestamp: BigInt
+  leverageprice: BigInt!
+  hedgeprice: BigInt!
+}
+
 
 

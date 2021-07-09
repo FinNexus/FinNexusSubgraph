@@ -47,28 +47,6 @@ dataSources:
     - handler: handleBlock
     file: ./src/mapping.ts
 
-- kind: ethereum/contract
-  name: phxoracle
-  network: rinkeby
-  source:
-    address: "0xdae742f9675b5dfa932ce4b1cd0a9f0d089b7b4d"
-    abi: phxoracle
-    startBlock: 8878482
-  mapping:
-    kind: ethereum/events
-    apiVersion: 0.0.4
-    language: wasm/assemblyscript
-    entities:
-    - EntityLeverageFactory
-    - EntityLeveragePool
-    - EntityStakePool
-    abis:
-    - name: phxoracle
-      file: ./abis/phxoracle.json
-    blockHandlers:
-    - handler: oracleHandleBlock
-    file: ./src/mapping.ts
-
 templates:
 - kind: ethereum/contract
   name: leveragePool
@@ -147,6 +125,7 @@ templates:
     - EntityTradeVol
     - EntityStakePool
     - EntityFee
+    - EntityPrice
     abis:
     - name: stakePool
       file: ./abis/stakePool.json
