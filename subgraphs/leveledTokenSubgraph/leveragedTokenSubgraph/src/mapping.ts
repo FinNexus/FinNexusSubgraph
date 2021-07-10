@@ -61,7 +61,8 @@ import {EntityLeveragePool,
 } from "../generated/schema"
 
 let ONE_DAY_SECONDS = 3600*24;
-//let ONE_DAY_SECONDS = 3600;
+//let ONE_DAY_SECONDS = 1;
+let FACTORY_ADDR = "0xdb6136017fe722044a332df2f2ffee7c26b06d75";
 
 export function handleCreateLeveragePool(event: CreateLeveragePool): void {
     //begin monitor pool event
@@ -116,7 +117,7 @@ export function handleBuyHedge(event: BuyHedge): void {
 
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  let entity = EntityTradeItem.load(event.transaction.from.toHex())
+  let entity = EntityTradeItem.load(event.transaction.hash.toHex())
 
   // // Entities only exist after they have been saved to the store;
   // // `null` checks allow to create entities on demand
@@ -124,7 +125,7 @@ export function handleBuyHedge(event: BuyHedge): void {
      let contract = leveragePool.bind(event.address);
      let info = contract.getLeverageInfo();
 
-     entity = new EntityTradeItem(event.transaction.from.toHex());
+     entity = new EntityTradeItem(event.transaction.hash.toHex());
      entity.from = event.params.from;
      entity.timestamp = event.block.timestamp;
      entity.status = "Buying";
@@ -152,14 +153,14 @@ export function handleBuyLeverage(event: BuyLeverage): void {
 
     // Entities can be loaded from the store using a string ID; this ID
     // needs to be unique across all entities of the same type
-    let entity = EntityTradeItem.load(event.transaction.from.toHex());
+    let entity = EntityTradeItem.load(event.transaction.hash.toHex());
 
     // // Entities only exist after they have been saved to the store;
     // // `null` checks allow to create entities on demand
     if (entity == null) {
         let contract = leveragePool.bind(event.address);
         let info = contract.getLeverageInfo();
-        entity = new EntityTradeItem(event.transaction.from.toHex());
+        entity = new EntityTradeItem(event.transaction.hash.toHex());
         entity.from = event.params.from;
         entity.timestamp = event.block.timestamp;
 
@@ -188,14 +189,14 @@ export function handleSellHedge(event: SellHedge): void {
 
     // Entities can be loaded from the store using a string ID; this ID
     // needs to be unique across all entities of the same type
-    let entity = EntityTradeItem.load(event.transaction.from.toHex());
+    let entity = EntityTradeItem.load(event.transaction.hash.toHex());
 
     // // Entities only exist after they have been saved to the store;
     // // `null` checks allow to create entities on demand
     if (entity == null) {
         let contract = leveragePool.bind(event.address);
         let info = contract.getLeverageInfo();
-        entity = new EntityTradeItem(event.transaction.from.toHex());
+        entity = new EntityTradeItem(event.transaction.hash.toHex());
         entity.from = event.params.from;
         entity.timestamp = event.block.timestamp;
 
@@ -224,14 +225,14 @@ export function handleSellLeverage(event: SellLeverage): void {
 
     // Entities can be loaded from the store using a string ID; this ID
     // needs to be unique across all entities of the same type
-    let entity = EntityTradeItem.load(event.transaction.from.toHex());
+    let entity = EntityTradeItem.load(event.transaction.hash.toHex());
 
     // // Entities only exist after they have been saved to the store;
     // // `null` checks allow to create entities on demand
     if (entity == null) {
         let contract = leveragePool.bind(event.address);
         let info = contract.getLeverageInfo();
-        entity = new EntityTradeItem(event.transaction.from.toHex());
+        entity = new EntityTradeItem(event.transaction.hash.toHex());
         entity.from = event.params.from;
         entity.timestamp = event.block.timestamp;
 
@@ -268,12 +269,12 @@ export function handleBlock(block: ethereum.Block): void {
    // log.error("step 1",[]);
 
     if(totalTvlentity==null){
-        let factorysc = leverageFactorysc.bind(dataSource.address());
+      //  let factorysc = leverageFactorysc.bind(dataSource.address());
+        let factorysc = leverageFactorysc.bind(Address.fromString(FACTORY_ADDR));
         let oracleaddr = factorysc.phxOracle();
         if (oracleaddr==Address.fromString("0x0000000000000000000000000000000000000000")) {
             return;
         }
-
         let oracelsc = phxoracle.bind(oracleaddr);
 
         totalTvlentity = new EntityTotalTVL(id.toHex());
@@ -388,6 +389,7 @@ export function handleBlock(block: ethereum.Block): void {
     }
 }
 
+export function handleBorrow(event: Borrow): void {}
 export function handleLiquidate(event: Liquidate): void {}
 
 export function handleRebalance(event: Rebalance): void {}
@@ -397,3 +399,11 @@ export function handleRedeem(event: Redeem): void {}
 export function handleSwap(event: Swap): void {}
 
 export function oracleHandleBlock(block: ethereum.Block): void {}
+
+export function handleInterest(event: Interest): void {}
+
+export function handleRepay(event: Repay): void {}
+
+export function handleStake(event: Stake): void {}
+
+export function handleUnstake(event: Unstake): void {}
