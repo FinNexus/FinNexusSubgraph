@@ -1,0 +1,41 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Contract
+    network: mainnet
+    source:
+      address: "0x120f18f5b8edcaa3c083f9464c57c11d81a9e549"
+      abi: Contract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - AddCollateral
+        - BuyOption
+        - DebugEvent
+        - ExerciseOption
+        - OwnershipTransferred
+        - RedeemCollateral
+        - SellOption
+      abis:
+        - name: Contract
+          file: ./abis/Contract.json
+      eventHandlers:
+        - event: AddCollateral(indexed address,indexed address,uint256,uint256)
+          handler: handleAddCollateral
+        - event: BuyOption(indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleBuyOption
+        - event: DebugEvent(uint256,uint256,uint256)
+          handler: handleDebugEvent
+        - event: ExerciseOption(indexed address,indexed uint256,uint256,uint256)
+          handler: handleExerciseOption
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RedeemCollateral(indexed address,address,uint256)
+          handler: handleRedeemCollateral
+        - event: SellOption(indexed address,indexed uint256,uint256,uint256)
+          handler: handleSellOption
+      file: ./src/mapping.ts
