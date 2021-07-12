@@ -1,3 +1,11 @@
+type EntityOptionManager @entity {
+  id: ID!
+}
+
+type EntityOptionPool @entity {
+  id: ID!
+}
+
 type EntityBuyOptionItem @entity {
   id: ID!
   Optionid: Int!
