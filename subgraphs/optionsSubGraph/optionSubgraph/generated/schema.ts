@@ -722,49 +722,72 @@ export class EntityPoolTLV extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get TimeStamp(): BigInt {
+  get TimeStamp(): BigInt | null {
     let value = this.get("TimeStamp");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set TimeStamp(value: BigInt) {
-    this.set("TimeStamp", Value.fromBigInt(value));
+  set TimeStamp(value: BigInt | null) {
+    if (value === null) {
+      this.unset("TimeStamp");
+    } else {
+      this.set("TimeStamp", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get Pool(): Bytes {
-    let value = this.get("Pool");
-    return value.toBytes();
-  }
-
-  set Pool(value: Bytes) {
-    this.set("Pool", Value.fromBytes(value));
-  }
-
-  get Token(): Bytes {
+  get Token(): Bytes | null {
     let value = this.get("Token");
-    return value.toBytes();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
   }
 
-  set Token(value: Bytes) {
-    this.set("Token", Value.fromBytes(value));
+  set Token(value: Bytes | null) {
+    if (value === null) {
+      this.unset("Token");
+    } else {
+      this.set("Token", Value.fromBytes(value as Bytes));
+    }
   }
 
-  get Amout(): BigInt {
+  get Amout(): BigInt | null {
     let value = this.get("Amout");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set Amout(value: BigInt) {
-    this.set("Amout", Value.fromBigInt(value));
+  set Amout(value: BigInt | null) {
+    if (value === null) {
+      this.unset("Amout");
+    } else {
+      this.set("Amout", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get UsdValue(): BigInt {
+  get UsdValue(): BigInt | null {
     let value = this.get("UsdValue");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set UsdValue(value: BigInt) {
-    this.set("UsdValue", Value.fromBigInt(value));
+  set UsdValue(value: BigInt | null) {
+    if (value === null) {
+      this.unset("UsdValue");
+    } else {
+      this.set("UsdValue", Value.fromBigInt(value as BigInt));
+    }
   }
 }
 
@@ -967,8 +990,8 @@ export class EntityPremium extends Entity {
     }
   }
 
-  get Amount(): BigInt | null {
-    let value = this.get("Amount");
+  get CallAmount(): BigInt | null {
+    let value = this.get("CallAmount");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -976,16 +999,16 @@ export class EntityPremium extends Entity {
     }
   }
 
-  set Amount(value: BigInt | null) {
+  set CallAmount(value: BigInt | null) {
     if (value === null) {
-      this.unset("Amount");
+      this.unset("CallAmount");
     } else {
-      this.set("Amount", Value.fromBigInt(value as BigInt));
+      this.set("CallAmount", Value.fromBigInt(value as BigInt));
     }
   }
 
-  get UsdValue(): BigInt | null {
-    let value = this.get("UsdValue");
+  get CallUsdValue(): BigInt | null {
+    let value = this.get("CallUsdValue");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -993,11 +1016,45 @@ export class EntityPremium extends Entity {
     }
   }
 
-  set UsdValue(value: BigInt | null) {
+  set CallUsdValue(value: BigInt | null) {
     if (value === null) {
-      this.unset("UsdValue");
+      this.unset("CallUsdValue");
     } else {
-      this.set("UsdValue", Value.fromBigInt(value as BigInt));
+      this.set("CallUsdValue", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get PutAmount(): BigInt | null {
+    let value = this.get("PutAmount");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set PutAmount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("PutAmount");
+    } else {
+      this.set("PutAmount", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get PutUsdValue(): BigInt | null {
+    let value = this.get("PutUsdValue");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set PutUsdValue(value: BigInt | null) {
+    if (value === null) {
+      this.unset("PutUsdValue");
+    } else {
+      this.set("PutUsdValue", Value.fromBigInt(value as BigInt));
     }
   }
 }
@@ -1058,8 +1115,8 @@ export class EntityFee extends Entity {
     }
   }
 
-  get Amount(): BigInt | null {
-    let value = this.get("Amount");
+  get CallAmount(): BigInt | null {
+    let value = this.get("CallAmount");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -1067,16 +1124,16 @@ export class EntityFee extends Entity {
     }
   }
 
-  set Amount(value: BigInt | null) {
+  set CallAmount(value: BigInt | null) {
     if (value === null) {
-      this.unset("Amount");
+      this.unset("CallAmount");
     } else {
-      this.set("Amount", Value.fromBigInt(value as BigInt));
+      this.set("CallAmount", Value.fromBigInt(value as BigInt));
     }
   }
 
-  get UsdValue(): BigInt | null {
-    let value = this.get("UsdValue");
+  get CallUsdValue(): BigInt | null {
+    let value = this.get("CallUsdValue");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -1084,11 +1141,45 @@ export class EntityFee extends Entity {
     }
   }
 
-  set UsdValue(value: BigInt | null) {
+  set CallUsdValue(value: BigInt | null) {
     if (value === null) {
-      this.unset("UsdValue");
+      this.unset("CallUsdValue");
     } else {
-      this.set("UsdValue", Value.fromBigInt(value as BigInt));
+      this.set("CallUsdValue", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get PutAmount(): BigInt | null {
+    let value = this.get("PutAmount");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set PutAmount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("PutAmount");
+    } else {
+      this.set("PutAmount", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get PutUsdValue(): BigInt | null {
+    let value = this.get("PutUsdValue");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set PutUsdValue(value: BigInt | null) {
+    if (value === null) {
+      this.unset("PutUsdValue");
+    } else {
+      this.set("PutUsdValue", Value.fromBigInt(value as BigInt));
     }
   }
 }

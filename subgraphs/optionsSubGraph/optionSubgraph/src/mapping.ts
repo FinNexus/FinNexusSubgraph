@@ -64,49 +64,42 @@ let OPTION_MANAGERS = ["0xfdf252995da6d6c54c03fc993e7aa6b593a57b8d",
 export function handleBuyOption(event: BuyOption): void {
     let entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
     if(entityBuyOptionItem==null){
-        let entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
+        entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
     }
     //OptionPrice: BigInt  #buyInfoMap[optionid]/100000000,
     entityBuyOptionItem.OptionPrice = event.params.optionPrice;
-     entityBuyOptionItem.CreatedTime = event.block.timestamp;
+    entityBuyOptionItem.CreatedTime = event.block.timestamp;
     entityBuyOptionItem.save();
 }
 
 export function handleCreateOption(event: CreateOption): void {
    let entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
    if(entityBuyOptionItem==null){
-      let entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
-      let entityidhash = new EntityBuyOptionHashId(event.params.optionID.toHex());
+      entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
    }
-    // Optionid: Int
-    entityBuyOptionItem.Optionid = event.params.optionID;
-    // Owner: Bytes!
-    entityBuyOptionItem.Owner = event.params.owner;
-    // OptType: String       #0 for call, 1 for put
-    entityBuyOptionItem.OptType = event.params.optType;
-    //     Underlying: BigInt    #underlying ID, 1 for BTC,2 for ETH
-    entityBuyOptionItem.Underlying = event.params.underlying;
 
-    //     Expiration: BigInt    #getDate(option[4]), //
-    entityBuyOptionItem.Expiration = event.params.expiration;
+   let entityidhash = EntityBuyOptionHashId.load(event.params.optionID.toHex());
+   if(entityidhash==null) {
+       let entityidhash = new EntityBuyOptionHashId(event.params.optionID.toHex());
+       entityidhash.BuyHash = event.transaction.hash.toHex();
+       entityidhash.save();
+   }
 
-    //     Amount: BigInt        #web3.utils.fromWei(new BN(option[6])),
-    entityBuyOptionItem.Amount = event.params.amount;
-
-    //     StrikePrice: BigInt     #option[5]/100000000,   //  strike price
-    entityBuyOptionItem.StrikePrice = event.params.strikePrice;
-    entityBuyOptionItem.save();
-
-    //     Settlement: Bytes     #settle[optionextra[0].toLowerCase()],    //user's settlement paying for option.
-    //     UnderLyingPrice: BigInt #optionextra[2]/100000000,
-    //     CurrentWorth: BigInt    #web3.utils.fromWei(new BN(worth))/100000000 +"(USD)"
+   entityBuyOptionItem.Optionid = event.params.optionID;
+   entityBuyOptionItem.Owner = event.params.owner;
+   entityBuyOptionItem.OptType = event.params.optType;
+   entityBuyOptionItem.Underlying = event.params.underlying;
+   entityBuyOptionItem.Expiration = event.params.expiration;
+   entityBuyOptionItem.Amount = event.params.amount;
+   entityBuyOptionItem.StrikePrice = event.params.strikePrice;
+   entityBuyOptionItem.save();
 
 }
 
 export function handleAddFee(event: AddFee): void {
     let entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
     if(entityBuyOptionItem==null){
-        let entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
+        entityBuyOptionItem = new EntityBuyOptionItem(event.transaction.hash.toHex());
     }
     entityBuyOptionItem.Fee = event.params.payback;
     entityBuyOptionItem.Settlement = event.params.settlement;
@@ -118,23 +111,25 @@ export function handleExerciseOption(event: ExerciseOption): void {
     if(entityExcerciseOptionItem==null) {
         entityExcerciseOptionItem = new EntityExcerciseOptionItem(event.transaction.hash.toHex());
     }
-
     entityExcerciseOptionItem.Optionid = event.params.optionId;
     entityExcerciseOptionItem.ExerciseAmount = event.params.amount;
     entityExcerciseOptionItem.ExerciseBack = event.params.sellValue;
 }
 
-
 export function handleBlock(block: ethereum.Block): void {
+
    let intid = block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS));
    let dayStart = intid.times(ONE_DAY_SECONDS);
    let dayEnd = (intid.plus(BigInt.fromI32(1))).times(ONE_DAY_SECONDS);
    let id = intid.toHex();
    let entityTotalTLV = EntityTotalTLV.load(id);
+
    if (entityTotalTLV == null) {
        entityTotalTLV = new EntityTotalTLV(id);
        entityTotalTLV.TimeStamp = block.timestamp;
        entityTotalTLV.TotalUsdValue = BigInt.fromI32(0);
+       let oraclesc = null;
+
        for (let i=0;i<OPTION_MANAGERS.length;i++) {
          let managersc = OptionManager.bind(Address.fromString(OPTION_MANAGERS[i]));
          let optionPoolAssress = OptionManager.getCollateralPoolAddress();
@@ -142,13 +137,14 @@ export function handleBlock(block: ethereum.Block): void {
          let colPoolAddress = OptionManager.getCollateralPoolAddress();
          let colpoolsc = CollateralPool.bind(colPoolAddress);
          let oracleAddress = managersc.getOracleAddress();
-         let oraclesc = OptionOracle.bind(oracleAddress);
+         oraclesc = OptionOracle.bind(oracleAddress);
 
          let entityOptionManager = EntityOptionManager.load(OPTION_MANAGERS[i]);
          if (entityOptionManager == null) {
              entityOptionManager = new EntityOptionManager(OPTION_MANAGERS[i]);
              entityOptionManager.save();
              OptionManagerTemplate.create(Address.fromString(OPTION_MANAGERS[i]));
+
              let entityOptionPool = new EntityOptionPool(optionPoolAssress);
              entityOptionPool.save();
              OPtionPoolTemplate.create(Address.fromString(optionPoolAssress));
@@ -156,21 +152,34 @@ export function handleBlock(block: ethereum.Block): void {
 
          let tokens = managersc.getWhiteList();
          for (let i=0;i<tokens.length;i++) {
-            let entityPoolTLV = new EntityPoolTLV(tokens[i]+id.substr(2));
-            entityPoolTLV.TimeStamp = block.timestamp;
-            entityPoolTLV.Pool = Address.fromString(optionPoolAssress[i]);
-            entityPoolTLV.Token = tokens[i];
-            entityPoolTLV.Amout = colpoolsc.getCollateralBalance(tokens[i]);
-            entityPoolTLV.UsdValue = optionpoolsc.getNetWrothLatestWorth(tokens[i])
+            //token address + id as key
+            let entityPoolTLV = EntityPoolTLV.load(tokens[i]+id.substr(2));
+            if(entityPoolTLV==null) {
+                entityPoolTLV = new EntityPoolTLV(tokens[i] + id.substr(2));
+                entityPoolTLV.TimeStamp = block.timestamp;
+                entityPoolTLV.Token = tokens[i];
+            }
+            entityPoolTLV.Amout = entityPoolTLV.Amout.plus(colpoolsc.getCollateralBalance(tokens[i]));
+            let tkprice = oraclesc.getPrice(tokens[i]);
+            entityPoolTLV.UsdValue = entityPoolTLV.UsdValue.plus(entityPoolTLV.Amout.times(tkprice));
             entityPoolTLV.save();
 
-            let entityFee = new EntityFee(tokens[i]+id.substr(2));
-            entityFee.TimeStamp = block.timestamp;
-            entityFee.save();
+            let entityFee = EntityFee.load(tokens[i]+id.substr(2));
+            if(entityFee==null) {
+                entityFee = new EntityFee(tokens[i] + id.substr(2));
+                entityFee.TimeStamp = block.timestamp;
+                entityFee.Token = tokens[i];
+                entityFee.save();
+            }
 
-             let entityPremium = new EntityPremium(tokens[i]+id.substr(2));
-             entityPremium.TimeStamp = block.timestamp;
-             entityPremium.save();
+            let entityPremium = EntityPremium.load(tokens[i]+id.substr(2));
+            if(entityPremium==null) {
+                entityPremium = new EntityPremium(tokens[i] + id.substr(2));
+                entityPremium.TimeStamp = block.timestamp;
+                entityPremium.Token = tokens[i];
+                entityPremium.save();
+            }
+
          }
 
          entityTotalTLV.TotalUsdValue = entityTotalTLV.TotalUsdValue.plus(colpoolsc.getRealBalance(tokens));
@@ -193,30 +202,61 @@ export function handleBlock(block: ethereum.Block): void {
              // 3 info.optionsPrice,
              // 4 info.iv)
              let extrainfo = optionpoolsc.getOptionsExtraById(i);
-             if(optinfo.value4.lt(block.timestamp)) {
-                 break;
-             }
-             //underlying+id as key
-             let entityActiveOption = EntityActiveOption.load(optinfo.value3.toHex()+id.substr(2));
-             if(entityActiveOption==null) {
-                 entityActiveOption =  new  EntityActiveOption(optinfo.value3.toHex()+id.substr(2));
-             }
-             entityActiveOption.Underlying = optinfo.value3;
-             entityActiveOption.TimeStamp = block.timestamp;
-             let usdvalue = optinfo.value6.times(extrainfo.value3);
-             //accumulate amount in one day
-             if(optinfo.value4.lt(dayEnd)&&
-                optinfo.value4.ge(dayStart)) {
-                 if (optinfo.value2 == 0) {
-                     entityActiveOption.CallAmount = entityActiveOption.CallAmount.plus(optinfo.value6);
-                     entityActiveOption.CallUsdValue = entityActiveOption.CallUsdValue.plus(usdvalue);
-                 } else {
-                     entityActiveOption.PutAmount = entityActiveOption.PutAmount.plus(optinfo.value6);
-                     entityActiveOption.PutUsdValue = entityActiveOption.PutUsdValue.plus(usdvalue);
+             if(optinfo.value4.gt(block.timestamp)) {
+                 //underlying+id as key
+                 let entityActiveOption = EntityActiveOption.load(optinfo.value3.toHex() + id.substr(2));
+                 if (entityActiveOption == null) {
+                     entityActiveOption = new EntityActiveOption(optinfo.value3.toHex() + id.substr(2));
                  }
+                 entityActiveOption.Underlying = optinfo.value3;
+                 entityActiveOption.TimeStamp = block.timestamp;
+                 let usdvalue = optinfo.value6.times(extrainfo.value3);
+                 //accumulate amount in one day
+                 if (optinfo.value4.lt(dayEnd) &&
+                     optinfo.value4.ge(dayStart)) {
+                     if (optinfo.value2 == 0) {
+                         entityActiveOption.CallAmount = entityActiveOption.CallAmount.plus(optinfo.value6);
+                         entityActiveOption.CallUsdValue = entityActiveOption.CallUsdValue.plus(usdvalue);
+                     } else {
+                         entityActiveOption.PutAmount = entityActiveOption.PutAmount.plus(optinfo.value6);
+                         entityActiveOption.PutUsdValue = entityActiveOption.PutUsdValue.plus(usdvalue);
+                     }
+                 }
+                 entityActiveOption.save();
              }
-             entityActiveOption.save();
-         }
+
+             let entityoption = EntityOptionItem.load(i)
+             if(entityoption==null) {
+                 let entityBuyIdHash = EntityBuyOptionHashId.load(i);
+                 if (entityBuyIdHash == null) {
+                     continue;
+                 }
+                 let entiyBuyOptionItem = EntityBuyOptionItem.load(entityBuyIdHash.BuyHash);
+                 if (entiyBuyOptionItem == null) {
+                     continue;
+                 }
+                 entiyBuyOptionItem.Settlement = extrainfo.value0;
+                 entiyBuyOptionItem.UnderLyingPrice = extrainfo.value2;
+                 if (optinfo.value4.gt(block.timestamp)) {
+                     entiyBuyOptionItem.CurrentWorth = optionpoolsc.getExerciseWorth(i, optinfo.value6);
+                 } else {
+                     entiyBuyOptionItem.CurrentWorth = BigInt.fromI32(0);
+                 }
+                 entiyBuyOptionItem.save();
+
+                 let entityexcercisehash = EntityExcerciseOptionHashId.load(i);
+                 if(entityexcercisehash==null) {
+                     continue;
+                 }
+                 let entityexcerciseitem = EntityExcerciseOptionItem.load(entityexcercisehash.id)
+
+                 let entityOptionItem = new EntityOptionItem(i);
+                 entityOptionItem.Amount =
+                 entityOptionItem.save();
+
+             }
+
+         }//for option length
 
        }
 
@@ -232,11 +272,7 @@ export function handleRedeemCollateral(event: RedeemCollateral): void {}
 
 export function handleSellOption(event: SellOption): void {}
 
-export function handleBurnOption(event: BurnOption): void {
-
-}
-
-
+export function handleBurnOption(event: BurnOption): void {}
 
 export function handleDebugEvent(event: DebugEvent): void {}
 

@@ -62,11 +62,10 @@ type EntityTotalTLV @entity {
 
 type EntityPoolTLV @entity {
   id: ID!
-  TimeStamp: BigInt!
-  Pool: Bytes!
-  Token: Bytes!
-  Amout: BigInt!
-  UsdValue: BigInt!
+  TimeStamp: BigInt
+  Token: Bytes
+  Amout: BigInt
+  UsdValue: BigInt
 }
 
 type EntityNetWorth @entity {
@@ -90,16 +89,20 @@ type EntityPremium @entity {
   id: ID!
   TimeStamp: BigInt!
   Token: Bytes
-  Amount: BigInt
-  UsdValue: BigInt
+  CallAmount: BigInt
+  CallUsdValue: BigInt
+  PutAmount: BigInt
+  PutUsdValue: BigInt
 }
 
 type EntityFee @entity {
   id: ID!
   TimeStamp: BigInt!
   Token: Bytes
-  Amount: BigInt
-  UsdValue: BigInt
+  CallAmount: BigInt
+  CallUsdValue: BigInt
+  PutAmount: BigInt
+  PutUsdValue: BigInt
 }
 
 
