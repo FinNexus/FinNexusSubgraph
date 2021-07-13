@@ -74,6 +74,52 @@ export class EntityOptionPool extends Entity {
   }
 }
 
+export class EntityBuyOptionHashId extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(
+      id !== null,
+      "Cannot save EntityBuyOptionHashId entity without an ID"
+    );
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save EntityBuyOptionHashId entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("EntityBuyOptionHashId", id.toString(), this);
+  }
+
+  static load(id: string): EntityBuyOptionHashId | null {
+    return store.get(
+      "EntityBuyOptionHashId",
+      id
+    ) as EntityBuyOptionHashId | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get BuyHash(): string {
+    let value = this.get("BuyHash");
+    return value.toString();
+  }
+
+  set BuyHash(value: string) {
+    this.set("BuyHash", Value.fromString(value));
+  }
+}
+
 export class EntityBuyOptionItem extends Entity {
   constructor(id: string) {
     super();
@@ -122,94 +168,229 @@ export class EntityBuyOptionItem extends Entity {
     this.set("Owner", Value.fromBytes(value));
   }
 
-  get OptType(): string {
+  get OptType(): i32 {
     let value = this.get("OptType");
-    return value.toString();
+    return value.toI32();
   }
 
-  set OptType(value: string) {
-    this.set("OptType", Value.fromString(value));
+  set OptType(value: i32) {
+    this.set("OptType", Value.fromI32(value));
   }
 
-  get Underlying(): string {
+  get Underlying(): BigInt | null {
     let value = this.get("Underlying");
-    return value.toString();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set Underlying(value: string) {
-    this.set("Underlying", Value.fromString(value));
+  set Underlying(value: BigInt | null) {
+    if (value === null) {
+      this.unset("Underlying");
+    } else {
+      this.set("Underlying", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get OptionsPrice(): BigInt {
-    let value = this.get("OptionsPrice");
-    return value.toBigInt();
+  get OptionPrice(): BigInt | null {
+    let value = this.get("OptionPrice");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set OptionsPrice(value: BigInt) {
-    this.set("OptionsPrice", Value.fromBigInt(value));
+  set OptionPrice(value: BigInt | null) {
+    if (value === null) {
+      this.unset("OptionPrice");
+    } else {
+      this.set("OptionPrice", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get Settlement(): string {
+  get Settlement(): Bytes | null {
     let value = this.get("Settlement");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set Settlement(value: Bytes | null) {
+    if (value === null) {
+      this.unset("Settlement");
+    } else {
+      this.set("Settlement", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get Expiration(): BigInt | null {
+    let value = this.get("Expiration");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set Expiration(value: BigInt | null) {
+    if (value === null) {
+      this.unset("Expiration");
+    } else {
+      this.set("Expiration", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get Amount(): BigInt | null {
+    let value = this.get("Amount");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set Amount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("Amount");
+    } else {
+      this.set("Amount", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get StrikePrice(): BigInt | null {
+    let value = this.get("StrikePrice");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set StrikePrice(value: BigInt | null) {
+    if (value === null) {
+      this.unset("StrikePrice");
+    } else {
+      this.set("StrikePrice", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get UnderLyingPrice(): BigInt | null {
+    let value = this.get("UnderLyingPrice");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set UnderLyingPrice(value: BigInt | null) {
+    if (value === null) {
+      this.unset("UnderLyingPrice");
+    } else {
+      this.set("UnderLyingPrice", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get CreatedTime(): BigInt | null {
+    let value = this.get("CreatedTime");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set CreatedTime(value: BigInt | null) {
+    if (value === null) {
+      this.unset("CreatedTime");
+    } else {
+      this.set("CreatedTime", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get CurrentWorth(): BigInt | null {
+    let value = this.get("CurrentWorth");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set CurrentWorth(value: BigInt | null) {
+    if (value === null) {
+      this.unset("CurrentWorth");
+    } else {
+      this.set("CurrentWorth", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get Fee(): BigInt | null {
+    let value = this.get("Fee");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set Fee(value: BigInt | null) {
+    if (value === null) {
+      this.unset("Fee");
+    } else {
+      this.set("Fee", Value.fromBigInt(value as BigInt));
+    }
+  }
+}
+
+export class EntityExcerciseOptionHashId extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(
+      id !== null,
+      "Cannot save EntityExcerciseOptionHashId entity without an ID"
+    );
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save EntityExcerciseOptionHashId entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("EntityExcerciseOptionHashId", id.toString(), this);
+  }
+
+  static load(id: string): EntityExcerciseOptionHashId | null {
+    return store.get(
+      "EntityExcerciseOptionHashId",
+      id
+    ) as EntityExcerciseOptionHashId | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
     return value.toString();
   }
 
-  set Settlement(value: string) {
-    this.set("Settlement", Value.fromString(value));
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
   }
 
-  get Expiration(): BigInt {
-    let value = this.get("Expiration");
-    return value.toBigInt();
+  get BuyHash(): string {
+    let value = this.get("BuyHash");
+    return value.toString();
   }
 
-  set Expiration(value: BigInt) {
-    this.set("Expiration", Value.fromBigInt(value));
-  }
-
-  get Amount(): BigInt {
-    let value = this.get("Amount");
-    return value.toBigInt();
-  }
-
-  set Amount(value: BigInt) {
-    this.set("Amount", Value.fromBigInt(value));
-  }
-
-  get StrikePrice(): BigInt {
-    let value = this.get("StrikePrice");
-    return value.toBigInt();
-  }
-
-  set StrikePrice(value: BigInt) {
-    this.set("StrikePrice", Value.fromBigInt(value));
-  }
-
-  get UnderLyingPrice(): BigInt {
-    let value = this.get("UnderLyingPrice");
-    return value.toBigInt();
-  }
-
-  set UnderLyingPrice(value: BigInt) {
-    this.set("UnderLyingPrice", Value.fromBigInt(value));
-  }
-
-  get CreatedTime(): BigInt {
-    let value = this.get("CreatedTime");
-    return value.toBigInt();
-  }
-
-  set CreatedTime(value: BigInt) {
-    this.set("CreatedTime", Value.fromBigInt(value));
-  }
-
-  get CurrentWorth(): BigInt {
-    let value = this.get("CurrentWorth");
-    return value.toBigInt();
-  }
-
-  set CurrentWorth(value: BigInt) {
-    this.set("CurrentWorth", Value.fromBigInt(value));
+  set BuyHash(value: string) {
+    this.set("BuyHash", Value.fromString(value));
   }
 }
 
@@ -492,6 +673,15 @@ export class EntityTotalTLV extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get TimeStamp(): BigInt {
+    let value = this.get("TimeStamp");
+    return value.toBigInt();
+  }
+
+  set TimeStamp(value: BigInt) {
+    this.set("TimeStamp", Value.fromBigInt(value));
+  }
+
   get TotalUsdValue(): BigInt {
     let value = this.get("TotalUsdValue");
     return value.toBigInt();
@@ -530,6 +720,15 @@ export class EntityPoolTLV extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get TimeStamp(): BigInt {
+    let value = this.get("TimeStamp");
+    return value.toBigInt();
+  }
+
+  set TimeStamp(value: BigInt) {
+    this.set("TimeStamp", Value.fromBigInt(value));
   }
 
   get Pool(): Bytes {
@@ -666,48 +865,49 @@ export class EntityActiveOption extends Entity {
     this.set("TimeStamp", Value.fromBigInt(value));
   }
 
-  get Underlying(): Bytes {
+  get Underlying(): BigInt {
     let value = this.get("Underlying");
-    return value.toBytes();
-  }
-
-  set Underlying(value: Bytes) {
-    this.set("Underlying", Value.fromBytes(value));
-  }
-
-  get Amount(): BigInt {
-    let value = this.get("Amount");
     return value.toBigInt();
   }
 
-  set Amount(value: BigInt) {
-    this.set("Amount", Value.fromBigInt(value));
+  set Underlying(value: BigInt) {
+    this.set("Underlying", Value.fromBigInt(value));
   }
 
-  get UsdValue(): BigInt {
-    let value = this.get("UsdValue");
+  get CallAmount(): BigInt {
+    let value = this.get("CallAmount");
     return value.toBigInt();
   }
 
-  set UsdValue(value: BigInt) {
-    this.set("UsdValue", Value.fromBigInt(value));
+  set CallAmount(value: BigInt) {
+    this.set("CallAmount", Value.fromBigInt(value));
   }
 
-  get OptionType(): string | null {
-    let value = this.get("OptionType");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
+  get CallUsdValue(): BigInt {
+    let value = this.get("CallUsdValue");
+    return value.toBigInt();
   }
 
-  set OptionType(value: string | null) {
-    if (value === null) {
-      this.unset("OptionType");
-    } else {
-      this.set("OptionType", Value.fromString(value as string));
-    }
+  set CallUsdValue(value: BigInt) {
+    this.set("CallUsdValue", Value.fromBigInt(value));
+  }
+
+  get PutAmount(): BigInt {
+    let value = this.get("PutAmount");
+    return value.toBigInt();
+  }
+
+  set PutAmount(value: BigInt) {
+    this.set("PutAmount", Value.fromBigInt(value));
+  }
+
+  get PutUsdValue(): BigInt {
+    let value = this.get("PutUsdValue");
+    return value.toBigInt();
+  }
+
+  set PutUsdValue(value: BigInt) {
+    this.set("PutUsdValue", Value.fromBigInt(value));
   }
 }
 
@@ -750,47 +950,54 @@ export class EntityPremium extends Entity {
     this.set("TimeStamp", Value.fromBigInt(value));
   }
 
-  get Token(): Bytes {
+  get Token(): Bytes | null {
     let value = this.get("Token");
-    return value.toBytes();
-  }
-
-  set Token(value: Bytes) {
-    this.set("Token", Value.fromBytes(value));
-  }
-
-  get Amount(): BigInt {
-    let value = this.get("Amount");
-    return value.toBigInt();
-  }
-
-  set Amount(value: BigInt) {
-    this.set("Amount", Value.fromBigInt(value));
-  }
-
-  get UsdValue(): BigInt {
-    let value = this.get("UsdValue");
-    return value.toBigInt();
-  }
-
-  set UsdValue(value: BigInt) {
-    this.set("UsdValue", Value.fromBigInt(value));
-  }
-
-  get OptionType(): string | null {
-    let value = this.get("OptionType");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
-      return value.toString();
+      return value.toBytes();
     }
   }
 
-  set OptionType(value: string | null) {
+  set Token(value: Bytes | null) {
     if (value === null) {
-      this.unset("OptionType");
+      this.unset("Token");
     } else {
-      this.set("OptionType", Value.fromString(value as string));
+      this.set("Token", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get Amount(): BigInt | null {
+    let value = this.get("Amount");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set Amount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("Amount");
+    } else {
+      this.set("Amount", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get UsdValue(): BigInt | null {
+    let value = this.get("UsdValue");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set UsdValue(value: BigInt | null) {
+    if (value === null) {
+      this.unset("UsdValue");
+    } else {
+      this.set("UsdValue", Value.fromBigInt(value as BigInt));
     }
   }
 }
@@ -834,47 +1041,54 @@ export class EntityFee extends Entity {
     this.set("TimeStamp", Value.fromBigInt(value));
   }
 
-  get Token(): Bytes {
+  get Token(): Bytes | null {
     let value = this.get("Token");
-    return value.toBytes();
-  }
-
-  set Token(value: Bytes) {
-    this.set("Token", Value.fromBytes(value));
-  }
-
-  get Amount(): BigInt {
-    let value = this.get("Amount");
-    return value.toBigInt();
-  }
-
-  set Amount(value: BigInt) {
-    this.set("Amount", Value.fromBigInt(value));
-  }
-
-  get UsdValue(): BigInt {
-    let value = this.get("UsdValue");
-    return value.toBigInt();
-  }
-
-  set UsdValue(value: BigInt) {
-    this.set("UsdValue", Value.fromBigInt(value));
-  }
-
-  get OptionType(): string | null {
-    let value = this.get("OptionType");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
-      return value.toString();
+      return value.toBytes();
     }
   }
 
-  set OptionType(value: string | null) {
+  set Token(value: Bytes | null) {
     if (value === null) {
-      this.unset("OptionType");
+      this.unset("Token");
     } else {
-      this.set("OptionType", Value.fromString(value as string));
+      this.set("Token", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get Amount(): BigInt | null {
+    let value = this.get("Amount");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set Amount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("Amount");
+    } else {
+      this.set("Amount", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get UsdValue(): BigInt | null {
+    let value = this.get("UsdValue");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set UsdValue(value: BigInt | null) {
+    if (value === null) {
+      this.unset("UsdValue");
+    } else {
+      this.set("UsdValue", Value.fromBigInt(value as BigInt));
     }
   }
 }

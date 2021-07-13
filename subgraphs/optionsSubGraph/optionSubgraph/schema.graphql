@@ -6,20 +6,31 @@ type EntityOptionPool @entity {
   id: ID!
 }
 
+type EntityBuyOptionHashId @entity {
+  id: ID!
+  BuyHash: ID!
+}
+
 type EntityBuyOptionItem @entity {
   id: ID!
-  Optionid: Int!
+  Optionid: Int
   Owner: Bytes!
-  OptType: String!    #0 for call, 1 for put
-  Underlying: String! #underlying ID, 1 for BTC,2 for ETH
-  OptionsPrice: BigInt! #buyInfoMap[optionid]/100000000,
-  Settlement: String! #settle[optionextra[0].toLowerCase()],    //user's settlement paying for option.
-  Expiration: BigInt! #getDate(option[4]), //
-  Amount: BigInt! #web3.utils.fromWei(new BN(option[6])),
-  StrikePrice: BigInt! #option[5]/100000000,   //  strike price
-  UnderLyingPrice: BigInt! #optionextra[2]/100000000,
-  CreatedTime: BigInt!  #getDate(blk.timestamp),
-  CurrentWorth: BigInt! #web3.utils.fromWei(new BN(worth))/100000000 +"(USD)"
+  OptType: Int       #0 for call, 1 for put
+  Underlying: BigInt    #underlying ID, 1 for BTC,2 for ETH
+  OptionPrice: BigInt  #buyInfoMap[optionid]/100000000,
+  Settlement: Bytes     #settle[optionextra[0].toLowerCase()],    //user's settlement paying for option.
+  Expiration: BigInt    #getDate(option[4]), //
+  Amount: BigInt        #web3.utils.fromWei(new BN(option[6])),
+  StrikePrice: BigInt     #option[5]/100000000,   //  strike price
+  UnderLyingPrice: BigInt #optionextra[2]/100000000,
+  CreatedTime: BigInt     #getDate(blk.timestamp),
+  CurrentWorth: BigInt    #web3.utils.fromWei(new BN(worth))/100000000 +"(USD)"
+  Fee: BigInt #fees
+}
+
+type EntityExcerciseOptionHashId @entity {
+  id: ID!
+  BuyHash: ID!
 }
 
 type EntityExcerciseOptionItem @entity {
@@ -45,11 +56,13 @@ type EntityOptionItem @entity {
 
 type EntityTotalTLV @entity {
   id: ID!
+  TimeStamp: BigInt!
   TotalUsdValue: BigInt!
 }
 
 type EntityPoolTLV @entity {
   id: ID!
+  TimeStamp: BigInt!
   Pool: Bytes!
   Token: Bytes!
   Amout: BigInt!
@@ -64,30 +77,29 @@ type EntityNetWorth @entity {
 }
 
 type EntityActiveOption @entity {
-  id: ID!
+  id: ID! #token + timeid as id
   TimeStamp: BigInt!
-  Underlying: Bytes!
-  Amount: BigInt!
-  UsdValue: BigInt!
-  OptionType: String
+  Underlying: BigInt!
+  CallAmount: BigInt!
+  CallUsdValue: BigInt!
+  PutAmount: BigInt!
+  PutUsdValue: BigInt!
 }
 
 type EntityPremium @entity {
   id: ID!
   TimeStamp: BigInt!
-  Token: Bytes!
-  Amount: BigInt!
-  UsdValue: BigInt!
-  OptionType: String
+  Token: Bytes
+  Amount: BigInt
+  UsdValue: BigInt
 }
 
 type EntityFee @entity {
   id: ID!
   TimeStamp: BigInt!
-  Token: Bytes!
-  Amount: BigInt!
-  UsdValue: BigInt!
-  OptionType: String
+  Token: Bytes
+  Amount: BigInt
+  UsdValue: BigInt
 }
 
 

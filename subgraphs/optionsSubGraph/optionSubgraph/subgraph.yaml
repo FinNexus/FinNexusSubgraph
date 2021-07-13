@@ -130,10 +130,4 @@ templates:
       eventHandlers:
       - event: AddFee(indexed address,uint256)
         handler: handleAddFee
-      - event: OwnershipTransferred(indexed address,indexed address)
-        handler: handleOwnershipTransferred
-      - event: RedeemFee(indexed address,indexed address,uint256)
-        handler: handleRedeemFee
-      - event: TransferPayback(indexed address,indexed address,uint256)
-        handler: handleTransferPayback
       file: ./src/mapping.ts
