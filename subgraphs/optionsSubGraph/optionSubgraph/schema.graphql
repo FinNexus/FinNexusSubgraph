@@ -13,9 +13,9 @@ type EntityBuyOptionHashId @entity {
 
 type EntityBuyOptionItem @entity {
   id: ID!
-  Optionid: BigInt!
-  Owner: Bytes!
-  OptType: BigInt!       #0 for call, 1 for put
+  Owner: Bytes
+  Optionid: BigInt
+  OptType: BigInt       #0 for call, 1 for put
   Underlying: BigInt    #underlying ID, 1 for BTC,2 for ETH
   OptionPrice: BigInt  #buyInfoMap[optionid]/100000000,
   Settlement: Bytes     #settle[optionextra[0].toLowerCase()],    //user's settlement paying for option.

@@ -77,7 +77,6 @@ export function handleCreateOption(event: CreateOption): void {
    if(entityBuyOptionItem==null){
       entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
    }
-
    let entityidhash = EntityBuyOptionHashId.load(event.params.optionID.toHex());
    if(entityidhash==null) {
        let entityidhash = new EntityBuyOptionHashId(event.params.optionID.toHex());
@@ -93,7 +92,6 @@ export function handleCreateOption(event: CreateOption): void {
    entityBuyOptionItem.Amount = event.params.amount;
    entityBuyOptionItem.StrikePrice = event.params.strikePrice;
    entityBuyOptionItem.save();
-
 }
 
 export function handleAddFee(event: AddFee): void {
@@ -196,7 +194,9 @@ export function handleBlock(block: ethereum.Block): void {
 
          for(let j=optionlen-1;i>0;j--) {
              let i = BigInt.fromI32(j);
-             //(optionsId 0,info.owner 1,info.optType 2,info.underlying 3
+             //(optionsId 0,info.owner 1,
+             // info.optType 2,
+             // info.underlying 3
              // info.createTime+info.expiration 4
              // info.strikePrice 5,info.amount 6)
              let optinfo = optionpoolsc.getOptionsById(i);
@@ -257,7 +257,7 @@ export function handleBlock(block: ethereum.Block): void {
                  entityOptionItem.Date = entityBuyOptionItem.CreatedTime;
                  entityOptionItem.Amount = optinfo.value6;//amount
                  entityOptionItem.UnderlyingAssets = optinfo.value3 //underlying
-                 entityOptionItem.Type = entityBuyOptionItem.OptType;
+                 entityOptionItem.Type = BigInt.fromI32(optinfo.value2);
                  entityOptionItem.UsdValue = entityBuyOptionItem.CurrentWorth;
                  entityOptionItem.StrikePrice = entityBuyOptionItem.StrikePrice;
                  let optionpayusd = entityBuyOptionItem.OptionPrice.times(entityBuyOptionItem.Amount);

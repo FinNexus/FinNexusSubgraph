@@ -150,31 +150,55 @@ export class EntityBuyOptionItem extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get Optionid(): BigInt {
-    let value = this.get("Optionid");
-    return value.toBigInt();
-  }
-
-  set Optionid(value: BigInt) {
-    this.set("Optionid", Value.fromBigInt(value));
-  }
-
-  get Owner(): Bytes {
+  get Owner(): Bytes | null {
     let value = this.get("Owner");
-    return value.toBytes();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
   }
 
-  set Owner(value: Bytes) {
-    this.set("Owner", Value.fromBytes(value));
+  set Owner(value: Bytes | null) {
+    if (value === null) {
+      this.unset("Owner");
+    } else {
+      this.set("Owner", Value.fromBytes(value as Bytes));
+    }
   }
 
-  get OptType(): BigInt {
+  get Optionid(): BigInt | null {
+    let value = this.get("Optionid");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set Optionid(value: BigInt | null) {
+    if (value === null) {
+      this.unset("Optionid");
+    } else {
+      this.set("Optionid", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get OptType(): BigInt | null {
     let value = this.get("OptType");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set OptType(value: BigInt) {
-    this.set("OptType", Value.fromBigInt(value));
+  set OptType(value: BigInt | null) {
+    if (value === null) {
+      this.unset("OptType");
+    } else {
+      this.set("OptType", Value.fromBigInt(value as BigInt));
+    }
   }
 
   get Underlying(): BigInt | null {
