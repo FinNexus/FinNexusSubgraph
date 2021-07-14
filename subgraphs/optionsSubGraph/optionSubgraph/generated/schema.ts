@@ -506,55 +506,31 @@ export class EntityOptionItem extends Entity {
     this.set("Date", Value.fromBigInt(value));
   }
 
-  get Status(): string | null {
+  get Status(): string {
     let value = this.get("Status");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
+    return value.toString();
   }
 
-  set Status(value: string | null) {
-    if (value === null) {
-      this.unset("Status");
-    } else {
-      this.set("Status", Value.fromString(value as string));
-    }
+  set Status(value: string) {
+    this.set("Status", Value.fromString(value));
   }
 
-  get UnderlyingAssets(): string | null {
+  get UnderlyingAssets(): BigInt {
     let value = this.get("UnderlyingAssets");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
+    return value.toBigInt();
   }
 
-  set UnderlyingAssets(value: string | null) {
-    if (value === null) {
-      this.unset("UnderlyingAssets");
-    } else {
-      this.set("UnderlyingAssets", Value.fromString(value as string));
-    }
+  set UnderlyingAssets(value: BigInt) {
+    this.set("UnderlyingAssets", Value.fromBigInt(value));
   }
 
-  get Type(): string | null {
+  get Type(): i32 {
     let value = this.get("Type");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
+    return value.toI32();
   }
 
-  set Type(value: string | null) {
-    if (value === null) {
-      this.unset("Type");
-    } else {
-      this.set("Type", Value.fromString(value as string));
-    }
+  set Type(value: i32) {
+    this.set("Type", Value.fromI32(value));
   }
 
   get Amount(): BigInt | null {

@@ -44,9 +44,9 @@ type EntityExcerciseOptionItem @entity {
 type EntityOptionItem @entity {
   id: ID!
   Date: BigInt!
-  Status: String
-  UnderlyingAssets: String
-  Type: String
+  Status: String!
+  UnderlyingAssets: BigInt!
+  Type: Int!
   Amount: BigInt
   UsdValue: BigInt
   StrikePrice: BigInt

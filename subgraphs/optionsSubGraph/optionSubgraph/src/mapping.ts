@@ -231,29 +231,58 @@ export function handleBlock(block: ethereum.Block): void {
                  if (entityBuyIdHash == null) {
                      continue;
                  }
-                 let entiyBuyOptionItem = EntityBuyOptionItem.load(entityBuyIdHash.BuyHash);
-                 if (entiyBuyOptionItem == null) {
+                 let entityBuyOptionItem = EntityBuyOptionItem.load(entityBuyIdHash.BuyHash);
+                 if (entityBuyOptionItem == null) {
                      continue;
                  }
-                 entiyBuyOptionItem.Settlement = extrainfo.value0;
-                 entiyBuyOptionItem.UnderLyingPrice = extrainfo.value2;
-                 if (optinfo.value4.gt(block.timestamp)) {
-                     entiyBuyOptionItem.CurrentWorth = optionpoolsc.getExerciseWorth(i, optinfo.value6);
-                 } else {
-                     entiyBuyOptionItem.CurrentWorth = BigInt.fromI32(0);
-                 }
-                 entiyBuyOptionItem.save();
+
+                 entityBuyOptionItem.Settlement = extrainfo.value0;
+                 entityBuyOptionItem.UnderLyingPrice = extrainfo.value2;
+                 entityBuyOptionItem.CurrentWorth = entityBuyOptionItem.Amount.times(entityBuyOptionItem.OptionPrice);
+
+                 entityBuyOptionItem.save();
 
                  let entityexcercisehash = EntityExcerciseOptionHashId.load(i);
-                 if(entityexcercisehash==null) {
-                     continue;
-                 }
                  let entityexcerciseitem = EntityExcerciseOptionItem.load(entityexcercisehash.id)
 
-                 let entityOptionItem = new EntityOptionItem(i);
-                 entityOptionItem.Amount =
+                 let entityOptionItem = EntityOptionItem.load(i);
+                 if(entityOptionItem==null) {
+                     entityOptionItem = new EntityOptionItem(i);
+                 }
+                 entityOptionItem.Date = entityBuyOptionItem.CreatedTime;
+                 entityOptionItem.Amount = optinfo.value6;//amount
+                 entityOptionItem.UnderlyingAssets = entityBuyOptionItem.Underlying
+                 entityOptionItem.Type = entityBuyOptionItem.OptType;
+                 entityOptionItem.UsdValue = entityBuyOptionItem.CurrentWorth;
+                 entityOptionItem.StrikePrice = entityBuyOptionItem.StrikePrice;
+                 let optionpayusd = entityBuyOptionItem.OptionPrice.times(entityBuyOptionItem.Amount);
+                 let feeusd = entityBuyOptionItem.Fee.times(extrainfo.value1);
+                 entityOptionItem.Premium = optionpayusd.plus(feeusd);
+                 //Status: String!
+                 if(entityOptionItem.Amount.equals(BigInt.fromI32(0))) {
+                     entityOptionItem.Status = "Excercised";
+                     if(entityexcerciseitem!=null) {
+                         entityOptionItem.PL = entityexcerciseitem.ExerciseBack.minus(entityOptionItem.Premium);
+                     } else {
+                         entityOptionItem.PL = BigInt.fromI32(0)
+                     }
+                 } else {
+                     if(entityexcerciseitem==null) {
+                         if (optinfo.value4.ge(block.timestamp)) {
+                             entityOptionItem.Status = "Active";
+                         } else {
+                             entityOptionItem.Status = "Expired";
+                         }
+                         entityOptionItem.PL = BigInt.fromI32(0).minus(entityOptionItem.Premium);
+                     } else {
+                         entityOptionItem.PL = entityexcerciseitem.ExerciseBack.minus(entityOptionItem.Premium);
+                     }
+                 }
+
                  entityOptionItem.save();
 
+             } else {
+                 break;
              }
 
          }//for option length
