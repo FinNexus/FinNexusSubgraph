@@ -13,17 +13,17 @@ type EntityBuyOptionHashId @entity {
 
 type EntityBuyOptionItem @entity {
   id: ID!
-  Optionid: Int
+  Optionid: BigInt!
   Owner: Bytes!
-  OptType: Int       #0 for call, 1 for put
+  OptType: BigInt!       #0 for call, 1 for put
   Underlying: BigInt    #underlying ID, 1 for BTC,2 for ETH
   OptionPrice: BigInt  #buyInfoMap[optionid]/100000000,
   Settlement: Bytes     #settle[optionextra[0].toLowerCase()],    //user's settlement paying for option.
   Expiration: BigInt    #getDate(option[4]), //
-  Amount: BigInt        #web3.utils.fromWei(new BN(option[6])),
+  Amount: BigInt!        #web3.utils.fromWei(new BN(option[6])),
   StrikePrice: BigInt     #option[5]/100000000,   //  strike price
   UnderLyingPrice: BigInt #optionextra[2]/100000000,
-  CreatedTime: BigInt     #getDate(blk.timestamp),
+  CreatedTime: BigInt!     #getDate(blk.timestamp),
   CurrentWorth: BigInt    #web3.utils.fromWei(new BN(worth))/100000000 +"(USD)"
   Fee: BigInt #fees
 }
@@ -35,7 +35,7 @@ type EntityExcerciseOptionHashId @entity {
 
 type EntityExcerciseOptionItem @entity {
   id: ID!
-  Optionid: Int!
+  Optionid: BigInt!
   ExerciseAmount: BigInt! #web3.utils.fromWei(new BN(sellAmount)),
   ExerciseBack: BigInt!  #web3.utils.fromWei(new BN(sellPay))/100000000+"(USD)",
   BuyPay: BigInt! #web3.utils.fromWei(new BN(sellAmount).mul(new BN(buyOptPrice)))/100000000 + "(USD)"
@@ -46,7 +46,7 @@ type EntityOptionItem @entity {
   Date: BigInt!
   Status: String!
   UnderlyingAssets: BigInt!
-  Type: Int!
+  Type: BigInt!
   Amount: BigInt
   UsdValue: BigInt
   StrikePrice: BigInt

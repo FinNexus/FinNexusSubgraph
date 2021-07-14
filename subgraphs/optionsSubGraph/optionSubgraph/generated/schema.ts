@@ -150,13 +150,13 @@ export class EntityBuyOptionItem extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get Optionid(): i32 {
+  get Optionid(): BigInt {
     let value = this.get("Optionid");
-    return value.toI32();
+    return value.toBigInt();
   }
 
-  set Optionid(value: i32) {
-    this.set("Optionid", Value.fromI32(value));
+  set Optionid(value: BigInt) {
+    this.set("Optionid", Value.fromBigInt(value));
   }
 
   get Owner(): Bytes {
@@ -168,13 +168,13 @@ export class EntityBuyOptionItem extends Entity {
     this.set("Owner", Value.fromBytes(value));
   }
 
-  get OptType(): i32 {
+  get OptType(): BigInt {
     let value = this.get("OptType");
-    return value.toI32();
+    return value.toBigInt();
   }
 
-  set OptType(value: i32) {
-    this.set("OptType", Value.fromI32(value));
+  set OptType(value: BigInt) {
+    this.set("OptType", Value.fromBigInt(value));
   }
 
   get Underlying(): BigInt | null {
@@ -245,21 +245,13 @@ export class EntityBuyOptionItem extends Entity {
     }
   }
 
-  get Amount(): BigInt | null {
+  get Amount(): BigInt {
     let value = this.get("Amount");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
+    return value.toBigInt();
   }
 
-  set Amount(value: BigInt | null) {
-    if (value === null) {
-      this.unset("Amount");
-    } else {
-      this.set("Amount", Value.fromBigInt(value as BigInt));
-    }
+  set Amount(value: BigInt) {
+    this.set("Amount", Value.fromBigInt(value));
   }
 
   get StrikePrice(): BigInt | null {
@@ -296,21 +288,13 @@ export class EntityBuyOptionItem extends Entity {
     }
   }
 
-  get CreatedTime(): BigInt | null {
+  get CreatedTime(): BigInt {
     let value = this.get("CreatedTime");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
+    return value.toBigInt();
   }
 
-  set CreatedTime(value: BigInt | null) {
-    if (value === null) {
-      this.unset("CreatedTime");
-    } else {
-      this.set("CreatedTime", Value.fromBigInt(value as BigInt));
-    }
+  set CreatedTime(value: BigInt) {
+    this.set("CreatedTime", Value.fromBigInt(value));
   }
 
   get CurrentWorth(): BigInt | null {
@@ -430,13 +414,13 @@ export class EntityExcerciseOptionItem extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get Optionid(): i32 {
+  get Optionid(): BigInt {
     let value = this.get("Optionid");
-    return value.toI32();
+    return value.toBigInt();
   }
 
-  set Optionid(value: i32) {
-    this.set("Optionid", Value.fromI32(value));
+  set Optionid(value: BigInt) {
+    this.set("Optionid", Value.fromBigInt(value));
   }
 
   get ExerciseAmount(): BigInt {
@@ -524,13 +508,13 @@ export class EntityOptionItem extends Entity {
     this.set("UnderlyingAssets", Value.fromBigInt(value));
   }
 
-  get Type(): i32 {
+  get Type(): BigInt {
     let value = this.get("Type");
-    return value.toI32();
+    return value.toBigInt();
   }
 
-  set Type(value: i32) {
-    this.set("Type", Value.fromI32(value));
+  set Type(value: BigInt) {
+    this.set("Type", Value.fromBigInt(value));
   }
 
   get Amount(): BigInt | null {
