@@ -193,7 +193,7 @@ export function handleBlock(block: ethereum.Block): void {
             if(entityPoolTLV==null) {
                 entityPoolTLV = new EntityPoolTLV(pooltokenid);
                 entityPoolTLV.TimeStamp = block.timestamp;
-                    entityPoolTLV.Token = tokens[i];
+                entityPoolTLV.Token = tokens[i];
             }
             entityPoolTLV.Amout = entityPoolTLV.Amout.plus(colpoolsc.getCollateralBalance(tokens[i]));
             let tkprice = oraclesc.getPrice(tokens[i]);
@@ -323,7 +323,6 @@ export function handleBlock(block: ethereum.Block): void {
 
                  entityOptionItem.save();
 
-
                  let entityPremium = EntityPremium.load(extrainfo.value0.toHex()+id);
                  if(entityPremium!=null) {
                      if (optinfo.value2 == 0) {
@@ -353,7 +352,7 @@ export function handleBlock(block: ethereum.Block): void {
 
          }//for option length
 
-       }
+       }//for manager length
 
        entityTotalTLV.save();
    }
