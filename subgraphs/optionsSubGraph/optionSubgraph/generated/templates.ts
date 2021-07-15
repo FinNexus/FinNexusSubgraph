@@ -47,3 +47,17 @@ export class CollateralPool extends DataSourceTemplate {
     );
   }
 }
+
+export class optionOracle extends DataSourceTemplate {
+  static create(address: Address): void {
+    DataSourceTemplate.create("optionOracle", [address.toHex()]);
+  }
+
+  static createWithContext(address: Address, context: DataSourceContext): void {
+    DataSourceTemplate.createWithContext(
+      "optionOracle",
+      [address.toHex()],
+      context
+    );
+  }
+}

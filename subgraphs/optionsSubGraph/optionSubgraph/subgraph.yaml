@@ -3,18 +3,20 @@ schema:
   file: ./schema.graphql
 dataSources:
 - kind: ethereum/contract
-  name: optionOracle
-  network: mainnet
+  name: OptionFactory
+  network: rinkeby
   source:
-    address: "0x43BD92bF3Bb25EBB3BdC2524CBd6156E3Fdd41F3"
-    abi: OptionOracle
+    address: "0xf0a1a6c65b7688b79e39ed712d0db4d2072786ce"
+    abi: OptionFactory
   mapping:
     kind: ethereum/events
     apiVersion: 0.0.4
     language: wasm/assemblyscript
     entities:
-    - OwnershipTransferred
+    - CreateOptionsManager
     abis:
+    - name: OptionFactory
+      file: ./abis/OptionFactory.json
     - name: OptionOracle
       file: ./abis/OptionOracle.json
     - name: OptionManager
@@ -24,16 +26,14 @@ dataSources:
     - name: CollateralPool
       file: ./abis/CollateralPool.json
     eventHandlers:
-    - event: OwnershipTransferred(indexed address,indexed address)
-      handler: handleOwnershipTransferred
-    blockHandlers:
-    - handler: handleBlock
+    - event: CreateOptionsManager(indexed address,address,address,address)
+      handler: handleCreateOptionsManager
     file: ./src/mapping.ts
 
 templates:
   - kind: ethereum/contract
     name: OptionManager
-    network: mainnet
+    network: rinkeby
     source:
       abi: OptionManager
     mapping:
@@ -43,9 +43,7 @@ templates:
       entities:
       - AddCollateral
       - BuyOption
-      - DebugEvent
       - ExerciseOption
-      - OwnershipTransferred
       - RedeemCollateral
       - SellOption
       abis:
@@ -60,12 +58,8 @@ templates:
         handler: handleAddCollateral
       - event: BuyOption(indexed address,indexed address,uint256,uint256,uint256)
         handler: handleBuyOption
-      - event: DebugEvent(uint256,uint256,uint256)
-        handler: handleDebugEvent
       - event: ExerciseOption(indexed address,indexed uint256,uint256,uint256)
         handler: handleExerciseOption
-      - event: OwnershipTransferred(indexed address,indexed address)
-        handler: handleOwnershipTransferred
       - event: RedeemCollateral(indexed address,address,uint256)
         handler: handleRedeemCollateral
       - event: SellOption(indexed address,indexed uint256,uint256,uint256)
@@ -74,7 +68,7 @@ templates:
 
   - kind: ethereum/contract
     name: OptionPool
-    network: mainnet
+    network: rinkeby
     source:
       abi: OptionPool
     mapping:
@@ -84,8 +78,6 @@ templates:
       entities:
       - BurnOption
       - CreateOption
-      - DebugEvent
-      - OwnershipTransferred
       abis:
       - name: OptionManager
         file: ./abis/OptionManager.json
@@ -99,15 +91,11 @@ templates:
         handler: handleBurnOption
       - event: CreateOption(indexed address,indexed uint256,uint8,uint32,uint256,uint256,uint256)
         handler: handleCreateOption
-      - event: DebugEvent(uint256,uint256,uint256)
-        handler: handleDebugEvent
-      - event: OwnershipTransferred(indexed address,indexed address)
-        handler: handleOwnershipTransferred
       file: ./src/mapping.ts
 
   - kind: ethereum/contract
     name: CollateralPool
-    network: mainnet
+    network: rinkeby
     source:
       abi: CollateralPool
     mapping:
@@ -116,9 +104,6 @@ templates:
       language: wasm/assemblyscript
       entities:
       - AddFee
-      - OwnershipTransferred
-      - RedeemFee
-      - TransferPayback
       abis:
       - name: OptionManager
         file: ./abis/OptionManager.json
@@ -130,4 +115,30 @@ templates:
       eventHandlers:
       - event: AddFee(indexed address,uint256)
         handler: handleAddFee
+      file: ./src/mapping.ts
+
+  - kind: ethereum/contract
+    name: optionOracle
+    network: rinkeby
+    source:
+      abi: OptionOracle
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+      - OwnershipTransferred
+      abis:
+      - name: OptionOracle
+        file: ./abis/OptionOracle.json
+      - name: OptionManager
+        file: ./abis/OptionManager.json
+      - name: OptionPool
+        file: ./abis/OptionPool.json
+      - name: CollateralPool
+        file: ./abis/CollateralPool.json
+      eventHandlers:
+      - event: OwnershipTransferred(indexed address,indexed address)
+        handler: handleOwnershipTransferred
+
       file: ./src/mapping.ts

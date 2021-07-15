@@ -36,8 +36,14 @@ import {
 
 import {
     OptionManager as OptionManagerTemplate,
-    OptionPool as OPtionPoolTemplate
+    OptionPool as OPtionPoolTemplate,
+    CollateralPool as CollateralPoolTemplate
 } from "../generated/templates"
+
+import {
+    OptionFactory,
+    CreateOptionsManager,
+} from "../generated/OptionFactory/OptionFactory"
 
 import {
     EntityActiveOption,
@@ -53,18 +59,42 @@ import {
     EntityTotalTLV,
     EntityOptionManager,
     EntityOptionPool,
+    EntityCollateralPool,
     EntityActiveOption
 } from "../generated/schema"
 
 let ONE_DAY_SECONDS = BigInt.fromI32(3600*24);
-//let ONE_DAY_SECONDS = 1;
-let OPTION_MANAGERS: string[] = ["0xfdf252995da6d6c54c03fc993e7aa6b593a57b8d",
-                       "0x120f18f5b8edcaa3c083f9464c57c11d81a9e549"];
+
+export function handleCreateOptionsManager(event: CreateOptionsManager): void {
+
+    let entityOptionManager = EntityOptionManager.load(event.params.optionsManager.toHex());
+    if (entityOptionManager == null) {
+        entityOptionManager = new EntityOptionManager(event.params.optionsManager.toHex());
+        entityOptionManager.save();
+        OptionManagerTemplate.create(event.params.optionsManager);
+    }
+
+    let entityOptionPool = EntityOptionPool.load(event.params.optionsPool.toHex());
+    if(entityOptionPool==null) {
+        entityOptionPool = new EntityOptionPool(event.params.optionsPool.toHex());
+        entityOptionPool.save();
+        OPtionPoolTemplate.create(event.params.optionsPool);
+    }
+
+    let entityCollateralPool = EntityCollateralPool.load(event.params.collateralPool.toHex());
+    if(entityCollateralPool==null) {
+        entityCollateralPool = new EntityCollateralPool(event.params.collateralPool.toHex());
+        entityCollateralPool.save();
+        CollateralPoolTemplate.create(event.params.collateralPool);
+    }
+
+}
 
 export function handleBuyOption(event: BuyOption): void {
     let entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
     if(entityBuyOptionItem==null){
-        entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
+        entityBuyOptionItem = new EntityBuyOptionItem(event.transaction.hash.toHex());
+        entityBuyOptionItem.Fee = BigInt.fromI32(0);
     }
     //OptionPrice: BigInt  #buyInfoMap[optionid]/100000000,
     entityBuyOptionItem.OptionPrice = event.params.optionPrice;
@@ -73,15 +103,17 @@ export function handleBuyOption(event: BuyOption): void {
 }
 
 export function handleCreateOption(event: CreateOption): void {
+   let entityidhash = EntityBuyOptionHashId.load(event.address.toHex() + event.params.optionID.toHex());
+   if(entityidhash==null) {
+        let entityidhash = new EntityBuyOptionHashId(event.address.toHex() + event.params.optionID.toHex());
+        entityidhash.BuyHash = event.transaction.hash.toHex();
+        entityidhash.save();
+   }
+
    let entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
    if(entityBuyOptionItem==null){
-      entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
-   }
-   let entityidhash = EntityBuyOptionHashId.load(event.params.optionID.toHex());
-   if(entityidhash==null) {
-       let entityidhash = new EntityBuyOptionHashId(event.params.optionID.toHex());
-       entityidhash.BuyHash = event.transaction.hash.toHex();
-       entityidhash.save();
+      entityBuyOptionItem = new EntityBuyOptionItem(event.transaction.hash.toHex());
+      entityBuyOptionItem.Fee = BigInt.fromI32(0);
    }
 
    entityBuyOptionItem.Optionid = event.params.optionID;
@@ -91,6 +123,7 @@ export function handleCreateOption(event: CreateOption): void {
    entityBuyOptionItem.Expiration = event.params.expiration;
    entityBuyOptionItem.Amount = event.params.amount;
    entityBuyOptionItem.StrikePrice = event.params.strikePrice;
+
    entityBuyOptionItem.save();
 }
 
@@ -99,12 +132,19 @@ export function handleAddFee(event: AddFee): void {
     if(entityBuyOptionItem==null){
         entityBuyOptionItem = new EntityBuyOptionItem(event.transaction.hash.toHex());
     }
+
     entityBuyOptionItem.Fee = event.params.payback;
     entityBuyOptionItem.Settlement = event.params.settlement;
     entityBuyOptionItem.save();
 }
 
 export function handleExerciseOption(event: ExerciseOption): void {
+    let entityExcerciseOptionHashId = EntityExcerciseOptionHashId.load(event.address.toHex()+event.params.optionId.toHex())
+    if(entityExcerciseOptionHashId == null) {
+        entityExcerciseOptionHashId = new EntityExcerciseOptionHashId(event.address.toHex()+event.params.optionId.toHex())
+        entityExcerciseOptionHashId.ExcerciseHash = event.transaction.hash.toHex();
+    }
+
     let entityExcerciseOptionItem = EntityExcerciseOptionItem.load(event.transaction.hash.toHex());
     if(entityExcerciseOptionItem==null) {
         entityExcerciseOptionItem = new EntityExcerciseOptionItem(event.transaction.hash.toHex());
@@ -127,8 +167,14 @@ export function handleBlock(block: ethereum.Block): void {
        entityTotalTLV.TotalUsdValue = BigInt.fromI32(0);
        let oraclesc : OptionOracle;
 
-       for (let i=0;i<OPTION_MANAGERS.length;i++) {
-         let managersc = OptionManager.bind(Address.fromString(OPTION_MANAGERS[i]));
+       let factorysc = OptionFactory.bind(dataSource.address());
+       let managerlen =factorysc.getOptionsMangerLength();
+
+       for (let i=0;i<managerlen.toI32();i++) {
+
+         let alladdress = factorysc.getOptionsMangerAddress(BigInt.fromI32(i))
+         let managerAddess = alladdress.value0;
+         let managersc = OptionManager.bind(managerAddess);
 
          let optionPoolAssress = managersc.getCollateralPoolAddress();
          let optionpoolsc = OptionPool.bind(optionPoolAssress);
@@ -139,78 +185,67 @@ export function handleBlock(block: ethereum.Block): void {
          let oracleAddress = managersc.getOracleAddress();
          oraclesc = OptionOracle.bind(oracleAddress);
 
-         let entityOptionManager = EntityOptionManager.load(OPTION_MANAGERS[i]);
-         if (entityOptionManager == null) {
-             entityOptionManager = new EntityOptionManager(OPTION_MANAGERS[i]);
-             entityOptionManager.save();
-             OptionManagerTemplate.create(Address.fromString(OPTION_MANAGERS[i]));
-
-             let entityOptionPool = new EntityOptionPool(optionPoolAssress.toHex());
-             entityOptionPool.save();
-             OPtionPoolTemplate.create(optionPoolAssress);
-         }
-
          let tokens = managersc.getWhiteList();
          for (let i=0;i<tokens.length;i++) {
-            //token address + id as key
-            let entityPoolTLV = EntityPoolTLV.load(tokens[i].toHex()+id.substr(2));
+            // token address + timeid as key
+            let pooltokenid = tokens[i].toHex()+id;
+            let entityPoolTLV = EntityPoolTLV.load(pooltokenid);
             if(entityPoolTLV==null) {
-                entityPoolTLV = new EntityPoolTLV(tokens[i].toHex() + id.substr(2));
+                entityPoolTLV = new EntityPoolTLV(pooltokenid);
                 entityPoolTLV.TimeStamp = block.timestamp;
-                entityPoolTLV.Token = tokens[i];
+                    entityPoolTLV.Token = tokens[i];
             }
             entityPoolTLV.Amout = entityPoolTLV.Amout.plus(colpoolsc.getCollateralBalance(tokens[i]));
             let tkprice = oraclesc.getPrice(tokens[i]);
             entityPoolTLV.UsdValue = entityPoolTLV.UsdValue.plus(entityPoolTLV.Amout.times(tkprice));
             entityPoolTLV.save();
 
-            let entityFee = EntityFee.load(tokens[i].toHex()+id.substr(2));
+            let entityFee = EntityFee.load(tokens[i].toHex()+id);
             if(entityFee==null) {
-                entityFee = new EntityFee(tokens[i].toHex() + id.substr(2));
+                entityFee = new EntityFee(tokens[i].toHex()+id);
                 entityFee.TimeStamp = block.timestamp;
                 entityFee.Token = tokens[i];
                 entityFee.save();
             }
 
-            let entityPremium = EntityPremium.load(tokens[i].toHex()+id.substr(2));
+            let entityPremium = EntityPremium.load(tokens[i].toHex()+id);
             if(entityPremium==null) {
-                entityPremium = new EntityPremium(tokens[i].toHex() + id.substr(2));
+                entityPremium = new EntityPremium(tokens[i].toHex() + id);
                 entityPremium.TimeStamp = block.timestamp;
                 entityPremium.Token = tokens[i];
                 entityPremium.save();
             }
-
-         }
+         }//whitelist token[] end
 
          entityTotalTLV.TotalUsdValue = entityTotalTLV.TotalUsdValue.plus(colpoolsc.getRealBalance(tokens[i]));
 
          let entityNetWorth = new EntityNetWorth(id);
          entityNetWorth.TimeStamp = block.timestamp;
-         entityNetWorth.Pool = colPoolAddress;
+         entityNetWorth.Pool = managerAddess;
          entityNetWorth.NetWorth = managersc.getTokenNetworth();
          entityNetWorth.save();
 
          let optionlen = optionpoolsc.getOptionInfoLength().toI32();
-
          for(let j=optionlen-1;i>0;j--) {
-             let i = BigInt.fromI32(j);
+             let k = BigInt.fromI32(j);
+             let pooloptionid = BigInt.fromI32(i).toHex() +k.toHex();
              //(optionsId 0,info.owner 1,
              // info.optType 2,
              // info.underlying 3
              // info.createTime+info.expiration 4
              // info.strikePrice 5,info.amount 6)
-             let optinfo = optionpoolsc.getOptionsById(i);
+             let optinfo = optionpoolsc.getOptionsById(k);
              // 0 info.settlement
              // 1 info.settlePrice,
              // 2 (info.strikePrice*info.priceRate)>>28,
              // 3 info.optionsPrice,
              // 4 info.iv)
-             let extrainfo = optionpoolsc.getOptionsExtraById(i);
+             let extrainfo = optionpoolsc.getOptionsExtraById(k);
              if(optinfo.value4.gt(block.timestamp)) {
-                 //underlying+id as key
-                 let entityActiveOption = EntityActiveOption.load(optinfo.value3.toHex() + id.substr(2));
+                 //poolid+optionid as key
+                 let entityActiveOption = EntityActiveOption.load(pooloptionid);
                  if (entityActiveOption == null) {
-                     entityActiveOption = new EntityActiveOption(optinfo.value3.toHex() + id.substr(2));
+                     entityActiveOption = new EntityActiveOption(pooloptionid);
                  }
                  entityActiveOption.Underlying = optinfo.value3;
                  entityActiveOption.TimeStamp = block.timestamp;
@@ -227,11 +262,13 @@ export function handleBlock(block: ethereum.Block): void {
                      }
                  }
                  entityActiveOption.save();
-             }
 
-             let entityoption = EntityOptionItem.load(i.toHex())
+             }//active option caculation
+
+             //poolid+optionid as key
+             let entityoption = EntityOptionItem.load(pooloptionid);
              if(entityoption==null) {
-                 let entityBuyIdHash = EntityBuyOptionHashId.load(i.toHex());
+                 let entityBuyIdHash = EntityBuyOptionHashId.load(optionPoolAssress.toHex()+k.toHex());
                  if (entityBuyIdHash == null) {
                      continue;
                  }
@@ -239,19 +276,18 @@ export function handleBlock(block: ethereum.Block): void {
                  if (entityBuyOptionItem == null) {
                      continue;
                  }
-
+                 //supplement missing field value from event
                  entityBuyOptionItem.Settlement = extrainfo.value0;
                  entityBuyOptionItem.UnderLyingPrice = extrainfo.value2;
                  entityBuyOptionItem.CurrentWorth = entityBuyOptionItem.Amount.times(extrainfo.value3);
-
                  entityBuyOptionItem.save();
 
-                 let entityexcercisehash = EntityExcerciseOptionHashId.load(i.toHex());
+                 let entityexcercisehash = EntityExcerciseOptionHashId.load(managerAddess.toHex()+k.toHex());
                  let entityexcerciseitem = EntityExcerciseOptionItem.load(entityexcercisehash.id)
 
-                 let entityOptionItem = EntityOptionItem.load(i.toHex());
+                 let entityOptionItem = EntityOptionItem.load(pooloptionid);
                  if(entityOptionItem==null) {
-                     entityOptionItem = new EntityOptionItem(i.toHex());
+                     entityOptionItem = new EntityOptionItem(pooloptionid);
                  }
 
                  entityOptionItem.Date = entityBuyOptionItem.CreatedTime;
@@ -287,6 +323,30 @@ export function handleBlock(block: ethereum.Block): void {
 
                  entityOptionItem.save();
 
+
+                 let entityPremium = EntityPremium.load(extrainfo.value0.toHex()+id);
+                 if(entityPremium!=null) {
+                     if (optinfo.value2 == 0) {
+                         entityPremium.CallUsdValue = entityPremium.CallUsdValue.plus(premium);
+                         let settleAmount = entityOptionItem.Premium.div(extrainfo.value1)
+                         entityPremium.CallAmount = entityPremium.CallAmount.plus(settleAmount);
+                     } else {
+                         entityPremium.PutUsdValue = entityPremium.PutUsdValue.plus(premium);
+                         let settleAmount = entityOptionItem.Premium.div(extrainfo.value1)
+                         entityPremium.PutAmount = entityPremium.PutAmount.plus(settleAmount);
+                     }
+                 }
+
+                 let entityFee = EntityFee.load(extrainfo.value0.toHex()+id);
+                 if(entityFee!=null) {
+                     if (optinfo.value2 == 0) {
+                         entityFee.CallUsdValue = entityFee.CallUsdValue.plus(feeusd);
+                         entityFee.CallAmount = entityFee.CallAmount.plus(entityBuyOptionItem.Fee);
+                     } else {
+                         entityFee.PutUsdValue = entityFee.PutUsdValue.plus(feeusd);
+                         entityFee.PutAmount = entityFee.PutAmount.plus(entityBuyOptionItem.Fee);
+                     }
+                 }
              } else {
                  break;
              }

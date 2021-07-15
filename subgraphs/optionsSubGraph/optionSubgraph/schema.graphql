@@ -6,6 +6,10 @@ type EntityOptionPool @entity {
   id: ID!
 }
 
+type EntityCollateralPool @entity {
+  id: ID!
+}
+
 type EntityBuyOptionHashId @entity {
   id: ID!
   BuyHash: ID!
@@ -25,12 +29,12 @@ type EntityBuyOptionItem @entity {
   UnderLyingPrice: BigInt #optionextra[2]/100000000,
   CreatedTime: BigInt!     #getDate(blk.timestamp),
   CurrentWorth: BigInt    #web3.utils.fromWei(new BN(worth))/100000000 +"(USD)"
-  Fee: BigInt #fees
+  Fee: BigInt! #fees
 }
 
 type EntityExcerciseOptionHashId @entity {
   id: ID!
-  BuyHash: ID!
+  ExcerciseHash: ID!
 }
 
 type EntityExcerciseOptionItem @entity {

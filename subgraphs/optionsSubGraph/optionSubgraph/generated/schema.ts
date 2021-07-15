@@ -74,6 +74,40 @@ export class EntityOptionPool extends Entity {
   }
 }
 
+export class EntityCollateralPool extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(
+      id !== null,
+      "Cannot save EntityCollateralPool entity without an ID"
+    );
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save EntityCollateralPool entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("EntityCollateralPool", id.toString(), this);
+  }
+
+  static load(id: string): EntityCollateralPool | null {
+    return store.get("EntityCollateralPool", id) as EntityCollateralPool | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+}
+
 export class EntityBuyOptionHashId extends Entity {
   constructor(id: string) {
     super();
@@ -338,21 +372,13 @@ export class EntityBuyOptionItem extends Entity {
     }
   }
 
-  get Fee(): BigInt | null {
+  get Fee(): BigInt {
     let value = this.get("Fee");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
+    return value.toBigInt();
   }
 
-  set Fee(value: BigInt | null) {
-    if (value === null) {
-      this.unset("Fee");
-    } else {
-      this.set("Fee", Value.fromBigInt(value as BigInt));
-    }
+  set Fee(value: BigInt) {
+    this.set("Fee", Value.fromBigInt(value));
   }
 }
 
@@ -392,13 +418,13 @@ export class EntityExcerciseOptionHashId extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get BuyHash(): string {
-    let value = this.get("BuyHash");
+  get ExcerciseHash(): string {
+    let value = this.get("ExcerciseHash");
     return value.toString();
   }
 
-  set BuyHash(value: string) {
-    this.set("BuyHash", Value.fromString(value));
+  set ExcerciseHash(value: string) {
+    this.set("ExcerciseHash", Value.fromString(value));
   }
 }
 
