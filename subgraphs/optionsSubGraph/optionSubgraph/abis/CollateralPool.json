@@ -3,10 +3,9 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "implementation_",
+        "name": "multiSignatureClient",
         "type": "address"
-      },
-      { "internalType": "address", "name": "optionsPool", "type": "address" }
+      }
     ],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -29,6 +28,81 @@
       }
     ],
     "name": "AddFee",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "msgHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "value1",
+        "type": "uint256"
+      }
+    ],
+    "name": "DebugEvent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOperator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOperator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "OperatorTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOrigin",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOrigin",
+        "type": "address"
+      }
+    ],
+    "name": "OriginTransferred",
     "type": "event"
   },
   {
@@ -62,50 +136,25 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "settlement",
+        "name": "token",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "payback",
+        "name": "amount",
         "type": "uint256"
       }
     ],
-    "name": "RedeemFee",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "recieptor",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "settlement",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "payback",
-        "type": "uint256"
-      }
-    ],
-    "name": "TransferPayback",
+    "name": "Redeem",
     "type": "event"
   },
   { "payable": true, "stateMutability": "payable", "type": "fallback" },
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
     ],
     "name": "addCollateralBalance",
     "outputs": [],
@@ -116,8 +165,8 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      { "internalType": "address", "name": "settlement", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
     ],
     "name": "addNetBalance",
     "outputs": [],
@@ -128,8 +177,8 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "int256", "name": "", "type": "int256" }
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "int256", "name": "amount", "type": "int256" }
     ],
     "name": "addNetWorthBalance",
     "outputs": [],
@@ -140,20 +189,9 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "addAddress", "type": "address" }
-    ],
-    "name": "addOperator",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "internalType": "uint256", "name": "feeType", "type": "uint256" }
     ],
     "name": "addTransactionFee",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
@@ -164,9 +202,10 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      { "internalType": "address", "name": "user", "type": "address" },
+      { "internalType": "uint256", "name": "amountUSD", "type": "uint256" },
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
     ],
     "name": "addUserInputCollateral",
     "outputs": [],
@@ -177,33 +216,18 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "name": "addUserPayingUsd",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      { "internalType": "address", "name": "addAddress", "type": "address" }
-    ],
-    "name": "addWhiteList",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      { "internalType": "address payable", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      {
+        "internalType": "address payable",
+        "name": "recieptor",
+        "type": "address"
+      },
+      { "internalType": "address", "name": "settlement", "type": "address" },
+      {
+        "internalType": "uint256",
+        "name": "settlementAmount",
+        "type": "uint256"
+      },
+      { "internalType": "uint256", "name": "allPay", "type": "uint256" }
     ],
     "name": "buyOptionsPayfor",
     "outputs": [],
@@ -214,7 +238,7 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address[]", "name": "", "type": "address[]" }
+      { "internalType": "address[]", "name": "_whiteList", "type": "address[]" }
     ],
     "name": "calSharedPayment",
     "outputs": [],
@@ -225,8 +249,8 @@
   {
     "constant": true,
     "inputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      { "internalType": "uint256", "name": "feeType", "type": "uint256" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
     ],
     "name": "calculateFee",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
@@ -237,49 +261,7 @@
   {
     "constant": true,
     "inputs": [
-      { "internalType": "address", "name": "tmpAddress", "type": "address" },
-      { "internalType": "uint256", "name": "state", "type": "uint256" }
-    ],
-    "name": "checkAddressPermission",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [{ "internalType": "bytes", "name": "data", "type": "bytes" }],
-    "name": "delegateToImplementation",
-    "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [{ "internalType": "bytes", "name": "data", "type": "bytes" }],
-    "name": "delegateToViewImplementation",
-    "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "getAllFeeBalances",
-    "outputs": [
-      { "internalType": "address[]", "name": "", "type": "address[]" },
-      { "internalType": "uint256[]", "name": "", "type": "uint256[]" }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      { "internalType": "address[]", "name": "", "type": "address[]" }
+      { "internalType": "address[]", "name": "whiteList", "type": "address[]" }
     ],
     "name": "getAllRealBalance",
     "outputs": [{ "internalType": "int256[]", "name": "", "type": "int256[]" }],
@@ -290,11 +272,23 @@
   {
     "constant": true,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "address[]", "name": "", "type": "address[]" },
-      { "internalType": "uint256[]", "name": "", "type": "uint256[]" },
-      { "internalType": "uint256[]", "name": "", "type": "uint256[]" }
+      { "internalType": "address", "name": "account", "type": "address" },
+      {
+        "internalType": "uint256",
+        "name": "userTotalWorth",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "tmpWhiteList",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_RealBalances",
+        "type": "uint256[]"
+      },
+      { "internalType": "uint256[]", "name": "prices", "type": "uint256[]" }
     ],
     "name": "getCollateralAndPremiumBalances",
     "outputs": [
@@ -307,7 +301,9 @@
   },
   {
     "constant": true,
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "inputs": [
+      { "internalType": "address", "name": "collateral", "type": "address" }
+    ],
     "name": "getCollateralBalance",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
@@ -316,7 +312,9 @@
   },
   {
     "constant": true,
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "inputs": [
+      { "internalType": "address", "name": "settlement", "type": "address" }
+    ],
     "name": "getFeeBalance",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
@@ -325,7 +323,9 @@
   },
   {
     "constant": true,
-    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "inputs": [
+      { "internalType": "uint256", "name": "feeType", "type": "uint256" }
+    ],
     "name": "getFeeRate",
     "outputs": [{ "internalType": "uint32", "name": "", "type": "uint32" }],
     "payable": false,
@@ -344,7 +344,7 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "getImplementation",
+    "name": "getMultiSignatureAddress",
     "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "payable": false,
     "stateMutability": "view",
@@ -352,16 +352,9 @@
   },
   {
     "constant": true,
-    "inputs": [],
-    "name": "getManager",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "inputs": [
+      { "internalType": "address", "name": "settlement", "type": "address" }
+    ],
     "name": "getNetWorthBalance",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
@@ -370,19 +363,10 @@
   },
   {
     "constant": true,
-    "inputs": [],
-    "name": "getOperator",
-    "outputs": [
-      { "internalType": "address[]", "name": "", "type": "address[]" }
+    "inputs": [
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "getOptionsPoolAddress",
+    "name": "getOperator",
     "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "payable": false,
     "stateMutability": "view",
@@ -390,7 +374,9 @@
   },
   {
     "constant": true,
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "inputs": [
+      { "internalType": "address", "name": "settlement", "type": "address" }
+    ],
     "name": "getRealBalance",
     "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
     "payable": false,
@@ -400,8 +386,8 @@
   {
     "constant": true,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" }
+      { "internalType": "address", "name": "user", "type": "address" },
+      { "internalType": "address", "name": "collateral", "type": "address" }
     ],
     "name": "getUserInputCollateral",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
@@ -411,7 +397,9 @@
   },
   {
     "constant": true,
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "inputs": [
+      { "internalType": "address", "name": "user", "type": "address" }
+    ],
     "name": "getUserPayingUsd",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
@@ -421,32 +409,19 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "getWhiteList",
-    "outputs": [
-      { "internalType": "address[]", "name": "", "type": "address[]" }
-    ],
+    "name": "implementationVersion",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
-    "stateMutability": "view",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
-    "constant": true,
+    "constant": false,
     "inputs": [],
-    "name": "implementation",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "initialize",
+    "outputs": [],
     "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      { "internalType": "address", "name": "tmpAddress", "type": "address" }
-    ],
-    "name": "isEligibleAddress",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "payable": false,
-    "stateMutability": "view",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -459,29 +434,43 @@
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
-      { "internalType": "address", "name": "addAddress", "type": "address" },
-      { "internalType": "uint256", "name": "permission", "type": "uint256" }
+    "constant": true,
+    "inputs": [],
+    "name": "optionsPool",
+    "outputs": [
+      { "internalType": "contract IOptionsPool", "name": "", "type": "address" }
     ],
-    "name": "modifyPermission",
-    "outputs": [],
     "payable": false,
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
     "constant": true,
     "inputs": [],
     "name": "owner",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "outputs": [
+      { "internalType": "address", "name": "_owner", "type": "address" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "ownerExpiredTime",
+    "outputs": [
+      { "internalType": "uint256", "name": "_expired", "type": "uint256" }
+    ],
     "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
     "constant": false,
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "inputs": [
+      { "internalType": "address", "name": "currency", "type": "address" }
+    ],
     "name": "redeem",
     "outputs": [],
     "payable": false,
@@ -490,49 +479,9 @@
   },
   {
     "constant": false,
-    "inputs": [],
-    "name": "redeemAll",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "removeAddress", "type": "address" }
-    ],
-    "name": "removeOperator",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      { "internalType": "address", "name": "removeAddress", "type": "address" }
-    ],
-    "name": "removeWhiteList",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
     ],
     "name": "setCollateralBalance",
     "outputs": [],
@@ -542,32 +491,8 @@
   },
   {
     "constant": false,
-    "inputs": [{ "internalType": "bool", "name": "halt", "type": "bool" }],
-    "name": "setHalt",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "implementation_",
-        "type": "address"
-      }
-    ],
-    "name": "setImplementation",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      { "internalType": "address", "name": "managerAddress", "type": "address" }
+      { "internalType": "address", "name": "newManager", "type": "address" }
     ],
     "name": "setManager",
     "outputs": [],
@@ -578,8 +503,8 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "int256", "name": "", "type": "int256" }
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "int256", "name": "amount", "type": "int256" }
     ],
     "name": "setNetWorthBalance",
     "outputs": [],
@@ -591,7 +516,7 @@
     "constant": false,
     "inputs": [
       { "internalType": "uint256", "name": "index", "type": "uint256" },
-      { "internalType": "address", "name": "addAddress", "type": "address" }
+      { "internalType": "address", "name": "newAddress", "type": "address" }
     ],
     "name": "setOperator",
     "outputs": [],
@@ -602,18 +527,7 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address[]", "name": "operators", "type": "address[]" }
-    ],
-    "name": "setOperators",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      { "internalType": "address", "name": "optionsPool", "type": "address" }
+      { "internalType": "address", "name": "_optionsPool", "type": "address" }
     ],
     "name": "setOptionsPoolAddress",
     "outputs": [],
@@ -624,10 +538,18 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address[]", "name": "", "type": "address[]" },
-      { "internalType": "int256[]", "name": "", "type": "int256[]" },
-      { "internalType": "int256[]", "name": "", "type": "int256[]" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      {
+        "internalType": "address[]",
+        "name": "_whiteList",
+        "type": "address[]"
+      },
+      { "internalType": "int256[]", "name": "newNetworth", "type": "int256[]" },
+      {
+        "internalType": "int256[]",
+        "name": "sharedBalances",
+        "type": "int256[]"
+      },
+      { "internalType": "uint256", "name": "firstOption", "type": "uint256" }
     ],
     "name": "setSharedPayment",
     "outputs": [],
@@ -638,8 +560,8 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint32", "name": "", "type": "uint32" }
+      { "internalType": "uint256", "name": "feeType", "type": "uint256" },
+      { "internalType": "uint32", "name": "thousandth", "type": "uint32" }
     ],
     "name": "setTransactionFee",
     "outputs": [],
@@ -650,9 +572,9 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      { "internalType": "address", "name": "user", "type": "address" },
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
     ],
     "name": "setUserInputCollateral",
     "outputs": [],
@@ -663,8 +585,8 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      { "internalType": "address", "name": "user", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
     ],
     "name": "setUserPayingUsd",
     "outputs": [],
@@ -675,8 +597,8 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
     ],
     "name": "subCollateralBalance",
     "outputs": [],
@@ -687,8 +609,8 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "int256", "name": "", "type": "int256" }
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "int256", "name": "amount", "type": "int256" }
     ],
     "name": "subNetWorthBalance",
     "outputs": [],
@@ -699,9 +621,9 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      { "internalType": "address", "name": "user", "type": "address" },
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
     ],
     "name": "subUserInputCollateral",
     "outputs": [],
@@ -712,8 +634,8 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      { "internalType": "address", "name": "user", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
     ],
     "name": "subUserPayingUsd",
     "outputs": [],
@@ -724,7 +646,18 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "newOwner", "type": "address" }
+      { "internalType": "address", "name": "_newOrigin", "type": "address" }
+    ],
+    "name": "transferOrigin",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address", "name": "_newOwner", "type": "address" }
     ],
     "name": "transferOwnership",
     "outputs": [],
@@ -735,9 +668,13 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address payable", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      {
+        "internalType": "address payable",
+        "name": "recieptor",
+        "type": "address"
+      },
+      { "internalType": "address", "name": "settlement", "type": "address" },
+      { "internalType": "uint256", "name": "payback", "type": "uint256" }
     ],
     "name": "transferPayback",
     "outputs": [],
@@ -748,10 +685,14 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address payable", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      {
+        "internalType": "address payable",
+        "name": "recieptor",
+        "type": "address"
+      },
+      { "internalType": "address", "name": "settlement", "type": "address" },
+      { "internalType": "uint256", "name": "payback", "type": "uint256" },
+      { "internalType": "uint256", "name": "feeType", "type": "uint256" }
     ],
     "name": "transferPaybackAndFee",
     "outputs": [],
@@ -762,17 +703,64 @@
   {
     "constant": false,
     "inputs": [
-      { "internalType": "address payable", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "address[]", "name": "", "type": "address[]" },
-      { "internalType": "uint256[]", "name": "", "type": "uint256[]" },
-      { "internalType": "uint256[]", "name": "", "type": "uint256[]" },
-      { "internalType": "uint256[]", "name": "", "type": "uint256[]" }
+      {
+        "internalType": "address payable",
+        "name": "account",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "redeemWorth", "type": "uint256" },
+      {
+        "internalType": "address[]",
+        "name": "tmpWhiteList",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "colBalances",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "PremiumBalances",
+        "type": "uint256[]"
+      },
+      { "internalType": "uint256[]", "name": "prices", "type": "uint256[]" }
     ],
     "name": "transferPaybackBalances",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "txOrigin",
+    "outputs": [
+      { "internalType": "address", "name": "_origin", "type": "address" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "update",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "version",
+    "outputs": [
+      { "internalType": "uint256", "name": "version_", "type": "uint256" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   }
 ]

@@ -100,6 +100,36 @@ export class DebugEvent__Params {
   }
 }
 
+export class DebugEvent1 extends ethereum.Event {
+  get params(): DebugEvent1__Params {
+    return new DebugEvent1__Params(this);
+  }
+}
+
+export class DebugEvent1__Params {
+  _event: DebugEvent1;
+
+  constructor(event: DebugEvent1) {
+    this._event = event;
+  }
+
+  get from(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get msgHash(): Bytes {
+    return this._event.parameters[1].value.toBytes();
+  }
+
+  get value(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+
+  get value1(): BigInt {
+    return this._event.parameters[3].value.toBigInt();
+  }
+}
+
 export class ExerciseOption extends ethereum.Event {
   get params(): ExerciseOption__Params {
     return new ExerciseOption__Params(this);
@@ -127,6 +157,28 @@ export class ExerciseOption__Params {
 
   get sellValue(): BigInt {
     return this._event.parameters[3].value.toBigInt();
+  }
+}
+
+export class OriginTransferred extends ethereum.Event {
+  get params(): OriginTransferred__Params {
+    return new OriginTransferred__Params(this);
+  }
+}
+
+export class OriginTransferred__Params {
+  _event: OriginTransferred;
+
+  constructor(event: OriginTransferred) {
+    this._event = event;
+  }
+
+  get previousOrigin(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get newOrigin(): Address {
+    return this._event.parameters[1].value.toAddress();
   }
 }
 
@@ -208,34 +260,6 @@ export class SellOption__Params {
   }
 }
 
-export class OptionManager__getALLCollateralinfoResult {
-  value0: Array<BigInt>;
-  value1: Array<BigInt>;
-  value2: Array<BigInt>;
-  value3: Array<BigInt>;
-
-  constructor(
-    value0: Array<BigInt>,
-    value1: Array<BigInt>,
-    value2: Array<BigInt>,
-    value3: Array<BigInt>
-  ) {
-    this.value0 = value0;
-    this.value1 = value1;
-    this.value2 = value2;
-    this.value3 = value3;
-  }
-
-  toMap(): TypedMap<string, ethereum.Value> {
-    let map = new TypedMap<string, ethereum.Value>();
-    map.set("value0", ethereum.Value.fromUnsignedBigIntArray(this.value0));
-    map.set("value1", ethereum.Value.fromSignedBigIntArray(this.value1));
-    map.set("value2", ethereum.Value.fromUnsignedBigIntArray(this.value2));
-    map.set("value3", ethereum.Value.fromUnsignedBigIntArray(this.value3));
-    return map;
-  }
-}
-
 export class OptionManager__getInputAmountRangeResult {
   value0: BigInt;
   value1: BigInt;
@@ -275,18 +299,22 @@ export class OptionManager extends ethereum.SmartContract {
     return new OptionManager("OptionManager", address);
   }
 
-  allowance(spender: Address): BigInt {
-    let result = super.call("allowance", "allowance(address):(uint256)", [
-      ethereum.Value.fromAddress(spender)
-    ]);
+  addressPermission(param0: Address): BigInt {
+    let result = super.call(
+      "addressPermission",
+      "addressPermission(address):(uint256)",
+      [ethereum.Value.fromAddress(param0)]
+    );
 
     return result[0].toBigInt();
   }
 
-  try_allowance(spender: Address): ethereum.CallResult<BigInt> {
-    let result = super.tryCall("allowance", "allowance(address):(uint256)", [
-      ethereum.Value.fromAddress(spender)
-    ]);
+  try_addressPermission(param0: Address): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "addressPermission",
+      "addressPermission(address):(uint256)",
+      [ethereum.Value.fromAddress(param0)]
+    );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
@@ -294,21 +322,21 @@ export class OptionManager extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  calCollateralWorth(param0: Address): Array<BigInt> {
+  calCollateralWorth(account: Address): Array<BigInt> {
     let result = super.call(
       "calCollateralWorth",
       "calCollateralWorth(address):(uint256[])",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(account)]
     );
 
     return result[0].toBigIntArray();
   }
 
-  try_calCollateralWorth(param0: Address): ethereum.CallResult<Array<BigInt>> {
+  try_calCollateralWorth(account: Address): ethereum.CallResult<Array<BigInt>> {
     let result = super.tryCall(
       "calCollateralWorth",
       "calCollateralWorth(address):(uint256[])",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(account)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -318,19 +346,19 @@ export class OptionManager extends ethereum.SmartContract {
   }
 
   calOptionsOccupied(
-    param0: BigInt,
-    param1: BigInt,
-    param2: BigInt,
-    param3: i32
+    strikePrice: BigInt,
+    underlyingPrice: BigInt,
+    amount: BigInt,
+    optType: i32
   ): BigInt {
     let result = super.call(
       "calOptionsOccupied",
       "calOptionsOccupied(uint256,uint256,uint256,uint8):(uint256)",
       [
-        ethereum.Value.fromUnsignedBigInt(param0),
-        ethereum.Value.fromUnsignedBigInt(param1),
-        ethereum.Value.fromUnsignedBigInt(param2),
-        ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(param3))
+        ethereum.Value.fromUnsignedBigInt(strikePrice),
+        ethereum.Value.fromUnsignedBigInt(underlyingPrice),
+        ethereum.Value.fromUnsignedBigInt(amount),
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(optType))
       ]
     );
 
@@ -338,19 +366,19 @@ export class OptionManager extends ethereum.SmartContract {
   }
 
   try_calOptionsOccupied(
-    param0: BigInt,
-    param1: BigInt,
-    param2: BigInt,
-    param3: i32
+    strikePrice: BigInt,
+    underlyingPrice: BigInt,
+    amount: BigInt,
+    optType: i32
   ): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
       "calOptionsOccupied",
       "calOptionsOccupied(uint256,uint256,uint256,uint8):(uint256)",
       [
-        ethereum.Value.fromUnsignedBigInt(param0),
-        ethereum.Value.fromUnsignedBigInt(param1),
-        ethereum.Value.fromUnsignedBigInt(param2),
-        ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(param3))
+        ethereum.Value.fromUnsignedBigInt(strikePrice),
+        ethereum.Value.fromUnsignedBigInt(underlyingPrice),
+        ethereum.Value.fromUnsignedBigInt(amount),
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(optType))
       ]
     );
     if (result.reverted) {
@@ -415,121 +443,46 @@ export class OptionManager extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBoolean());
   }
 
-  checkAllowance(spender: Address, amount: BigInt): boolean {
-    let result = super.call(
-      "checkAllowance",
-      "checkAllowance(address,uint256):(bool)",
-      [
-        ethereum.Value.fromAddress(spender),
-        ethereum.Value.fromUnsignedBigInt(amount)
-      ]
-    );
+  collateralPool(): Address {
+    let result = super.call("collateralPool", "collateralPool():(address)", []);
 
-    return result[0].toBoolean();
+    return result[0].toAddress();
   }
 
-  try_checkAllowance(
-    spender: Address,
-    amount: BigInt
-  ): ethereum.CallResult<boolean> {
+  try_collateralPool(): ethereum.CallResult<Address> {
     let result = super.tryCall(
-      "checkAllowance",
-      "checkAllowance(address,uint256):(bool)",
-      [
-        ethereum.Value.fromAddress(spender),
-        ethereum.Value.fromUnsignedBigInt(amount)
-      ]
+      "collateralPool",
+      "collateralPool():(address)",
+      []
     );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBoolean());
+    return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
-  delegateToImplementation(data: Bytes): Bytes {
+  getAllRealBalance(): Array<BigInt> {
     let result = super.call(
-      "delegateToImplementation",
-      "delegateToImplementation(bytes):(bytes)",
-      [ethereum.Value.fromBytes(data)]
+      "getAllRealBalance",
+      "getAllRealBalance():(int256[])",
+      []
     );
 
-    return result[0].toBytes();
+    return result[0].toBigIntArray();
   }
 
-  try_delegateToImplementation(data: Bytes): ethereum.CallResult<Bytes> {
+  try_getAllRealBalance(): ethereum.CallResult<Array<BigInt>> {
     let result = super.tryCall(
-      "delegateToImplementation",
-      "delegateToImplementation(bytes):(bytes)",
-      [ethereum.Value.fromBytes(data)]
+      "getAllRealBalance",
+      "getAllRealBalance():(int256[])",
+      []
     );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBytes());
-  }
-
-  delegateToViewImplementation(data: Bytes): Bytes {
-    let result = super.call(
-      "delegateToViewImplementation",
-      "delegateToViewImplementation(bytes):(bytes)",
-      [ethereum.Value.fromBytes(data)]
-    );
-
-    return result[0].toBytes();
-  }
-
-  try_delegateToViewImplementation(data: Bytes): ethereum.CallResult<Bytes> {
-    let result = super.tryCall(
-      "delegateToViewImplementation",
-      "delegateToViewImplementation(bytes):(bytes)",
-      [ethereum.Value.fromBytes(data)]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBytes());
-  }
-
-  getALLCollateralinfo(
-    param0: Address
-  ): OptionManager__getALLCollateralinfoResult {
-    let result = super.call(
-      "getALLCollateralinfo",
-      "getALLCollateralinfo(address):(uint256[],int256[],uint32[],uint32[])",
-      [ethereum.Value.fromAddress(param0)]
-    );
-
-    return new OptionManager__getALLCollateralinfoResult(
-      result[0].toBigIntArray(),
-      result[1].toBigIntArray(),
-      result[2].toBigIntArray(),
-      result[3].toBigIntArray()
-    );
-  }
-
-  try_getALLCollateralinfo(
-    param0: Address
-  ): ethereum.CallResult<OptionManager__getALLCollateralinfoResult> {
-    let result = super.tryCall(
-      "getALLCollateralinfo",
-      "getALLCollateralinfo(address):(uint256[],int256[],uint32[],uint32[])",
-      [ethereum.Value.fromAddress(param0)]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(
-      new OptionManager__getALLCollateralinfoResult(
-        value[0].toBigIntArray(),
-        value[1].toBigIntArray(),
-        value[2].toBigIntArray(),
-        value[3].toBigIntArray()
-      )
-    );
+    return ethereum.CallResult.fromValue(value[0].toBigIntArray());
   }
 
   getAvailableCollateral(): BigInt {
@@ -555,44 +508,21 @@ export class OptionManager extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  getCollateralPoolAddress(): Address {
-    let result = super.call(
-      "getCollateralPoolAddress",
-      "getCollateralPoolAddress():(address)",
-      []
-    );
-
-    return result[0].toAddress();
-  }
-
-  try_getCollateralPoolAddress(): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "getCollateralPoolAddress",
-      "getCollateralPoolAddress():(address)",
-      []
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  getCollateralRate(param0: Address): BigInt {
+  getCollateralRate(collateral: Address): BigInt {
     let result = super.call(
       "getCollateralRate",
       "getCollateralRate(address):(uint256)",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(collateral)]
     );
 
     return result[0].toBigInt();
   }
 
-  try_getCollateralRate(param0: Address): ethereum.CallResult<BigInt> {
+  try_getCollateralRate(collateral: Address): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
       "getCollateralRate",
       "getCollateralRate(address):(uint256)",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(collateral)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -601,50 +531,27 @@ export class OptionManager extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  getFPTCoinAddress(): Address {
+  getCollateralWhiteList(): Array<Address> {
     let result = super.call(
-      "getFPTCoinAddress",
-      "getFPTCoinAddress():(address)",
+      "getCollateralWhiteList",
+      "getCollateralWhiteList():(address[])",
       []
     );
 
-    return result[0].toAddress();
+    return result[0].toAddressArray();
   }
 
-  try_getFPTCoinAddress(): ethereum.CallResult<Address> {
+  try_getCollateralWhiteList(): ethereum.CallResult<Array<Address>> {
     let result = super.tryCall(
-      "getFPTCoinAddress",
-      "getFPTCoinAddress():(address)",
+      "getCollateralWhiteList",
+      "getCollateralWhiteList():(address[])",
       []
     );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  getImplementation(): Address {
-    let result = super.call(
-      "getImplementation",
-      "getImplementation():(address)",
-      []
-    );
-
-    return result[0].toAddress();
-  }
-
-  try_getImplementation(): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "getImplementation",
-      "getImplementation():(address)",
-      []
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
+    return ethereum.CallResult.fromValue(value[0].toAddressArray());
   }
 
   getInputAmountRange(): OptionManager__getInputAmountRangeResult {
@@ -703,21 +610,44 @@ export class OptionManager extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  getNetWorthBalance(param0: Address): BigInt {
+  getMultiSignatureAddress(): Address {
+    let result = super.call(
+      "getMultiSignatureAddress",
+      "getMultiSignatureAddress():(address)",
+      []
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_getMultiSignatureAddress(): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "getMultiSignatureAddress",
+      "getMultiSignatureAddress():(address)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  getNetWorthBalance(settlement: Address): BigInt {
     let result = super.call(
       "getNetWorthBalance",
       "getNetWorthBalance(address):(uint256)",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(settlement)]
     );
 
     return result[0].toBigInt();
   }
 
-  try_getNetWorthBalance(param0: Address): ethereum.CallResult<BigInt> {
+  try_getNetWorthBalance(settlement: Address): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
       "getNetWorthBalance",
       "getNetWorthBalance(address):(uint256)",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(settlement)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -749,47 +679,24 @@ export class OptionManager extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  getOptionsPoolAddress(): Address {
-    let result = super.call(
-      "getOptionsPoolAddress",
-      "getOptionsPoolAddress():(address)",
-      []
-    );
-
-    return result[0].toAddress();
-  }
-
-  try_getOptionsPoolAddress(): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "getOptionsPoolAddress",
-      "getOptionsPoolAddress():(address)",
-      []
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
   getOptionsPrice(
-    param0: BigInt,
-    param1: BigInt,
-    param2: BigInt,
-    param3: BigInt,
-    param4: BigInt,
-    param5: i32
+    underlyingPrice: BigInt,
+    strikePrice: BigInt,
+    expiration: BigInt,
+    underlying: BigInt,
+    amount: BigInt,
+    optType: i32
   ): BigInt {
     let result = super.call(
       "getOptionsPrice",
       "getOptionsPrice(uint256,uint256,uint256,uint32,uint256,uint8):(uint256)",
       [
-        ethereum.Value.fromUnsignedBigInt(param0),
-        ethereum.Value.fromUnsignedBigInt(param1),
-        ethereum.Value.fromUnsignedBigInt(param2),
-        ethereum.Value.fromUnsignedBigInt(param3),
-        ethereum.Value.fromUnsignedBigInt(param4),
-        ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(param5))
+        ethereum.Value.fromUnsignedBigInt(underlyingPrice),
+        ethereum.Value.fromUnsignedBigInt(strikePrice),
+        ethereum.Value.fromUnsignedBigInt(expiration),
+        ethereum.Value.fromUnsignedBigInt(underlying),
+        ethereum.Value.fromUnsignedBigInt(amount),
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(optType))
       ]
     );
 
@@ -797,23 +704,23 @@ export class OptionManager extends ethereum.SmartContract {
   }
 
   try_getOptionsPrice(
-    param0: BigInt,
-    param1: BigInt,
-    param2: BigInt,
-    param3: BigInt,
-    param4: BigInt,
-    param5: i32
+    underlyingPrice: BigInt,
+    strikePrice: BigInt,
+    expiration: BigInt,
+    underlying: BigInt,
+    amount: BigInt,
+    optType: i32
   ): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
       "getOptionsPrice",
       "getOptionsPrice(uint256,uint256,uint256,uint32,uint256,uint8):(uint256)",
       [
-        ethereum.Value.fromUnsignedBigInt(param0),
-        ethereum.Value.fromUnsignedBigInt(param1),
-        ethereum.Value.fromUnsignedBigInt(param2),
-        ethereum.Value.fromUnsignedBigInt(param3),
-        ethereum.Value.fromUnsignedBigInt(param4),
-        ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(param5))
+        ethereum.Value.fromUnsignedBigInt(underlyingPrice),
+        ethereum.Value.fromUnsignedBigInt(strikePrice),
+        ethereum.Value.fromUnsignedBigInt(expiration),
+        ethereum.Value.fromUnsignedBigInt(underlying),
+        ethereum.Value.fromUnsignedBigInt(amount),
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(optType))
       ]
     );
     if (result.reverted) {
@@ -821,29 +728,6 @@ export class OptionManager extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBigInt());
-  }
-
-  getOptionsPriceAddress(): Address {
-    let result = super.call(
-      "getOptionsPriceAddress",
-      "getOptionsPriceAddress():(address)",
-      []
-    );
-
-    return result[0].toAddress();
-  }
-
-  try_getOptionsPriceAddress(): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "getOptionsPriceAddress",
-      "getOptionsPriceAddress():(address)",
-      []
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
   getOracleAddress(): Address {
@@ -902,21 +786,21 @@ export class OptionManager extends ethereum.SmartContract {
     );
   }
 
-  getRealBalance(param0: Address): BigInt {
+  getRealBalance(settlement: Address): BigInt {
     let result = super.call(
       "getRealBalance",
       "getRealBalance(address):(int256)",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(settlement)]
     );
 
     return result[0].toBigInt();
   }
 
-  try_getRealBalance(param0: Address): ethereum.CallResult<BigInt> {
+  try_getRealBalance(settlement: Address): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
       "getRealBalance",
       "getRealBalance(address):(int256)",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(settlement)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -994,21 +878,21 @@ export class OptionManager extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  getUserPayingUsd(param0: Address): BigInt {
+  getUserPayingUsd(user: Address): BigInt {
     let result = super.call(
       "getUserPayingUsd",
       "getUserPayingUsd(address):(uint256)",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(user)]
     );
 
     return result[0].toBigInt();
   }
 
-  try_getUserPayingUsd(param0: Address): ethereum.CallResult<BigInt> {
+  try_getUserPayingUsd(user: Address): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
       "getUserPayingUsd",
       "getUserPayingUsd(address):(uint256)",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(user)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -1017,21 +901,21 @@ export class OptionManager extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  getUserTotalWorth(param0: Address): BigInt {
+  getUserTotalWorth(account: Address): BigInt {
     let result = super.call(
       "getUserTotalWorth",
       "getUserTotalWorth(address):(uint256)",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(account)]
     );
 
     return result[0].toBigInt();
   }
 
-  try_getUserTotalWorth(param0: Address): ethereum.CallResult<BigInt> {
+  try_getUserTotalWorth(account: Address): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
       "getUserTotalWorth",
       "getUserTotalWorth(address):(uint256)",
-      [ethereum.Value.fromAddress(param0)]
+      [ethereum.Value.fromAddress(account)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -1040,82 +924,44 @@ export class OptionManager extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  getWhiteList(): Array<Address> {
-    let result = super.call("getWhiteList", "getWhiteList():(address[])", []);
+  implementationVersion(): BigInt {
+    let result = super.call(
+      "implementationVersion",
+      "implementationVersion():(uint256)",
+      []
+    );
 
-    return result[0].toAddressArray();
+    return result[0].toBigInt();
   }
 
-  try_getWhiteList(): ethereum.CallResult<Array<Address>> {
+  try_implementationVersion(): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
-      "getWhiteList",
-      "getWhiteList():(address[])",
+      "implementationVersion",
+      "implementationVersion():(uint256)",
       []
     );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddressArray());
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  implementation(): Address {
-    let result = super.call("implementation", "implementation():(address)", []);
-
-    return result[0].toAddress();
-  }
-
-  try_implementation(): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "implementation",
-      "implementation():(address)",
-      []
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  isEligibleAddress(tmpAddress: Address): boolean {
+  isInputAmountInRange(amount: BigInt): boolean {
     let result = super.call(
-      "isEligibleAddress",
-      "isEligibleAddress(address):(bool)",
-      [ethereum.Value.fromAddress(tmpAddress)]
+      "isInputAmountInRange",
+      "isInputAmountInRange(uint256):(bool)",
+      [ethereum.Value.fromUnsignedBigInt(amount)]
     );
 
     return result[0].toBoolean();
   }
 
-  try_isEligibleAddress(tmpAddress: Address): ethereum.CallResult<boolean> {
-    let result = super.tryCall(
-      "isEligibleAddress",
-      "isEligibleAddress(address):(bool)",
-      [ethereum.Value.fromAddress(tmpAddress)]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBoolean());
-  }
-
-  isInputAmountInRange(Amount: BigInt): boolean {
-    let result = super.call(
-      "isInputAmountInRange",
-      "isInputAmountInRange(uint256):(bool)",
-      [ethereum.Value.fromUnsignedBigInt(Amount)]
-    );
-
-    return result[0].toBoolean();
-  }
-
-  try_isInputAmountInRange(Amount: BigInt): ethereum.CallResult<boolean> {
+  try_isInputAmountInRange(amount: BigInt): ethereum.CallResult<boolean> {
     let result = super.tryCall(
       "isInputAmountInRange",
       "isInputAmountInRange(uint256):(bool)",
-      [ethereum.Value.fromUnsignedBigInt(Amount)]
+      [ethereum.Value.fromUnsignedBigInt(amount)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -1139,6 +985,66 @@ export class OptionManager extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBoolean());
   }
 
+  maxPriceRate(): BigInt {
+    let result = super.call("maxPriceRate", "maxPriceRate():(uint256)", []);
+
+    return result[0].toBigInt();
+  }
+
+  try_maxPriceRate(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall("maxPriceRate", "maxPriceRate():(uint256)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  minPriceRate(): BigInt {
+    let result = super.call("minPriceRate", "minPriceRate():(uint256)", []);
+
+    return result[0].toBigInt();
+  }
+
+  try_minPriceRate(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall("minPriceRate", "minPriceRate():(uint256)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  optionsPool(): Address {
+    let result = super.call("optionsPool", "optionsPool():(address)", []);
+
+    return result[0].toAddress();
+  }
+
+  try_optionsPool(): ethereum.CallResult<Address> {
+    let result = super.tryCall("optionsPool", "optionsPool():(address)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  optionsPrice(): Address {
+    let result = super.call("optionsPrice", "optionsPrice():(address)", []);
+
+    return result[0].toAddress();
+  }
+
+  try_optionsPrice(): ethereum.CallResult<Address> {
+    let result = super.tryCall("optionsPrice", "optionsPrice():(address)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
   owner(): Address {
     let result = super.call("owner", "owner():(address)", []);
 
@@ -1154,48 +1060,93 @@ export class OptionManager extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
-  removeWhiteList(removeAddress: Address): boolean {
+  ownerExpiredTime(): BigInt {
     let result = super.call(
-      "removeWhiteList",
-      "removeWhiteList(address):(bool)",
-      [ethereum.Value.fromAddress(removeAddress)]
+      "ownerExpiredTime",
+      "ownerExpiredTime():(uint256)",
+      []
     );
 
-    return result[0].toBoolean();
+    return result[0].toBigInt();
   }
 
-  try_removeWhiteList(removeAddress: Address): ethereum.CallResult<boolean> {
+  try_ownerExpiredTime(): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
-      "removeWhiteList",
-      "removeWhiteList(address):(bool)",
-      [ethereum.Value.fromAddress(removeAddress)]
+      "ownerExpiredTime",
+      "ownerExpiredTime():(uint256)",
+      []
     );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBoolean());
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  userInputCollateral(param0: Address, param1: Address): BigInt {
+  pptCoin(): Address {
+    let result = super.call("pptCoin", "pptCoin():(address)", []);
+
+    return result[0].toAddress();
+  }
+
+  try_pptCoin(): ethereum.CallResult<Address> {
+    let result = super.tryCall("pptCoin", "pptCoin():(address)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  txOrigin(): Address {
+    let result = super.call("txOrigin", "txOrigin():(address)", []);
+
+    return result[0].toAddress();
+  }
+
+  try_txOrigin(): ethereum.CallResult<Address> {
+    let result = super.tryCall("txOrigin", "txOrigin():(address)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  userInputCollateral(user: Address, collateral: Address): BigInt {
     let result = super.call(
       "userInputCollateral",
       "userInputCollateral(address,address):(uint256)",
-      [ethereum.Value.fromAddress(param0), ethereum.Value.fromAddress(param1)]
+      [ethereum.Value.fromAddress(user), ethereum.Value.fromAddress(collateral)]
     );
 
     return result[0].toBigInt();
   }
 
   try_userInputCollateral(
-    param0: Address,
-    param1: Address
+    user: Address,
+    collateral: Address
   ): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
       "userInputCollateral",
       "userInputCollateral(address,address):(uint256)",
-      [ethereum.Value.fromAddress(param0), ethereum.Value.fromAddress(param1)]
+      [ethereum.Value.fromAddress(user), ethereum.Value.fromAddress(collateral)]
     );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  version(): BigInt {
+    let result = super.call("version", "version():(uint256)", []);
+
+    return result[0].toBigInt();
+  }
+
+  try_version(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall("version", "version():(uint256)", []);
     if (result.reverted) {
       return new ethereum.CallResult();
     }
@@ -1221,28 +1172,8 @@ export class ConstructorCall__Inputs {
     this._call = call;
   }
 
-  get implementation_(): Address {
+  get multiSignature(): Address {
     return this._call.inputValues[0].value.toAddress();
-  }
-
-  get oracleAddr(): Address {
-    return this._call.inputValues[1].value.toAddress();
-  }
-
-  get optionsPriceAddr(): Address {
-    return this._call.inputValues[2].value.toAddress();
-  }
-
-  get optionsPoolAddr(): Address {
-    return this._call.inputValues[3].value.toAddress();
-  }
-
-  get collateralPoolAddr(): Address {
-    return this._call.inputValues[4].value.toAddress();
-  }
-
-  get FPTCoinAddr(): Address {
-    return this._call.inputValues[5].value.toAddress();
   }
 }
 
@@ -1271,71 +1202,7 @@ export class AddCollateralCall__Inputs {
     this._call = call;
   }
 
-  get value0(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-
-  get value1(): BigInt {
-    return this._call.inputValues[1].value.toBigInt();
-  }
-}
-
-export class AddCollateralCall__Outputs {
-  _call: AddCollateralCall;
-
-  constructor(call: AddCollateralCall) {
-    this._call = call;
-  }
-}
-
-export class AddWhiteListCall extends ethereum.Call {
-  get inputs(): AddWhiteListCall__Inputs {
-    return new AddWhiteListCall__Inputs(this);
-  }
-
-  get outputs(): AddWhiteListCall__Outputs {
-    return new AddWhiteListCall__Outputs(this);
-  }
-}
-
-export class AddWhiteListCall__Inputs {
-  _call: AddWhiteListCall;
-
-  constructor(call: AddWhiteListCall) {
-    this._call = call;
-  }
-
-  get addAddress(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-}
-
-export class AddWhiteListCall__Outputs {
-  _call: AddWhiteListCall;
-
-  constructor(call: AddWhiteListCall) {
-    this._call = call;
-  }
-}
-
-export class ApproveCall extends ethereum.Call {
-  get inputs(): ApproveCall__Inputs {
-    return new ApproveCall__Inputs(this);
-  }
-
-  get outputs(): ApproveCall__Outputs {
-    return new ApproveCall__Outputs(this);
-  }
-}
-
-export class ApproveCall__Inputs {
-  _call: ApproveCall;
-
-  constructor(call: ApproveCall) {
-    this._call = call;
-  }
-
-  get spender(): Address {
+  get collateral(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 
@@ -1344,10 +1211,10 @@ export class ApproveCall__Inputs {
   }
 }
 
-export class ApproveCall__Outputs {
-  _call: ApproveCall;
+export class AddCollateralCall__Outputs {
+  _call: AddCollateralCall;
 
-  constructor(call: ApproveCall) {
+  constructor(call: AddCollateralCall) {
     this._call = call;
   }
 }
@@ -1369,31 +1236,31 @@ export class BuyOptionCall__Inputs {
     this._call = call;
   }
 
-  get value0(): Address {
+  get settlement(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 
-  get value1(): BigInt {
+  get settlementAmount(): BigInt {
     return this._call.inputValues[1].value.toBigInt();
   }
 
-  get value2(): BigInt {
+  get strikePrice(): BigInt {
     return this._call.inputValues[2].value.toBigInt();
   }
 
-  get value3(): BigInt {
+  get underlying(): BigInt {
     return this._call.inputValues[3].value.toBigInt();
   }
 
-  get value4(): BigInt {
+  get expiration(): BigInt {
     return this._call.inputValues[4].value.toBigInt();
   }
 
-  get value5(): BigInt {
+  get amount(): BigInt {
     return this._call.inputValues[5].value.toBigInt();
   }
 
-  get value6(): i32 {
+  get optType(): i32 {
     return this._call.inputValues[6].value.toI32();
   }
 }
@@ -1403,40 +1270,6 @@ export class BuyOptionCall__Outputs {
 
   constructor(call: BuyOptionCall) {
     this._call = call;
-  }
-}
-
-export class DelegateToImplementationCall extends ethereum.Call {
-  get inputs(): DelegateToImplementationCall__Inputs {
-    return new DelegateToImplementationCall__Inputs(this);
-  }
-
-  get outputs(): DelegateToImplementationCall__Outputs {
-    return new DelegateToImplementationCall__Outputs(this);
-  }
-}
-
-export class DelegateToImplementationCall__Inputs {
-  _call: DelegateToImplementationCall;
-
-  constructor(call: DelegateToImplementationCall) {
-    this._call = call;
-  }
-
-  get data(): Bytes {
-    return this._call.inputValues[0].value.toBytes();
-  }
-}
-
-export class DelegateToImplementationCall__Outputs {
-  _call: DelegateToImplementationCall;
-
-  constructor(call: DelegateToImplementationCall) {
-    this._call = call;
-  }
-
-  get value0(): Bytes {
-    return this._call.outputValues[0].value.toBytes();
   }
 }
 
@@ -1457,11 +1290,11 @@ export class ExerciseOptionCall__Inputs {
     this._call = call;
   }
 
-  get value0(): BigInt {
+  get optionsId(): BigInt {
     return this._call.inputValues[0].value.toBigInt();
   }
 
-  get value1(): BigInt {
+  get amount(): BigInt {
     return this._call.inputValues[1].value.toBigInt();
   }
 }
@@ -1470,6 +1303,86 @@ export class ExerciseOptionCall__Outputs {
   _call: ExerciseOptionCall;
 
   constructor(call: ExerciseOptionCall) {
+    this._call = call;
+  }
+}
+
+export class InitAddressesCall extends ethereum.Call {
+  get inputs(): InitAddressesCall__Inputs {
+    return new InitAddressesCall__Inputs(this);
+  }
+
+  get outputs(): InitAddressesCall__Outputs {
+    return new InitAddressesCall__Outputs(this);
+  }
+}
+
+export class InitAddressesCall__Inputs {
+  _call: InitAddressesCall;
+
+  constructor(call: InitAddressesCall) {
+    this._call = call;
+  }
+
+  get collateral(): Array<Address> {
+    return this._call.inputValues[0].value.toAddressArray();
+  }
+
+  get rate(): Array<BigInt> {
+    return this._call.inputValues[1].value.toBigIntArray();
+  }
+
+  get oracleAddr(): Address {
+    return this._call.inputValues[2].value.toAddress();
+  }
+
+  get optionsPriceAddr(): Address {
+    return this._call.inputValues[3].value.toAddress();
+  }
+
+  get optionsPoolAddr(): Address {
+    return this._call.inputValues[4].value.toAddress();
+  }
+
+  get collateralPoolAddr(): Address {
+    return this._call.inputValues[5].value.toAddress();
+  }
+
+  get PPTCoinAddr(): Address {
+    return this._call.inputValues[6].value.toAddress();
+  }
+}
+
+export class InitAddressesCall__Outputs {
+  _call: InitAddressesCall;
+
+  constructor(call: InitAddressesCall) {
+    this._call = call;
+  }
+}
+
+export class InitializeCall extends ethereum.Call {
+  get inputs(): InitializeCall__Inputs {
+    return new InitializeCall__Inputs(this);
+  }
+
+  get outputs(): InitializeCall__Outputs {
+    return new InitializeCall__Outputs(this);
+  }
+}
+
+export class InitializeCall__Inputs {
+  _call: InitializeCall;
+
+  constructor(call: InitializeCall) {
+    this._call = call;
+  }
+}
+
+export class InitializeCall__Outputs {
+  _call: InitializeCall;
+
+  constructor(call: InitializeCall) {
     this._call = call;
   }
 }
@@ -1525,11 +1438,11 @@ export class RedeemCollateralCall__Inputs {
     this._call = call;
   }
 
-  get value0(): BigInt {
+  get tokenAmount(): BigInt {
     return this._call.inputValues[0].value.toBigInt();
   }
 
-  get value1(): Address {
+  get collateral(): Address {
     return this._call.inputValues[1].value.toAddress();
   }
 }
@@ -1538,100 +1451,6 @@ export class RedeemCollateralCall__Outputs {
   _call: RedeemCollateralCall;
 
   constructor(call: RedeemCollateralCall) {
-    this._call = call;
-  }
-}
-
-export class RemoveWhiteListCall extends ethereum.Call {
-  get inputs(): RemoveWhiteListCall__Inputs {
-    return new RemoveWhiteListCall__Inputs(this);
-  }
-
-  get outputs(): RemoveWhiteListCall__Outputs {
-    return new RemoveWhiteListCall__Outputs(this);
-  }
-}
-
-export class RemoveWhiteListCall__Inputs {
-  _call: RemoveWhiteListCall;
-
-  constructor(call: RemoveWhiteListCall) {
-    this._call = call;
-  }
-
-  get removeAddress(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-}
-
-export class RemoveWhiteListCall__Outputs {
-  _call: RemoveWhiteListCall;
-
-  constructor(call: RemoveWhiteListCall) {
-    this._call = call;
-  }
-
-  get value0(): boolean {
-    return this._call.outputValues[0].value.toBoolean();
-  }
-}
-
-export class RenounceOwnershipCall extends ethereum.Call {
-  get inputs(): RenounceOwnershipCall__Inputs {
-    return new RenounceOwnershipCall__Inputs(this);
-  }
-
-  get outputs(): RenounceOwnershipCall__Outputs {
-    return new RenounceOwnershipCall__Outputs(this);
-  }
-}
-
-export class RenounceOwnershipCall__Inputs {
-  _call: RenounceOwnershipCall;
-
-  constructor(call: RenounceOwnershipCall) {
-    this._call = call;
-  }
-}
-
-export class RenounceOwnershipCall__Outputs {
-  _call: RenounceOwnershipCall;
-
-  constructor(call: RenounceOwnershipCall) {
-    this._call = call;
-  }
-}
-
-export class SellOptionCall extends ethereum.Call {
-  get inputs(): SellOptionCall__Inputs {
-    return new SellOptionCall__Inputs(this);
-  }
-
-  get outputs(): SellOptionCall__Outputs {
-    return new SellOptionCall__Outputs(this);
-  }
-}
-
-export class SellOptionCall__Inputs {
-  _call: SellOptionCall;
-
-  constructor(call: SellOptionCall) {
-    this._call = call;
-  }
-
-  get value0(): BigInt {
-    return this._call.inputValues[0].value.toBigInt();
-  }
-
-  get value1(): BigInt {
-    return this._call.inputValues[1].value.toBigInt();
-  }
-}
-
-export class SellOptionCall__Outputs {
-  _call: SellOptionCall;
-
-  constructor(call: SellOptionCall) {
     this._call = call;
   }
 }
@@ -1653,7 +1472,7 @@ export class SetCollateralPoolAddressCall__Inputs {
     this._call = call;
   }
 
-  get collateralPool(): Address {
+  get _collateralPool(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 }
@@ -1683,11 +1502,11 @@ export class SetCollateralRateCall__Inputs {
     this._call = call;
   }
 
-  get value0(): Address {
+  get collateral(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 
-  get value1(): BigInt {
+  get colRate(): BigInt {
     return this._call.inputValues[1].value.toBigInt();
   }
 }
@@ -1696,36 +1515,6 @@ export class SetCollateralRateCall__Outputs {
   _call: SetCollateralRateCall;
 
   constructor(call: SetCollateralRateCall) {
-    this._call = call;
-  }
-}
-
-export class SetFPTCoinAddressCall extends ethereum.Call {
-  get inputs(): SetFPTCoinAddressCall__Inputs {
-    return new SetFPTCoinAddressCall__Inputs(this);
-  }
-
-  get outputs(): SetFPTCoinAddressCall__Outputs {
-    return new SetFPTCoinAddressCall__Outputs(this);
-  }
-}
-
-export class SetFPTCoinAddressCall__Inputs {
-  _call: SetFPTCoinAddressCall;
-
-  constructor(call: SetFPTCoinAddressCall) {
-    this._call = call;
-  }
-
-  get FPTCoinAddr(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-}
-
-export class SetFPTCoinAddressCall__Outputs {
-  _call: SetFPTCoinAddressCall;
-
-  constructor(call: SetFPTCoinAddressCall) {
     this._call = call;
   }
 }
@@ -1756,36 +1545,6 @@ export class SetHaltCall__Outputs {
   _call: SetHaltCall;
 
   constructor(call: SetHaltCall) {
-    this._call = call;
-  }
-}
-
-export class SetImplementationCall extends ethereum.Call {
-  get inputs(): SetImplementationCall__Inputs {
-    return new SetImplementationCall__Inputs(this);
-  }
-
-  get outputs(): SetImplementationCall__Outputs {
-    return new SetImplementationCall__Outputs(this);
-  }
-}
-
-export class SetImplementationCall__Inputs {
-  _call: SetImplementationCall;
-
-  constructor(call: SetImplementationCall) {
-    this._call = call;
-  }
-
-  get implementation_(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-}
-
-export class SetImplementationCall__Outputs {
-  _call: SetImplementationCall;
-
-  constructor(call: SetImplementationCall) {
     this._call = call;
   }
 }
@@ -1841,7 +1600,7 @@ export class SetOptionsPoolAddressCall__Inputs {
     this._call = call;
   }
 
-  get optionsPool(): Address {
+  get _optionsPool(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 }
@@ -1871,7 +1630,7 @@ export class SetOptionsPriceAddressCall__Inputs {
     this._call = call;
   }
 
-  get optionsPrice(): Address {
+  get _optionsPrice(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 }
@@ -1931,11 +1690,11 @@ export class SetPriceRateRangeCall__Inputs {
     this._call = call;
   }
 
-  get value0(): BigInt {
+  get _minPriceRate(): BigInt {
     return this._call.inputValues[0].value.toBigInt();
   }
 
-  get value1(): BigInt {
+  get _maxPriceRate(): BigInt {
     return this._call.inputValues[1].value.toBigInt();
   }
 }
@@ -1948,32 +1707,32 @@ export class SetPriceRateRangeCall__Outputs {
   }
 }
 
-export class SetValidCall extends ethereum.Call {
-  get inputs(): SetValidCall__Inputs {
-    return new SetValidCall__Inputs(this);
+export class TransferOriginCall extends ethereum.Call {
+  get inputs(): TransferOriginCall__Inputs {
+    return new TransferOriginCall__Inputs(this);
   }
 
-  get outputs(): SetValidCall__Outputs {
-    return new SetValidCall__Outputs(this);
+  get outputs(): TransferOriginCall__Outputs {
+    return new TransferOriginCall__Outputs(this);
   }
 }
 
-export class SetValidCall__Inputs {
-  _call: SetValidCall;
+export class TransferOriginCall__Inputs {
+  _call: TransferOriginCall;
 
-  constructor(call: SetValidCall) {
+  constructor(call: TransferOriginCall) {
     this._call = call;
   }
 
-  get _bValid(): boolean {
-    return this._call.inputValues[0].value.toBoolean();
+  get _newOrigin(): Address {
+    return this._call.inputValues[0].value.toAddress();
   }
 }
 
-export class SetValidCall__Outputs {
-  _call: SetValidCall;
+export class TransferOriginCall__Outputs {
+  _call: TransferOriginCall;
 
-  constructor(call: SetValidCall) {
+  constructor(call: TransferOriginCall) {
     this._call = call;
   }
 }
@@ -1995,7 +1754,7 @@ export class TransferOwnershipCall__Inputs {
     this._call = call;
   }
 
-  get newOwner(): Address {
+  get _newOwner(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 }
@@ -2004,6 +1763,32 @@ export class TransferOwnershipCall__Outputs {
   _call: TransferOwnershipCall;
 
   constructor(call: TransferOwnershipCall) {
+    this._call = call;
+  }
+}
+
+export class UpdateCall extends ethereum.Call {
+  get inputs(): UpdateCall__Inputs {
+    return new UpdateCall__Inputs(this);
+  }
+
+  get outputs(): UpdateCall__Outputs {
+    return new UpdateCall__Outputs(this);
+  }
+}
+
+export class UpdateCall__Inputs {
+  _call: UpdateCall;
+
+  constructor(call: UpdateCall) {
+    this._call = call;
+  }
+}
+
+export class UpdateCall__Outputs {
+  _call: UpdateCall;
+
+  constructor(call: UpdateCall) {
     this._call = call;
   }
 }

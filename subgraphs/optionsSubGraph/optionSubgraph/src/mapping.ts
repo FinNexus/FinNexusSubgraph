@@ -30,8 +30,6 @@ import {
     CollateralPool,
     AddFee,
     OwnershipTransferred,
-    RedeemFee,
-    TransferPayback
 } from "../generated/templates/CollateralPool/CollateralPool"
 
 import {
@@ -63,7 +61,9 @@ import {
     EntityActiveOption
 } from "../generated/schema"
 
-let ONE_DAY_SECONDS = BigInt.fromI32(3600*24);
+//let ONE_DAY_SECONDS = BigInt.fromI32(3600*24);
+
+let ONE_DAY_SECONDS = BigInt.fromI32(10);
 
 export function handleCreateOptionsManager(event: CreateOptionsManager): void {
 
@@ -155,6 +155,7 @@ export function handleExerciseOption(event: ExerciseOption): void {
 }
 
 export function handleBlock(block: ethereum.Block): void {
+
    let intid = block.timestamp.div(ONE_DAY_SECONDS);
    let dayStart = intid.times(ONE_DAY_SECONDS);
    let dayEnd = (intid.plus(BigInt.fromI32(1))).times(ONE_DAY_SECONDS);
@@ -171,191 +172,198 @@ export function handleBlock(block: ethereum.Block): void {
        let managerlen =factorysc.getOptionsMangerLength();
 
        for (let i=0;i<managerlen.toI32();i++) {
+             let alladdress = factorysc.getOptionsMangerAddress(BigInt.fromI32(i))
+             let managerAddess = alladdress.value0;
+             let managersc = OptionManager.bind(managerAddess);
 
-         let alladdress = factorysc.getOptionsMangerAddress(BigInt.fromI32(i))
-         let managerAddess = alladdress.value0;
-         let managersc = OptionManager.bind(managerAddess);
+             let colPoolAddress = alladdress.value1;
+             let colpoolsc = CollateralPool.bind(colPoolAddress);
 
-         let optionPoolAssress = managersc.getCollateralPoolAddress();
-         let optionpoolsc = OptionPool.bind(optionPoolAssress);
+             let optionPoolAssress = alladdress.value2;
+             let optionpoolsc = OptionPool.bind(optionPoolAssress);
 
-         let colPoolAddress = managersc.getCollateralPoolAddress();
-         let colpoolsc = CollateralPool.bind(colPoolAddress);
+             let oracleAddress = managersc.getOracleAddress();
+             oraclesc = OptionOracle.bind(oracleAddress);
+             log.debug("optionmanager={},optionPool{},colPool{}",
+                       [managerAddess.toHex(),optionPoolAssress.toHex(),colPoolAddress.toHex()]);
+             let tokens = managersc.getCollateralWhiteList();
+             for (let i=0;i<tokens.length;i++) {
+                log.debug("token[i{}]={}",[BigInt.fromI32(i).toString(),tokens[i].toHex()])
+                // token address + timeid as key
+                let pooltokenid = tokens[i].toHex()+id;
+                let entityPoolTLV = EntityPoolTLV.load(pooltokenid);
+                if(entityPoolTLV==null) {
+                    entityPoolTLV = new EntityPoolTLV(pooltokenid);
+                    entityPoolTLV.TimeStamp = block.timestamp;
+                    entityPoolTLV.Token = tokens[i];
+                }
+                log.debug("token step2",[]);
+                entityPoolTLV.Amout = entityPoolTLV.Amout.plus(colpoolsc.getCollateralBalance(tokens[i]));
+                let tkprice = oraclesc.getPrice(tokens[i]);
+                entityPoolTLV.UsdValue = entityPoolTLV.UsdValue.plus(entityPoolTLV.Amout.times(tkprice));
+                entityPoolTLV.save();
 
-         let oracleAddress = managersc.getOracleAddress();
-         oraclesc = OptionOracle.bind(oracleAddress);
+                let entityFee = EntityFee.load(tokens[i].toHex()+id);
+                if(entityFee==null) {
+                    entityFee = new EntityFee(tokens[i].toHex()+id);
+                    entityFee.TimeStamp = block.timestamp;
+                    entityFee.Token = tokens[i];
+                    entityFee.save();
+                }
+                 log.debug("token step3",[]);
+                let entityPremium = EntityPremium.load(tokens[i].toHex()+id);
+                if(entityPremium==null) {
+                    entityPremium = new EntityPremium(tokens[i].toHex() + id);
+                    entityPremium.TimeStamp = block.timestamp;
+                    entityPremium.Token = tokens[i];
+                    entityPremium.save();
+                }
+             }//whitelist token[] end
 
-         let tokens = managersc.getWhiteList();
-         for (let i=0;i<tokens.length;i++) {
-            // token address + timeid as key
-            let pooltokenid = tokens[i].toHex()+id;
-            let entityPoolTLV = EntityPoolTLV.load(pooltokenid);
-            if(entityPoolTLV==null) {
-                entityPoolTLV = new EntityPoolTLV(pooltokenid);
-                entityPoolTLV.TimeStamp = block.timestamp;
-                entityPoolTLV.Token = tokens[i];
-            }
-            entityPoolTLV.Amout = entityPoolTLV.Amout.plus(colpoolsc.getCollateralBalance(tokens[i]));
-            let tkprice = oraclesc.getPrice(tokens[i]);
-            entityPoolTLV.UsdValue = entityPoolTLV.UsdValue.plus(entityPoolTLV.Amout.times(tkprice));
-            entityPoolTLV.save();
 
-            let entityFee = EntityFee.load(tokens[i].toHex()+id);
-            if(entityFee==null) {
-                entityFee = new EntityFee(tokens[i].toHex()+id);
-                entityFee.TimeStamp = block.timestamp;
-                entityFee.Token = tokens[i];
-                entityFee.save();
-            }
+            /*
+            entityTotalTLV.TotalUsdValue = entityTotalTLV.TotalUsdValue.plus(colpoolsc.getRealBalance(tokens[i]));
+            entityTotalTLV.save();
 
-            let entityPremium = EntityPremium.load(tokens[i].toHex()+id);
-            if(entityPremium==null) {
-                entityPremium = new EntityPremium(tokens[i].toHex() + id);
-                entityPremium.TimeStamp = block.timestamp;
-                entityPremium.Token = tokens[i];
-                entityPremium.save();
-            }
-         }//whitelist token[] end
+            let entityNetWorth = new EntityNetWorth(id);
+            entityNetWorth.TimeStamp = block.timestamp;
+            entityNetWorth.Pool = managerAddess;
+            entityNetWorth.NetWorth = managersc.getTokenNetworth();
+            entityNetWorth.save();
+            */
 
-         entityTotalTLV.TotalUsdValue = entityTotalTLV.TotalUsdValue.plus(colpoolsc.getRealBalance(tokens[i]));
+            /*
+            let optionlen = optionpoolsc.getOptionInfoLength().toI32();
+            for(let j=optionlen-1;i>0;j--) {
+                let k = BigInt.fromI32(j);
+                let pooloptionid = BigInt.fromI32(i).toHex() +k.toHex();
+                //(optionsId 0,info.owner 1,
+                // info.optType 2,
+                // info.underlying 3
+                // info.createTime+info.expiration 4
+                // info.strikePrice 5,info.amount 6)
+                let optinfo = optionpoolsc.getOptionsById(k);
+                // 0 info.settlement
+                // 1 info.settlePrice,
+                // 2 (info.strikePrice*info.priceRate)>>28,
+                // 3 info.optionsPrice,
+                // 4 info.iv)
+                let extrainfo = optionpoolsc.getOptionsExtraById(k);
+                if(optinfo.value4.gt(block.timestamp)) {
+                    //poolid+optionid as key
+                    let entityActiveOption = EntityActiveOption.load(pooloptionid);
+                    if (entityActiveOption == null) {
+                        entityActiveOption = new EntityActiveOption(pooloptionid);
+                    }
+                    entityActiveOption.Underlying = optinfo.value3;
+                    entityActiveOption.TimeStamp = block.timestamp;
+                    let usdvalue = optinfo.value6.times(extrainfo.value3);
+                    //accumulate amount in one day
+                    if (optinfo.value4.lt(dayEnd) &&
+                        optinfo.value4.ge(dayStart)) {
+                        if (optinfo.value2 == 0) {
+                            entityActiveOption.CallAmount = entityActiveOption.CallAmount.plus(optinfo.value6);
+                            entityActiveOption.CallUsdValue = entityActiveOption.CallUsdValue.plus(usdvalue);
+                        } else {
+                            entityActiveOption.PutAmount = entityActiveOption.PutAmount.plus(optinfo.value6);
+                            entityActiveOption.PutUsdValue = entityActiveOption.PutUsdValue.plus(usdvalue);
+                        }
+                    }
+                    entityActiveOption.save();
 
-         let entityNetWorth = new EntityNetWorth(id);
-         entityNetWorth.TimeStamp = block.timestamp;
-         entityNetWorth.Pool = managerAddess;
-         entityNetWorth.NetWorth = managersc.getTokenNetworth();
-         entityNetWorth.save();
+                }//active option caculation
 
-         let optionlen = optionpoolsc.getOptionInfoLength().toI32();
-         for(let j=optionlen-1;i>0;j--) {
-             let k = BigInt.fromI32(j);
-             let pooloptionid = BigInt.fromI32(i).toHex() +k.toHex();
-             //(optionsId 0,info.owner 1,
-             // info.optType 2,
-             // info.underlying 3
-             // info.createTime+info.expiration 4
-             // info.strikePrice 5,info.amount 6)
-             let optinfo = optionpoolsc.getOptionsById(k);
-             // 0 info.settlement
-             // 1 info.settlePrice,
-             // 2 (info.strikePrice*info.priceRate)>>28,
-             // 3 info.optionsPrice,
-             // 4 info.iv)
-             let extrainfo = optionpoolsc.getOptionsExtraById(k);
-             if(optinfo.value4.gt(block.timestamp)) {
-                 //poolid+optionid as key
-                 let entityActiveOption = EntityActiveOption.load(pooloptionid);
-                 if (entityActiveOption == null) {
-                     entityActiveOption = new EntityActiveOption(pooloptionid);
-                 }
-                 entityActiveOption.Underlying = optinfo.value3;
-                 entityActiveOption.TimeStamp = block.timestamp;
-                 let usdvalue = optinfo.value6.times(extrainfo.value3);
-                 //accumulate amount in one day
-                 if (optinfo.value4.lt(dayEnd) &&
-                     optinfo.value4.ge(dayStart)) {
-                     if (optinfo.value2 == 0) {
-                         entityActiveOption.CallAmount = entityActiveOption.CallAmount.plus(optinfo.value6);
-                         entityActiveOption.CallUsdValue = entityActiveOption.CallUsdValue.plus(usdvalue);
-                     } else {
-                         entityActiveOption.PutAmount = entityActiveOption.PutAmount.plus(optinfo.value6);
-                         entityActiveOption.PutUsdValue = entityActiveOption.PutUsdValue.plus(usdvalue);
-                     }
-                 }
-                 entityActiveOption.save();
+                //poolid+optionid as key
+                let entityoption = EntityOptionItem.load(pooloptionid);
+                if(entityoption==null) {
+                    let entityBuyIdHash = EntityBuyOptionHashId.load(optionPoolAssress.toHex()+k.toHex());
+                    if (entityBuyIdHash == null) {
+                        continue;
+                    }
+                    let entityBuyOptionItem = EntityBuyOptionItem.load(entityBuyIdHash.BuyHash);
+                    if (entityBuyOptionItem == null) {
+                        continue;
+                    }
+                    //supplement missing field value from event
+                    entityBuyOptionItem.Settlement = extrainfo.value0;
+                    entityBuyOptionItem.UnderLyingPrice = extrainfo.value2;
+                    entityBuyOptionItem.CurrentWorth = entityBuyOptionItem.Amount.times(extrainfo.value3);
+                    entityBuyOptionItem.save();
 
-             }//active option caculation
+                    let entityexcercisehash = EntityExcerciseOptionHashId.load(managerAddess.toHex()+k.toHex());
+                    let entityexcerciseitem = EntityExcerciseOptionItem.load(entityexcercisehash.id)
 
-             //poolid+optionid as key
-             let entityoption = EntityOptionItem.load(pooloptionid);
-             if(entityoption==null) {
-                 let entityBuyIdHash = EntityBuyOptionHashId.load(optionPoolAssress.toHex()+k.toHex());
-                 if (entityBuyIdHash == null) {
-                     continue;
-                 }
-                 let entityBuyOptionItem = EntityBuyOptionItem.load(entityBuyIdHash.BuyHash);
-                 if (entityBuyOptionItem == null) {
-                     continue;
-                 }
-                 //supplement missing field value from event
-                 entityBuyOptionItem.Settlement = extrainfo.value0;
-                 entityBuyOptionItem.UnderLyingPrice = extrainfo.value2;
-                 entityBuyOptionItem.CurrentWorth = entityBuyOptionItem.Amount.times(extrainfo.value3);
-                 entityBuyOptionItem.save();
+                    let entityOptionItem = EntityOptionItem.load(pooloptionid);
+                    if(entityOptionItem==null) {
+                        entityOptionItem = new EntityOptionItem(pooloptionid);
+                    }
 
-                 let entityexcercisehash = EntityExcerciseOptionHashId.load(managerAddess.toHex()+k.toHex());
-                 let entityexcerciseitem = EntityExcerciseOptionItem.load(entityexcercisehash.id)
+                    entityOptionItem.Date = entityBuyOptionItem.CreatedTime;
+                    entityOptionItem.Amount = optinfo.value6;//amount
+                    entityOptionItem.UnderlyingAssets = optinfo.value3 //underlying
+                    entityOptionItem.Type = BigInt.fromI32(optinfo.value2);
+                    entityOptionItem.UsdValue = entityBuyOptionItem.CurrentWorth;
+                    entityOptionItem.StrikePrice = entityBuyOptionItem.StrikePrice;
+                    let optionpayusd = entityBuyOptionItem.OptionPrice.times(entityBuyOptionItem.Amount);
+                    let feeusd = entityBuyOptionItem.Fee.times(extrainfo.value1);
+                    let premium = optionpayusd.plus(feeusd);
+                    entityOptionItem.Premium = premium;
+                    //Status: String!
+                    if(entityOptionItem.Amount.equals(BigInt.fromI32(0))) {
+                        entityOptionItem.Status = "Excercised";
+                        if(entityexcerciseitem!=null) {
+                            entityOptionItem.PL = entityexcerciseitem.ExerciseBack.minus(premium);
+                        } else {
+                            entityOptionItem.PL = BigInt.fromI32(0)
+                        }
+                    } else {
+                        if(entityexcerciseitem==null) {
+                            if (optinfo.value4.ge(block.timestamp)) {
+                                entityOptionItem.Status = "Active";
+                            } else {
+                                entityOptionItem.Status = "Expired";
+                            }
+                            entityOptionItem.PL = BigInt.fromI32(0).minus(premium);
+                        } else {
+                            entityOptionItem.PL = entityexcerciseitem.ExerciseBack.minus(premium);
+                        }
+                    }
 
-                 let entityOptionItem = EntityOptionItem.load(pooloptionid);
-                 if(entityOptionItem==null) {
-                     entityOptionItem = new EntityOptionItem(pooloptionid);
-                 }
+                    entityOptionItem.save();
 
-                 entityOptionItem.Date = entityBuyOptionItem.CreatedTime;
-                 entityOptionItem.Amount = optinfo.value6;//amount
-                 entityOptionItem.UnderlyingAssets = optinfo.value3 //underlying
-                 entityOptionItem.Type = BigInt.fromI32(optinfo.value2);
-                 entityOptionItem.UsdValue = entityBuyOptionItem.CurrentWorth;
-                 entityOptionItem.StrikePrice = entityBuyOptionItem.StrikePrice;
-                 let optionpayusd = entityBuyOptionItem.OptionPrice.times(entityBuyOptionItem.Amount);
-                 let feeusd = entityBuyOptionItem.Fee.times(extrainfo.value1);
-                 let premium = optionpayusd.plus(feeusd);
-                 entityOptionItem.Premium = premium;
-                 //Status: String!
-                 if(entityOptionItem.Amount.equals(BigInt.fromI32(0))) {
-                     entityOptionItem.Status = "Excercised";
-                     if(entityexcerciseitem!=null) {
-                         entityOptionItem.PL = entityexcerciseitem.ExerciseBack.minus(premium);
-                     } else {
-                         entityOptionItem.PL = BigInt.fromI32(0)
-                     }
-                 } else {
-                     if(entityexcerciseitem==null) {
-                         if (optinfo.value4.ge(block.timestamp)) {
-                             entityOptionItem.Status = "Active";
-                         } else {
-                             entityOptionItem.Status = "Expired";
-                         }
-                         entityOptionItem.PL = BigInt.fromI32(0).minus(premium);
-                     } else {
-                         entityOptionItem.PL = entityexcerciseitem.ExerciseBack.minus(premium);
-                     }
-                 }
+                    let entityPremium = EntityPremium.load(extrainfo.value0.toHex()+id);
+                    if(entityPremium!=null) {
+                        if (optinfo.value2 == 0) {
+                            entityPremium.CallUsdValue = entityPremium.CallUsdValue.plus(premium);
+                            let settleAmount = entityOptionItem.Premium.div(extrainfo.value1)
+                            entityPremium.CallAmount = entityPremium.CallAmount.plus(settleAmount);
+                        } else {
+                            entityPremium.PutUsdValue = entityPremium.PutUsdValue.plus(premium);
+                            let settleAmount = entityOptionItem.Premium.div(extrainfo.value1)
+                            entityPremium.PutAmount = entityPremium.PutAmount.plus(settleAmount);
+                        }
+                    }
 
-                 entityOptionItem.save();
+                    let entityFee = EntityFee.load(extrainfo.value0.toHex()+id);
+                    if(entityFee!=null) {
+                        if (optinfo.value2 == 0) {
+                            entityFee.CallUsdValue = entityFee.CallUsdValue.plus(feeusd);
+                            entityFee.CallAmount = entityFee.CallAmount.plus(entityBuyOptionItem.Fee);
+                        } else {
+                            entityFee.PutUsdValue = entityFee.PutUsdValue.plus(feeusd);
+                            entityFee.PutAmount = entityFee.PutAmount.plus(entityBuyOptionItem.Fee);
+                        }
+                    }
+                } else {
+                    break;
+                }
 
-                 let entityPremium = EntityPremium.load(extrainfo.value0.toHex()+id);
-                 if(entityPremium!=null) {
-                     if (optinfo.value2 == 0) {
-                         entityPremium.CallUsdValue = entityPremium.CallUsdValue.plus(premium);
-                         let settleAmount = entityOptionItem.Premium.div(extrainfo.value1)
-                         entityPremium.CallAmount = entityPremium.CallAmount.plus(settleAmount);
-                     } else {
-                         entityPremium.PutUsdValue = entityPremium.PutUsdValue.plus(premium);
-                         let settleAmount = entityOptionItem.Premium.div(extrainfo.value1)
-                         entityPremium.PutAmount = entityPremium.PutAmount.plus(settleAmount);
-                     }
-                 }
+            }//for option length
+            */
+        }//for manager length
 
-                 let entityFee = EntityFee.load(extrainfo.value0.toHex()+id);
-                 if(entityFee!=null) {
-                     if (optinfo.value2 == 0) {
-                         entityFee.CallUsdValue = entityFee.CallUsdValue.plus(feeusd);
-                         entityFee.CallAmount = entityFee.CallAmount.plus(entityBuyOptionItem.Fee);
-                     } else {
-                         entityFee.PutUsdValue = entityFee.PutUsdValue.plus(feeusd);
-                         entityFee.PutAmount = entityFee.PutAmount.plus(entityBuyOptionItem.Fee);
-                     }
-                 }
-             } else {
-                 break;
-             }
+   }//end if (entityTotalTLV == null)
 
-         }//for option length
-
-       }//for manager length
-
-       entityTotalTLV.save();
-   }
 }
 
 export function handleDebugEvent(event: DebugEvent): void {}

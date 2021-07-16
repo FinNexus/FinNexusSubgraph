@@ -1,5 +1,48 @@
 [
-  { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOperator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOperator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "OperatorTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOrigin",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOrigin",
+        "type": "address"
+      }
+    ],
+    "name": "OriginTransferred",
+    "type": "event"
+  },
   {
     "anonymous": false,
     "inputs": [
@@ -20,15 +63,7 @@
     "type": "event"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "addAddress", "type": "address" }
-    ],
-    "name": "addOperator",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": true,
     "inputs": [
       { "internalType": "address", "name": "asset", "type": "address" },
       { "internalType": "uint256", "name": "underlying", "type": "uint256" }
@@ -38,40 +73,45 @@
       { "internalType": "uint256", "name": "", "type": "uint256" },
       { "internalType": "uint256", "name": "", "type": "uint256" }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
-      { "internalType": "address", "name": "asset", "type": "address" }
+      { "internalType": "address", "name": "oToken", "type": "address" }
     ],
-    "name": "getAssetsAggregator",
-    "outputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
+    "name": "getBuyOptionsPrice",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
+    ],
     "name": "getOperator",
-    "outputs": [
-      { "internalType": "address[]", "name": "", "type": "address[]" }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
       { "internalType": "address", "name": "asset", "type": "address" }
     ],
     "name": "getPrice",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
       { "internalType": "uint256[]", "name": "assets", "type": "uint256[]" }
     ],
@@ -79,146 +119,193 @@
     "outputs": [
       { "internalType": "uint256[]", "name": "", "type": "uint256[]" }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
-      { "internalType": "uint256", "name": "underlying", "type": "uint256" }
+      { "internalType": "address", "name": "oToken", "type": "address" }
     ],
-    "name": "getUnderlyingAggregator",
-    "outputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
+    "name": "getSellOptionsPrice",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
       { "internalType": "uint256", "name": "underlying", "type": "uint256" }
     ],
     "name": "getUnderlyingPrice",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "isOwner",
     "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "owner",
     "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "removeAddress", "type": "address" }
-    ],
-    "name": "removeOperator",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "constant": false,
+    "inputs": [],
+    "name": "renounceOrigin",
+    "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [],
     "name": "renounceOwnership",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
-      { "internalType": "address", "name": "asset", "type": "address" },
-      { "internalType": "address", "name": "aggergator", "type": "address" },
-      { "internalType": "uint256", "name": "_decimals", "type": "uint256" }
+      { "internalType": "address", "name": "optoken", "type": "address" },
+      { "internalType": "uint256", "name": "price", "type": "uint256" }
     ],
-    "name": "setAssetsAggregator",
+    "name": "setBuyOptionsPrice",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
-      { "internalType": "uint256", "name": "newDecimals", "type": "uint256" }
+      { "internalType": "address", "name": "newManager", "type": "address" }
     ],
-    "name": "setDecimals",
+    "name": "setManager",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       { "internalType": "uint256", "name": "index", "type": "uint256" },
-      { "internalType": "address", "name": "addAddress", "type": "address" }
+      { "internalType": "address", "name": "newAddress", "type": "address" }
     ],
     "name": "setOperator",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
-      { "internalType": "address[]", "name": "operators", "type": "address[]" }
+      { "internalType": "address[]", "name": "optokens", "type": "address[]" },
+      { "internalType": "uint256[]", "name": "buyPrices", "type": "uint256[]" },
+      { "internalType": "uint256[]", "name": "SellPrices", "type": "uint256[]" }
     ],
-    "name": "setOperators",
+    "name": "setOptionsBuyAndSellPrice",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       { "internalType": "address", "name": "asset", "type": "address" },
       { "internalType": "uint256", "name": "price", "type": "uint256" }
     ],
     "name": "setPrice",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
-      { "internalType": "uint256[]", "name": "assets", "type": "uint256[]" },
-      { "internalType": "uint256[]", "name": "prices", "type": "uint256[]" }
+      { "internalType": "address[]", "name": "assets", "type": "address[]" },
+      {
+        "internalType": "uint256[]",
+        "name": "assetPrices",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "underlyings",
+        "type": "uint256[]"
+      },
+      { "internalType": "uint256[]", "name": "ulPrices", "type": "uint256[]" }
     ],
-    "name": "setPrices",
+    "name": "setPriceAndUnderlyingPrice",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
-      { "internalType": "uint256", "name": "underlying", "type": "uint256" },
-      { "internalType": "address", "name": "aggergator", "type": "address" },
-      { "internalType": "uint256", "name": "_decimals", "type": "uint256" }
+      { "internalType": "address", "name": "optoken", "type": "address" },
+      { "internalType": "uint256", "name": "price", "type": "uint256" }
     ],
-    "name": "setUnderlyingAggregator",
+    "name": "setSellOptionsPrice",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       { "internalType": "uint256", "name": "underlying", "type": "uint256" },
       { "internalType": "uint256", "name": "price", "type": "uint256" }
     ],
     "name": "setUnderlyingPrice",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address", "name": "newOrigin", "type": "address" }
+    ],
+    "name": "transferOrigin",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
     "inputs": [
       { "internalType": "address", "name": "newOwner", "type": "address" }
     ],
     "name": "transferOwnership",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   }

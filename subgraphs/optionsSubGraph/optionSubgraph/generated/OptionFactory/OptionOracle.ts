@@ -10,6 +10,54 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
+export class OperatorTransferred extends ethereum.Event {
+  get params(): OperatorTransferred__Params {
+    return new OperatorTransferred__Params(this);
+  }
+}
+
+export class OperatorTransferred__Params {
+  _event: OperatorTransferred;
+
+  constructor(event: OperatorTransferred) {
+    this._event = event;
+  }
+
+  get previousOperator(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get newOperator(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get index(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class OriginTransferred extends ethereum.Event {
+  get params(): OriginTransferred__Params {
+    return new OriginTransferred__Params(this);
+  }
+}
+
+export class OriginTransferred__Params {
+  _event: OriginTransferred;
+
+  constructor(event: OriginTransferred) {
+    this._event = event;
+  }
+
+  get previousOrigin(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get newOrigin(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+}
+
 export class OwnershipTransferred extends ethereum.Event {
   get params(): OwnershipTransferred__Params {
     return new OwnershipTransferred__Params(this);
@@ -44,40 +92,6 @@ export class OptionOracle__getAssetAndUnderlyingPriceResult {
   toMap(): TypedMap<string, ethereum.Value> {
     let map = new TypedMap<string, ethereum.Value>();
     map.set("value0", ethereum.Value.fromUnsignedBigInt(this.value0));
-    map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
-    return map;
-  }
-}
-
-export class OptionOracle__getAssetsAggregatorResult {
-  value0: Address;
-  value1: BigInt;
-
-  constructor(value0: Address, value1: BigInt) {
-    this.value0 = value0;
-    this.value1 = value1;
-  }
-
-  toMap(): TypedMap<string, ethereum.Value> {
-    let map = new TypedMap<string, ethereum.Value>();
-    map.set("value0", ethereum.Value.fromAddress(this.value0));
-    map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
-    return map;
-  }
-}
-
-export class OptionOracle__getUnderlyingAggregatorResult {
-  value0: Address;
-  value1: BigInt;
-
-  constructor(value0: Address, value1: BigInt) {
-    this.value0 = value0;
-    this.value1 = value1;
-  }
-
-  toMap(): TypedMap<string, ethereum.Value> {
-    let map = new TypedMap<string, ethereum.Value>();
-    map.set("value0", ethereum.Value.fromAddress(this.value0));
     map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
     return map;
   }
@@ -131,52 +145,48 @@ export class OptionOracle extends ethereum.SmartContract {
     );
   }
 
-  getAssetsAggregator(asset: Address): OptionOracle__getAssetsAggregatorResult {
+  getBuyOptionsPrice(oToken: Address): BigInt {
     let result = super.call(
-      "getAssetsAggregator",
-      "getAssetsAggregator(address):(address,uint256)",
-      [ethereum.Value.fromAddress(asset)]
+      "getBuyOptionsPrice",
+      "getBuyOptionsPrice(address):(uint256)",
+      [ethereum.Value.fromAddress(oToken)]
     );
 
-    return new OptionOracle__getAssetsAggregatorResult(
-      result[0].toAddress(),
-      result[1].toBigInt()
-    );
+    return result[0].toBigInt();
   }
 
-  try_getAssetsAggregator(
-    asset: Address
-  ): ethereum.CallResult<OptionOracle__getAssetsAggregatorResult> {
+  try_getBuyOptionsPrice(oToken: Address): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
-      "getAssetsAggregator",
-      "getAssetsAggregator(address):(address,uint256)",
-      [ethereum.Value.fromAddress(asset)]
+      "getBuyOptionsPrice",
+      "getBuyOptionsPrice(address):(uint256)",
+      [ethereum.Value.fromAddress(oToken)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
-    return ethereum.CallResult.fromValue(
-      new OptionOracle__getAssetsAggregatorResult(
-        value[0].toAddress(),
-        value[1].toBigInt()
-      )
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  getOperator(index: BigInt): Address {
+    let result = super.call("getOperator", "getOperator(uint256):(address)", [
+      ethereum.Value.fromUnsignedBigInt(index)
+    ]);
+
+    return result[0].toAddress();
+  }
+
+  try_getOperator(index: BigInt): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "getOperator",
+      "getOperator(uint256):(address)",
+      [ethereum.Value.fromUnsignedBigInt(index)]
     );
-  }
-
-  getOperator(): Array<Address> {
-    let result = super.call("getOperator", "getOperator():(address[])", []);
-
-    return result[0].toAddressArray();
-  }
-
-  try_getOperator(): ethereum.CallResult<Array<Address>> {
-    let result = super.tryCall("getOperator", "getOperator():(address[])", []);
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddressArray());
+    return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
   getPrice(asset: Address): BigInt {
@@ -219,39 +229,27 @@ export class OptionOracle extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigIntArray());
   }
 
-  getUnderlyingAggregator(
-    underlying: BigInt
-  ): OptionOracle__getUnderlyingAggregatorResult {
+  getSellOptionsPrice(oToken: Address): BigInt {
     let result = super.call(
-      "getUnderlyingAggregator",
-      "getUnderlyingAggregator(uint256):(address,uint256)",
-      [ethereum.Value.fromUnsignedBigInt(underlying)]
+      "getSellOptionsPrice",
+      "getSellOptionsPrice(address):(uint256)",
+      [ethereum.Value.fromAddress(oToken)]
     );
 
-    return new OptionOracle__getUnderlyingAggregatorResult(
-      result[0].toAddress(),
-      result[1].toBigInt()
-    );
+    return result[0].toBigInt();
   }
 
-  try_getUnderlyingAggregator(
-    underlying: BigInt
-  ): ethereum.CallResult<OptionOracle__getUnderlyingAggregatorResult> {
+  try_getSellOptionsPrice(oToken: Address): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
-      "getUnderlyingAggregator",
-      "getUnderlyingAggregator(uint256):(address,uint256)",
-      [ethereum.Value.fromUnsignedBigInt(underlying)]
+      "getSellOptionsPrice",
+      "getSellOptionsPrice(address):(uint256)",
+      [ethereum.Value.fromAddress(oToken)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
-    return ethereum.CallResult.fromValue(
-      new OptionOracle__getUnderlyingAggregatorResult(
-        value[0].toAddress(),
-        value[1].toBigInt()
-      )
-    );
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
   getUnderlyingPrice(underlying: BigInt): BigInt {
@@ -306,118 +304,31 @@ export class OptionOracle extends ethereum.SmartContract {
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toAddress());
   }
+}
 
-  removeOperator(removeAddress: Address): boolean {
-    let result = super.call(
-      "removeOperator",
-      "removeOperator(address):(bool)",
-      [ethereum.Value.fromAddress(removeAddress)]
-    );
-
-    return result[0].toBoolean();
+export class RenounceOriginCall extends ethereum.Call {
+  get inputs(): RenounceOriginCall__Inputs {
+    return new RenounceOriginCall__Inputs(this);
   }
 
-  try_removeOperator(removeAddress: Address): ethereum.CallResult<boolean> {
-    let result = super.tryCall(
-      "removeOperator",
-      "removeOperator(address):(bool)",
-      [ethereum.Value.fromAddress(removeAddress)]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBoolean());
+  get outputs(): RenounceOriginCall__Outputs {
+    return new RenounceOriginCall__Outputs(this);
   }
 }
 
-export class ConstructorCall extends ethereum.Call {
-  get inputs(): ConstructorCall__Inputs {
-    return new ConstructorCall__Inputs(this);
-  }
+export class RenounceOriginCall__Inputs {
+  _call: RenounceOriginCall;
 
-  get outputs(): ConstructorCall__Outputs {
-    return new ConstructorCall__Outputs(this);
-  }
-}
-
-export class ConstructorCall__Inputs {
-  _call: ConstructorCall;
-
-  constructor(call: ConstructorCall) {
+  constructor(call: RenounceOriginCall) {
     this._call = call;
   }
 }
 
-export class ConstructorCall__Outputs {
-  _call: ConstructorCall;
+export class RenounceOriginCall__Outputs {
+  _call: RenounceOriginCall;
 
-  constructor(call: ConstructorCall) {
+  constructor(call: RenounceOriginCall) {
     this._call = call;
-  }
-}
-
-export class AddOperatorCall extends ethereum.Call {
-  get inputs(): AddOperatorCall__Inputs {
-    return new AddOperatorCall__Inputs(this);
-  }
-
-  get outputs(): AddOperatorCall__Outputs {
-    return new AddOperatorCall__Outputs(this);
-  }
-}
-
-export class AddOperatorCall__Inputs {
-  _call: AddOperatorCall;
-
-  constructor(call: AddOperatorCall) {
-    this._call = call;
-  }
-
-  get addAddress(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-}
-
-export class AddOperatorCall__Outputs {
-  _call: AddOperatorCall;
-
-  constructor(call: AddOperatorCall) {
-    this._call = call;
-  }
-}
-
-export class RemoveOperatorCall extends ethereum.Call {
-  get inputs(): RemoveOperatorCall__Inputs {
-    return new RemoveOperatorCall__Inputs(this);
-  }
-
-  get outputs(): RemoveOperatorCall__Outputs {
-    return new RemoveOperatorCall__Outputs(this);
-  }
-}
-
-export class RemoveOperatorCall__Inputs {
-  _call: RemoveOperatorCall;
-
-  constructor(call: RemoveOperatorCall) {
-    this._call = call;
-  }
-
-  get removeAddress(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-}
-
-export class RemoveOperatorCall__Outputs {
-  _call: RemoveOperatorCall;
-
-  constructor(call: RemoveOperatorCall) {
-    this._call = call;
-  }
-
-  get value0(): boolean {
-    return this._call.outputValues[0].value.toBoolean();
   }
 }
 
@@ -447,70 +358,66 @@ export class RenounceOwnershipCall__Outputs {
   }
 }
 
-export class SetAssetsAggregatorCall extends ethereum.Call {
-  get inputs(): SetAssetsAggregatorCall__Inputs {
-    return new SetAssetsAggregatorCall__Inputs(this);
+export class SetBuyOptionsPriceCall extends ethereum.Call {
+  get inputs(): SetBuyOptionsPriceCall__Inputs {
+    return new SetBuyOptionsPriceCall__Inputs(this);
   }
 
-  get outputs(): SetAssetsAggregatorCall__Outputs {
-    return new SetAssetsAggregatorCall__Outputs(this);
+  get outputs(): SetBuyOptionsPriceCall__Outputs {
+    return new SetBuyOptionsPriceCall__Outputs(this);
   }
 }
 
-export class SetAssetsAggregatorCall__Inputs {
-  _call: SetAssetsAggregatorCall;
+export class SetBuyOptionsPriceCall__Inputs {
+  _call: SetBuyOptionsPriceCall;
 
-  constructor(call: SetAssetsAggregatorCall) {
+  constructor(call: SetBuyOptionsPriceCall) {
     this._call = call;
   }
 
-  get asset(): Address {
+  get optoken(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 
-  get aggergator(): Address {
-    return this._call.inputValues[1].value.toAddress();
-  }
-
-  get _decimals(): BigInt {
-    return this._call.inputValues[2].value.toBigInt();
+  get price(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
   }
 }
 
-export class SetAssetsAggregatorCall__Outputs {
-  _call: SetAssetsAggregatorCall;
+export class SetBuyOptionsPriceCall__Outputs {
+  _call: SetBuyOptionsPriceCall;
 
-  constructor(call: SetAssetsAggregatorCall) {
+  constructor(call: SetBuyOptionsPriceCall) {
     this._call = call;
   }
 }
 
-export class SetDecimalsCall extends ethereum.Call {
-  get inputs(): SetDecimalsCall__Inputs {
-    return new SetDecimalsCall__Inputs(this);
+export class SetManagerCall extends ethereum.Call {
+  get inputs(): SetManagerCall__Inputs {
+    return new SetManagerCall__Inputs(this);
   }
 
-  get outputs(): SetDecimalsCall__Outputs {
-    return new SetDecimalsCall__Outputs(this);
+  get outputs(): SetManagerCall__Outputs {
+    return new SetManagerCall__Outputs(this);
   }
 }
 
-export class SetDecimalsCall__Inputs {
-  _call: SetDecimalsCall;
+export class SetManagerCall__Inputs {
+  _call: SetManagerCall;
 
-  constructor(call: SetDecimalsCall) {
+  constructor(call: SetManagerCall) {
     this._call = call;
   }
 
-  get newDecimals(): BigInt {
-    return this._call.inputValues[0].value.toBigInt();
+  get newManager(): Address {
+    return this._call.inputValues[0].value.toAddress();
   }
 }
 
-export class SetDecimalsCall__Outputs {
-  _call: SetDecimalsCall;
+export class SetManagerCall__Outputs {
+  _call: SetManagerCall;
 
-  constructor(call: SetDecimalsCall) {
+  constructor(call: SetManagerCall) {
     this._call = call;
   }
 }
@@ -536,7 +443,7 @@ export class SetOperatorCall__Inputs {
     return this._call.inputValues[0].value.toBigInt();
   }
 
-  get addAddress(): Address {
+  get newAddress(): Address {
     return this._call.inputValues[1].value.toAddress();
   }
 }
@@ -549,32 +456,40 @@ export class SetOperatorCall__Outputs {
   }
 }
 
-export class SetOperatorsCall extends ethereum.Call {
-  get inputs(): SetOperatorsCall__Inputs {
-    return new SetOperatorsCall__Inputs(this);
+export class SetOptionsBuyAndSellPriceCall extends ethereum.Call {
+  get inputs(): SetOptionsBuyAndSellPriceCall__Inputs {
+    return new SetOptionsBuyAndSellPriceCall__Inputs(this);
   }
 
-  get outputs(): SetOperatorsCall__Outputs {
-    return new SetOperatorsCall__Outputs(this);
+  get outputs(): SetOptionsBuyAndSellPriceCall__Outputs {
+    return new SetOptionsBuyAndSellPriceCall__Outputs(this);
   }
 }
 
-export class SetOperatorsCall__Inputs {
-  _call: SetOperatorsCall;
+export class SetOptionsBuyAndSellPriceCall__Inputs {
+  _call: SetOptionsBuyAndSellPriceCall;
 
-  constructor(call: SetOperatorsCall) {
+  constructor(call: SetOptionsBuyAndSellPriceCall) {
     this._call = call;
   }
 
-  get operators(): Array<Address> {
+  get optokens(): Array<Address> {
     return this._call.inputValues[0].value.toAddressArray();
+  }
+
+  get buyPrices(): Array<BigInt> {
+    return this._call.inputValues[1].value.toBigIntArray();
+  }
+
+  get SellPrices(): Array<BigInt> {
+    return this._call.inputValues[2].value.toBigIntArray();
   }
 }
 
-export class SetOperatorsCall__Outputs {
-  _call: SetOperatorsCall;
+export class SetOptionsBuyAndSellPriceCall__Outputs {
+  _call: SetOptionsBuyAndSellPriceCall;
 
-  constructor(call: SetOperatorsCall) {
+  constructor(call: SetOptionsBuyAndSellPriceCall) {
     this._call = call;
   }
 }
@@ -613,74 +528,78 @@ export class SetPriceCall__Outputs {
   }
 }
 
-export class SetPricesCall extends ethereum.Call {
-  get inputs(): SetPricesCall__Inputs {
-    return new SetPricesCall__Inputs(this);
+export class SetPriceAndUnderlyingPriceCall extends ethereum.Call {
+  get inputs(): SetPriceAndUnderlyingPriceCall__Inputs {
+    return new SetPriceAndUnderlyingPriceCall__Inputs(this);
   }
 
-  get outputs(): SetPricesCall__Outputs {
-    return new SetPricesCall__Outputs(this);
+  get outputs(): SetPriceAndUnderlyingPriceCall__Outputs {
+    return new SetPriceAndUnderlyingPriceCall__Outputs(this);
   }
 }
 
-export class SetPricesCall__Inputs {
-  _call: SetPricesCall;
+export class SetPriceAndUnderlyingPriceCall__Inputs {
+  _call: SetPriceAndUnderlyingPriceCall;
 
-  constructor(call: SetPricesCall) {
+  constructor(call: SetPriceAndUnderlyingPriceCall) {
     this._call = call;
   }
 
-  get assets(): Array<BigInt> {
-    return this._call.inputValues[0].value.toBigIntArray();
+  get assets(): Array<Address> {
+    return this._call.inputValues[0].value.toAddressArray();
   }
 
-  get prices(): Array<BigInt> {
+  get assetPrices(): Array<BigInt> {
     return this._call.inputValues[1].value.toBigIntArray();
   }
+
+  get underlyings(): Array<BigInt> {
+    return this._call.inputValues[2].value.toBigIntArray();
+  }
+
+  get ulPrices(): Array<BigInt> {
+    return this._call.inputValues[3].value.toBigIntArray();
+  }
 }
 
-export class SetPricesCall__Outputs {
-  _call: SetPricesCall;
+export class SetPriceAndUnderlyingPriceCall__Outputs {
+  _call: SetPriceAndUnderlyingPriceCall;
 
-  constructor(call: SetPricesCall) {
+  constructor(call: SetPriceAndUnderlyingPriceCall) {
     this._call = call;
   }
 }
 
-export class SetUnderlyingAggregatorCall extends ethereum.Call {
-  get inputs(): SetUnderlyingAggregatorCall__Inputs {
-    return new SetUnderlyingAggregatorCall__Inputs(this);
+export class SetSellOptionsPriceCall extends ethereum.Call {
+  get inputs(): SetSellOptionsPriceCall__Inputs {
+    return new SetSellOptionsPriceCall__Inputs(this);
   }
 
-  get outputs(): SetUnderlyingAggregatorCall__Outputs {
-    return new SetUnderlyingAggregatorCall__Outputs(this);
+  get outputs(): SetSellOptionsPriceCall__Outputs {
+    return new SetSellOptionsPriceCall__Outputs(this);
   }
 }
 
-export class SetUnderlyingAggregatorCall__Inputs {
-  _call: SetUnderlyingAggregatorCall;
+export class SetSellOptionsPriceCall__Inputs {
+  _call: SetSellOptionsPriceCall;
 
-  constructor(call: SetUnderlyingAggregatorCall) {
+  constructor(call: SetSellOptionsPriceCall) {
     this._call = call;
   }
 
-  get underlying(): BigInt {
-    return this._call.inputValues[0].value.toBigInt();
+  get optoken(): Address {
+    return this._call.inputValues[0].value.toAddress();
   }
 
-  get aggergator(): Address {
-    return this._call.inputValues[1].value.toAddress();
-  }
-
-  get _decimals(): BigInt {
-    return this._call.inputValues[2].value.toBigInt();
+  get price(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
   }
 }
 
-export class SetUnderlyingAggregatorCall__Outputs {
-  _call: SetUnderlyingAggregatorCall;
+export class SetSellOptionsPriceCall__Outputs {
+  _call: SetSellOptionsPriceCall;
 
-  constructor(call: SetUnderlyingAggregatorCall) {
+  constructor(call: SetSellOptionsPriceCall) {
     this._call = call;
   }
 }
@@ -715,6 +634,36 @@ export class SetUnderlyingPriceCall__Outputs {
   _call: SetUnderlyingPriceCall;
 
   constructor(call: SetUnderlyingPriceCall) {
+    this._call = call;
+  }
+}
+
+export class TransferOriginCall extends ethereum.Call {
+  get inputs(): TransferOriginCall__Inputs {
+    return new TransferOriginCall__Inputs(this);
+  }
+
+  get outputs(): TransferOriginCall__Outputs {
+    return new TransferOriginCall__Outputs(this);
+  }
+}
+
+export class TransferOriginCall__Inputs {
+  _call: TransferOriginCall;
+
+  constructor(call: TransferOriginCall) {
+    this._call = call;
+  }
+
+  get newOrigin(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+}
+
+export class TransferOriginCall__Outputs {
+  _call: TransferOriginCall;
+
+  constructor(call: TransferOriginCall) {
     this._call = call;
   }
 }
