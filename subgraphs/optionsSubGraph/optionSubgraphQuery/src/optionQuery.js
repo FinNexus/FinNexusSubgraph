@@ -127,6 +127,38 @@ client.query(`
       }      
     }
 `).then(result => {
+    //console.log(result);
+});
+
+// type EntityOptionItem @entity {
+//     id: ID!
+//         Date: BigInt!
+//         Status: String!
+//         UnderlyingAssets: BigInt!
+//         Type: BigInt!
+//         Amount: BigInt
+//     UsdValue: BigInt
+//     StrikePrice: BigInt
+//     Premium: BigInt
+//     PL: BigInt
+// }
+
+client.query(`
+    {
+      entityOptionItems(first: 1000) {
+        id
+        Date
+        Status
+        UnderlyingAssets
+        Type
+        Amount
+        UsdValue
+        StrikePrice
+        Premium
+        PL
+      }      
+    }
+`).then(result => {
     console.log(result);
 });
 
