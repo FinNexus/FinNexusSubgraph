@@ -220,8 +220,6 @@ export function handleBlock(block: ethereum.Block): void {
                 }
              }//whitelist token[] end
 
-
-            /*
             entityTotalTLV.TotalUsdValue = entityTotalTLV.TotalUsdValue.plus(colpoolsc.getRealBalance(tokens[i]));
             entityTotalTLV.save();
 
@@ -230,11 +228,10 @@ export function handleBlock(block: ethereum.Block): void {
             entityNetWorth.Pool = managerAddess;
             entityNetWorth.NetWorth = managersc.getTokenNetworth();
             entityNetWorth.save();
-            */
 
-            /*
+            //no option,not test
             let optionlen = optionpoolsc.getOptionInfoLength().toI32();
-            for(let j=optionlen-1;i>0;j--) {
+            for(let j=optionlen-1;j>=0;j--) {
                 let k = BigInt.fromI32(j);
                 let pooloptionid = BigInt.fromI32(i).toHex() +k.toHex();
                 //(optionsId 0,info.owner 1,
@@ -272,6 +269,7 @@ export function handleBlock(block: ethereum.Block): void {
                     entityActiveOption.save();
 
                 }//active option caculation
+
 
                 //poolid+optionid as key
                 let entityoption = EntityOptionItem.load(pooloptionid);
@@ -359,7 +357,7 @@ export function handleBlock(block: ethereum.Block): void {
                 }
 
             }//for option length
-            */
+
         }//for manager length
 
    }//end if (entityTotalTLV == null)
