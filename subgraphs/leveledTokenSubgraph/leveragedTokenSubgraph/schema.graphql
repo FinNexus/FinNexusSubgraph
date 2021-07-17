@@ -32,7 +32,7 @@ type EntityTotalTVL @entity {
 type EntityTVL @entity {
   id: ID!
   timestamp: BigInt
-  poolAddress: Bytes
+#  poolAddress: Bytes
   token: Bytes
   amount: BigInt!
   value: BigInt!

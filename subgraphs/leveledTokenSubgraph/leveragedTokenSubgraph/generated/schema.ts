@@ -388,23 +388,6 @@ export class EntityTVL extends Entity {
     }
   }
 
-  get poolAddress(): Bytes | null {
-    let value = this.get("poolAddress");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set poolAddress(value: Bytes | null) {
-    if (value === null) {
-      this.unset("poolAddress");
-    } else {
-      this.set("poolAddress", Value.fromBytes(value as Bytes));
-    }
-  }
-
   get token(): Bytes | null {
     let value = this.get("token");
     if (value === null || value.kind == ValueKind.NULL) {

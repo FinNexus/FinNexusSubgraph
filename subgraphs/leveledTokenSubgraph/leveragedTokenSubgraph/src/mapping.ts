@@ -293,16 +293,21 @@ export function handleBlock(block: ethereum.Block): void {
 
             let pool = stakepools[i];
             let stkpool = stakePool.bind(pool);
-
-            tvlentity = new EntityTVL(pool.toHex() + id.toHex().substr(2));
+            let token = stkpool.poolToken();
+            tvlentity =  EntityTVL.load(token.toHex() + id.toHex().substr(2));
+            if(tvlentity==null) {
+                tvlentity = new EntityTVL(token.toHex() + id.toHex().substr(2));
+                tvlentity.amount = BigInt.fromI32(0);
+                tvlentity.value = BigInt.fromI32(0);
+            }
+            let amount = stkpool.totalSupply();
             tvlentity.timestamp = block.timestamp;
-
-            tvlentity.amount = stkpool.totalSupply();
-            tvlentity.poolAddress = pool;
+            tvlentity.amount = tvlentity.amount.plus(amount);
+            //tvlentity.poolAddress = pool;
 
             tvlentity.token = stkpool.poolToken();
             let tkprice = oracelsc.getPrice(stkpool.poolToken());
-            tvlentity.value = tvlentity.amount.times(tkprice);
+            tvlentity.value =tvlentity.value.plus(amount.times(tkprice));
             tvlentity.save();
 
             totalTvlentity.value = totalTvlentity.value.plus(tvlentity.value);
