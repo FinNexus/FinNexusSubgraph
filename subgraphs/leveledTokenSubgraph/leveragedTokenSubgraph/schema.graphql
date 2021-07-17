@@ -11,10 +11,12 @@ type EntityLeverageFactory @entity {
 
 type EntityTradeItem @entity {
   id: ID!
+  pool: Bytes!
   from: Bytes!
   timestamp: BigInt!
   status: String
-  underlying: Bytes
+  settlement: Bytes
+  leverageToken: Bytes
   leveragetype: String
   value: BigInt!
   price: BigInt!
@@ -39,7 +41,7 @@ type EntityTVL @entity {
 type EntityInterestAPY @entity {
   id: ID!
   timestamp: BigInt
-  poolAddress: Bytes
+  pool: Bytes
   token:  Bytes
   apy:  BigInt
 }

@@ -130,7 +130,9 @@ export function handleBuyHedge(event: BuyHedge): void {
      entity.timestamp = event.block.timestamp;
      entity.status = "Buying";
      entity.leveragetype = "Bear";
-     entity.underlying = info.value0;
+     entity.pool = event.address;
+     entity.settlement = info.value0;
+     entity.leverageToken = info.value2;
      entity.price = event.params.tokenPrice;
      entity.amount = event.params.hedgeAmount;
      entity.value = entity.price.times(entity.amount);
@@ -166,7 +168,9 @@ export function handleBuyLeverage(event: BuyLeverage): void {
 
         entity.status = "Buying";
         entity.leveragetype = "Bull";
-        entity.underlying = info.value0;
+        entity.pool = event.address;
+        entity.settlement = info.value0;
+        entity.leverageToken = info.value2;
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.leverageAmount;
         entity.value = entity.price.times(entity.amount);
@@ -202,7 +206,9 @@ export function handleSellHedge(event: SellHedge): void {
 
         entity.status = "Selling";
         entity.leveragetype = "Bear";
-        entity.underlying = info.value0;
+        entity.pool = event.address;
+        entity.settlement = info.value0;
+        entity.leverageToken = info.value2;
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.hedgeAmount;
         entity.value = entity.price.times(entity.amount);
@@ -238,12 +244,13 @@ export function handleSellLeverage(event: SellLeverage): void {
 
         entity.status = "Selling";
         entity.leveragetype = "Bull";
-        entity.underlying = info.value0;
+        entity.pool = event.address;
+        entity.settlement = info.value0;
+        entity.leverageToken = info.value2;
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.leverageAmount;
         entity.value = entity.price.times(entity.amount);
         entity.save();
-
 
         let trdid = event.address.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex().substr(2);
         let tradevolentity = EntityTradeVol.load(trdid);
@@ -302,7 +309,7 @@ export function handleBlock(block: ethereum.Block): void {
 
             apyentity = new EntityInterestAPY(pool.toHex() + id.toHex().substr(2));
             apyentity.timestamp = block.timestamp;
-            apyentity.poolAddress = pool;
+            apyentity.pool = pool;
             apyentity.apy = stkpool.poolInterest().times(BigInt.fromI32(365));
             apyentity.token = stkpool.poolToken();
             apyentity.save();

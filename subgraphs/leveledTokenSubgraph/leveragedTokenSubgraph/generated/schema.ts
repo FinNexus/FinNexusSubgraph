@@ -161,6 +161,15 @@ export class EntityTradeItem extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get pool(): Bytes {
+    let value = this.get("pool");
+    return value.toBytes();
+  }
+
+  set pool(value: Bytes) {
+    this.set("pool", Value.fromBytes(value));
+  }
+
   get from(): Bytes {
     let value = this.get("from");
     return value.toBytes();
@@ -196,8 +205,8 @@ export class EntityTradeItem extends Entity {
     }
   }
 
-  get underlying(): Bytes | null {
-    let value = this.get("underlying");
+  get settlement(): Bytes | null {
+    let value = this.get("settlement");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -205,11 +214,28 @@ export class EntityTradeItem extends Entity {
     }
   }
 
-  set underlying(value: Bytes | null) {
+  set settlement(value: Bytes | null) {
     if (value === null) {
-      this.unset("underlying");
+      this.unset("settlement");
     } else {
-      this.set("underlying", Value.fromBytes(value as Bytes));
+      this.set("settlement", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get leverageToken(): Bytes | null {
+    let value = this.get("leverageToken");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set leverageToken(value: Bytes | null) {
+    if (value === null) {
+      this.unset("leverageToken");
+    } else {
+      this.set("leverageToken", Value.fromBytes(value as Bytes));
     }
   }
 
@@ -462,8 +488,8 @@ export class EntityInterestAPY extends Entity {
     }
   }
 
-  get poolAddress(): Bytes | null {
-    let value = this.get("poolAddress");
+  get pool(): Bytes | null {
+    let value = this.get("pool");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -471,11 +497,11 @@ export class EntityInterestAPY extends Entity {
     }
   }
 
-  set poolAddress(value: Bytes | null) {
+  set pool(value: Bytes | null) {
     if (value === null) {
-      this.unset("poolAddress");
+      this.unset("pool");
     } else {
-      this.set("poolAddress", Value.fromBytes(value as Bytes));
+      this.set("pool", Value.fromBytes(value as Bytes));
     }
   }
 
