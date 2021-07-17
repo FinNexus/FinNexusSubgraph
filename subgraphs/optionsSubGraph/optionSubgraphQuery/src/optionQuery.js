@@ -3,7 +3,6 @@ const BN = require("bn.js");
 var Web3 = require('web3');
 var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
-//var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/34b6f08707964087bea0eb7571fdae41"));
 
 var { abi } = require('./erc20token.json');
 var tokenabi = abi;
@@ -18,6 +17,8 @@ const client = new Lokka({
 const PRICE_DECIMAL = new BN("100000000");
 const EIGHTEEN_DECIMAL = new BN("1000000000000000000");
 const NETWORTH_DECIMAL = new BN("100000000");
+const underLying = ["", "btc", "eth", "mkr", "snx", "link"];
+const optype = ["call", "put"];
 
 function getDate(unixtime) {
     var a = new Date(unixtime * 1000);
@@ -108,23 +109,23 @@ async function getTvls() {
 //         Pool: Bytes!
 //         NetWorth: BigInt!
 // }
-client.query(`
-    {
-      entityNetWorths(first: 1000) {
-        id
-        TimeStamp
-        Pool
-        NetWorth
-      }      
-    }
-`).then(result => {
-    //console.log(result);
-});
+// client.query(`
+//     {
+//       entityNetWorths(first: 1000) {
+//         id
+//         TimeStamp
+//         Pool
+//         NetWorth
+//       }
+//     }
+// `).then(result => {
+//     //console.log(result);
+// });
 
 async function getNetWorths() {
     let querystr = `
     {
-      entityNetWorths(first: 10,orderby: TimeStamp) {
+      entityNetWorths(first: 1000,orderby: TimeStamp,orderDirection: asc) {
         id
         TimeStamp
         Pool
@@ -155,9 +156,9 @@ async function getNetWorths() {
     return allNetWorths
 }
 
-getNetWorths();
+//getNetWorths();
 
-return;
+//return;
 
 // type EntityActiveOption @entity {
 //     id: ID! #token + timeid as id
@@ -169,7 +170,22 @@ return;
 //         PutUsdValue: BigInt!
 // }
 
-client.query(`
+// client.query(`
+//     {
+//       entityActiveOptions(first: 1000) {
+//         Underlying
+//         CallAmount
+//         CallUsdValue
+//         PutAmount
+//         PutUsdValue
+//       }
+//     }
+// `).then(result => {
+//    // console.log(result);
+// });
+
+async function getActiveOptions() {
+    let querystr = `
     {
       entityActiveOptions(first: 1000) {
         Underlying
@@ -177,11 +193,38 @@ client.query(`
         CallUsdValue
         PutAmount
         PutUsdValue
-      }      
+      }        
+    }`
+    let result = await client.query(querystr);
+    let activeOptions = result.entityActiveOptions;
+    //console.log(activeOptions)
+    let allActiveOptions = new Map();
+    for(let i=0;i<activeOptions.length;i++) {
+        let item = activeOptions[i];
+        //console.log(name,decimal)
+        let underLyingName = underLying[parseInt(item.Underlying)]
+        let activeopt = {
+            CallAmount: new BN(item.CallAmount).div(EIGHTEEN_DECIMAL),
+            CallUsdValue: new BN(item.CallUsdValue).div(EIGHTEEN_DECIMAL.mul(PRICE_DECIMAL)),
+            PutAmount: new BN(item.PutAmount).div(EIGHTEEN_DECIMAL),
+            PutUsdValue: new BN(item.PutUsdValue).div(EIGHTEEN_DECIMAL.mul(PRICE_DECIMAL)),
+        }
+
+        if(allActiveOptions[underLyingName]==undefined) {
+            allActiveOptions[underLyingName] = [];
+        }
+
+        allActiveOptions[underLyingName].push(activeopt);
     }
-`).then(result => {
-   // console.log(result);
-});
+
+    console.log(allActiveOptions);
+
+    return allActiveOptions;
+}
+
+//getActiveOptions();
+
+//return;
 
 // type EntityPremium @entity {
 //     id: ID!
@@ -192,9 +235,26 @@ client.query(`
 //     PutAmount: BigInt
 //     PutUsdValue: BigInt
 // }
-client.query(`
+// client.query(`
+//     {
+//       entityPremiums(first: 1000) {
+//         id
+//         TimeStamp
+//         Token
+//         CallAmount
+//         CallUsdValue
+//         PutAmount
+//         PutUsdValue
+//       }
+//     }
+// `).then(result => {
+//     //console.log(result);
+// });
+
+async function getEntityPremiums() {
+    let querystr = `
     {
-      entityPremiums(first: 1000) {
+      entityPremiums(first: 1000,orderby: TimeStamp, orderDirection: asc) {
         id
         TimeStamp
         Token
@@ -202,11 +262,38 @@ client.query(`
         CallUsdValue
         PutAmount
         PutUsdValue
-      }      
+      }       
+    }`
+    let result = await client.query(querystr);
+    let premiums = result.entityPremiums;
+    //console.log(premiums)
+    let allPremiums = new Map();
+    for(let i=0;i<premiums.length;i++) {
+        let item = premiums[i];
+        let tk = new web3.eth.Contract(tokenabi,item.Token);
+        let name = await tk.methods.symbol().call();
+        let decimal = await tk.methods.decimals().call();
+
+        let premium = {
+            Date: getDate(item.TimeStamp),
+            CallAmount: new BN(item.CallAmount).div(new BN(decimal)),
+            CallUsdValue: new BN(item.CallUsdValue).div(new BN(decimal).mul(PRICE_DECIMAL)),
+            PutAmount: new BN(item.PutAmount).div(new BN(decimal)),
+            PutUsdValue: new BN(item.PutUsdValue).div(new BN(decimal).mul(PRICE_DECIMAL)),
+        }
+
+        if(allPremiums[name]==undefined) {
+            allPremiums[name] = [];
+        }
+
+        allPremiums[name].push(premium);
     }
-`).then(result => {
-    //console.log(result);
-});
+    console.log(allPremiums);
+
+    return allPremiums;
+}
+//getEntityPremiums();
+//return;
 
 // type EntityFee @entity {
 //     id: ID!
@@ -233,6 +320,49 @@ client.query(`
     //console.log(result);
 });
 
+async function getEntityFees() {
+    let querystr = `
+    {
+      entityFees(first: 1000,orderby: TimeStamp, orderDirection: asc) {
+        id
+        TimeStamp
+        Token
+        CallAmount
+        CallUsdValue
+        PutAmount
+        PutUsdValue
+      }       
+    }`
+    let result = await client.query(querystr);
+    let fees = result.entityFees;
+    //console.log(premiums)
+    let allFees = new Map();
+    for(let i=0;i<fees.length;i++) {
+        let item = fees[i];
+        let tk = new web3.eth.Contract(tokenabi,item.Token);
+        let name = await tk.methods.symbol().call();
+        let decimal = await tk.methods.decimals().call();
+        let fee = {
+            Date: getDate(item.TimeStamp),
+            CallAmount: new BN(item.CallAmount).div(new BN(decimal)),
+            CallUsdValue: new BN(item.CallUsdValue).div(new BN(decimal).mul(PRICE_DECIMAL)),
+            PutAmount: new BN(item.PutAmount).div(new BN(decimal)),
+            PutUsdValue: new BN(item.PutUsdValue).div(new BN(decimal).mul(PRICE_DECIMAL)),
+        }
+
+        if(allFees[name]==undefined) {
+            allFees[name] = [];
+        }
+        allFees[name].push(fee);
+    }
+
+    console.log(allFees);
+    return allFees;
+}
+
+//getEntityFees()
+//return;
+
 // type EntityOptionItem @entity {
 //     id: ID!
 //         Date: BigInt!
@@ -246,59 +376,71 @@ client.query(`
 //     PL: BigInt
 // }
 
-client.query(`
-    {
-      entityOptionItems(first: 1000) {
-        id
-        Date
-        Status
-        UnderlyingAssets
-        Type
-        Amount
-        UsdValue
-        StrikePrice
-        Premium
-        PL
-      }      
-    }
-`).then(result => {
-    console.log(result);
-});
-
-/*
-
-async function getprices() {
-    let res = await getBasicPriceData("rinkeby", 1620921600,1621222954, "0xb86ded607497fe38a36b26f7b5c3dfdca30ef955")
-    //console.log(res)
-    console.log("uptokenprice", res.upprices)
-    console.log("-----------------------------------------")
-    console.log("downtokenprice", res.downprices)
-}
-*/
-//getprices()
 // client.query(`
 //     {
-//       leveragedTokenPriceEntities(where: {network: "rinkeby"}) {
-//         poolAddress
-//         uptokenprice
-//         downtokenprice
-//         timestamp
+//       entityOptionItems(first: 1000) {
+//         id
+//         Date
+//         Status
+//         UnderlyingAssets
+//         Type
+//         Amount
+//         UsdValue
+//         StrikePrice
+//         Premium
+//         PL
 //       }
 //     }
 // `).then(result => {
 //     console.log(result);
 // });
 
+async function getEntityOptionItems() {
+    let querystr = `
+    {
+       entityOptionItems(first: 1000) {
+            id
+            Date
+            Status
+            UnderlyingAssets
+            Type
+            Amount
+            UsdValue
+            StrikePrice
+            Premium
+            PL
+      }
+    }`
+    let result = await client.query(querystr);
+    let optionItems = result.entityOptionItems;
+    //console.log(premiums)
+    let allOptionItems = new Map();
 
-//exports.getBasicPriceData = getBasicPriceData
+    for(let i=0;i<optionItems.length;i++) {
+        let item = optionItems[i];
+        let name = underLying[parseInt(item.UnderlyingAssets)];
+        let option = {
+            Date: getDate(item.TimeStamp),
+            Status: item.Status,
+            Underlying: name,
+            Type: optype[parseInt(item.Type)],
+            Amount: new BN(item.Amount).div(new BN(EIGHTEEN_DECIMAL)),
+            UsdValue: new BN(item.UsdValue).div(new BN(EIGHTEEN_DECIMAL).mul(PRICE_DECIMAL)),
+            StrikePrice: new BN(item.StrikePrice).div(PRICE_DECIMAL),
+            Premium: new BN(item.Premium).div(PRICE_DECIMAL),
+            PL: new BN(item.Premium).div(PRICE_DECIMAL)
+        }
 
-// client.query(querystr).then(result => {
-//     let ltpes = result.leveragedTokenPriceEntities;
-//     for(let i=0;i<ltpes.length;i++) {
-//         let item = ltpes[i]
-//         basicUpPrices[item.timestamp] = item.uptokenprice;
-//         basicDownPrices[item.timestamp] = item.downtokenprice;
-//     }
-//
-//     return {upprices:basicDownPrices,downprices:basicDownPrices}
-// });
+        if(allOptionItems[name]==undefined) {
+            allOptionItems[name] = [];
+        }
+        allOptionItems[name].push(option);
+    }
+
+    console.log(allOptionItems);
+    return allOptionItems;
+}
+
+getEntityOptionItems();
+
+
