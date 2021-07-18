@@ -16,7 +16,7 @@ const client = new Lokka({
     transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/leveragedpoolsubgraph')
 });
 
-const PRICE_DECIMAL = new BN("100000000");
+const PRICE_DECIMAL = new BN("1000000");
 const EIGHTEEN_DECIMAL = new BN("1000000000000000000");
 const NETWORTH_DECIMAL = new BN("100000000");
 
@@ -146,6 +146,7 @@ async function getLeveragePools() {
 // });
 
 async function getEntityTradeItems() {
+    let pools = await getLeveragePools();
     let querystr = `
     {
       entityTradeItems(first: 1000, orderBy: timestamp, orderDirection: asc) {
@@ -165,9 +166,6 @@ async function getEntityTradeItems() {
     let result = await client.query(querystr)
     let tradeItems = result.entityTradeItems;
     console.log(tradeItems);
-
-    let pools = await getLeveragePools();
-
     let allTradeItems = new Map();
     for(let i=0;i<tradeItems.length;i++) {
         let item = tradeItems[i];
@@ -347,26 +345,26 @@ async function getApys() {
 //     sellHedgeValue: BigInt
 // }
 
-client.query(`
-    {
-      entityTradeVols(first: 5) {
-        id
-        timestamp
-        token
-        buyLeverAmount
-        buyLeverValue
-        sellLeverAmount
-        sellLeverValue
-        buyHedgeAmount
-        buyHedgeValue
-        sellHedgeAmount
-        sellHedgeValue
-      }      
-    }
-`).then(result => {
-    console.log("query entityTradeVols")
-    console.log(result);
-});
+// client.query(`
+//     {
+//       entityTradeVols(first: 5) {
+//         id
+//         timestamp
+//         token
+//         buyLeverAmount
+//         buyLeverValue
+//         sellLeverAmount
+//         sellLeverValue
+//         buyHedgeAmount
+//         buyHedgeValue
+//         sellHedgeAmount
+//         sellHedgeValue
+//       }
+//     }
+// `).then(result => {
+//     console.log("query entityTradeVols")
+//     console.log(result);
+// });
 
 async function getTradeVol() {
     let querystr = `
@@ -493,6 +491,63 @@ async function getTradeFee() {
     console.log(allfees);
     return allfees
 }
+
+// type EntityPrice @entity {
+// id: ID!
+//     timestamp: BigInt
+// pool: Bytes!
+//     leverSettlement: Bytes!
+//     leverageprice: BigInt!
+//     hedgeSettlement: Bytes!
+//     hedgeprice: BigInt!
+// }
+
+async function getLeverHedgeTokenPrice() {
+    let pools = await getLeveragePools();
+    let querystr = `
+    {
+       entityPrices(first: 1000, orderBy: timestamp, orderDirection: asc) {
+            id
+            timestamp
+            pool
+            leverSettlement
+            leverageprice
+            hedgeSettlement
+            hedgeprice
+      } 
+    }`
+    let result = await client.query(querystr)
+    let prices = result.entityPrices;
+    //console.log(prices);
+    let allprices = new Map();
+    for(let i=0;i<prices.length;i++) {
+        let item = prices[i];
+        let name = pools[item.pool].PoolName;
+        let tk = new web3.eth.Contract(tokenabi,item.leverSettlement);
+        let leverdecimal = await tk.methods.decimals().call();
+        tk = new web3.eth.Contract(tokenabi,item.hedgeSettlement);
+        let hedgedecimal = await tk.methods.decimals().call();
+        let price = {
+            TimeStamp: item.timestamp,
+            Leverageprice: new BN(item.leverageprice).div(PRICE_DECIMAL.mul(new BN(leverdecimal))).toNumber().toFixed(2),
+            Hedgeprice: new BN(item.hedgeprice).div(PRICE_DECIMAL.mul(new BN(hedgedecimal))).toNumber().toFixed(2)
+        }
+        if(allprices[name]==undefined) {
+            allprices[name] = [];
+        }
+        allprices[name].push(price);
+    }
+
+    console.log(allprices);
+    return allprices;
+}
+
+getLeverHedgeTokenPrice();
+
+
+
+
+
 
 
 
