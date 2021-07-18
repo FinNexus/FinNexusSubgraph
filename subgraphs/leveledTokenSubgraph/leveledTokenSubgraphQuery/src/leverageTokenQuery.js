@@ -16,7 +16,6 @@ const client = new Lokka({
     transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/leveragedpoolsubgraph')
 });
 
-
 const PRICE_DECIMAL = new BN("100000000");
 const EIGHTEEN_DECIMAL = new BN("1000000000000000000");
 const NETWORTH_DECIMAL = new BN("100000000");
@@ -330,8 +329,8 @@ async function getApys() {
     return allapys
 }
 
-getApys();
-return;
+//getApys();
+//return;
 
 
 // type EntityTradeVol @entity {
@@ -347,12 +346,13 @@ return;
 //     sellHedgeAmount: BigInt
 //     sellHedgeValue: BigInt
 // }
+
 client.query(`
     {
       entityTradeVols(first: 5) {
         id
         timestamp
-        pool
+        token
         buyLeverAmount
         buyLeverValue
         sellLeverAmount
@@ -367,25 +367,75 @@ client.query(`
     console.log("query entityTradeVols")
     console.log(result);
 });
+
+async function getTradeVol() {
+    let querystr = `
+    {
+       entityTradeVols(first: 1000, orderBy: timestamp, orderDirection: asc) {
+        id
+        timestamp
+        token
+        buyLeverAmount
+        buyLeverValue
+        sellLeverAmount
+        sellLeverValue
+        buyHedgeAmount
+        buyHedgeValue
+        sellHedgeAmount
+        sellHedgeValue
+      } 
+    }`
+    let result = await client.query(querystr)
+    let vols = result.entityTradeVols;
+    console.log(vols);
+
+    let allvols = new Map();
+    for(let i=0;i<vols.length;i++) {
+        let item = vols[i];
+        let tk = new web3.eth.Contract(tokenabi,item.token);
+        let name = await tk.methods.symbol().call();
+        let vol = {
+            TimeStamp: item.timestamp,
+            BuyLeverAmount: item.buyLeverAmount,
+            BuyLeverValue: item.buyLeverValue,
+            SellLeverAmount: sellLeverAmount,
+            SellLeverValue: sellLeverValue,
+            BuyHedgeAmount: buyHedgeAmount,
+            BuyHedgeValue: buyHedgeValue,
+            SellHedgeAmount: sellHedgeAmount,
+            SellHedgeValue: sellHedgeValue,
+        }
+
+        if(allvols[name]==undefined) {
+            allvols[name] = [];
+        }
+        allvols[name].push(vol);
+    }
+
+    console.log(allvols);
+    return allvols
+}
+
+
 // type EntityStakePool @entity {
 //     id: ID!
 //         underlyingAddress: Bytes!
 //         underlyingName: String!
 //         interestrate: BigInt!
 // }
-client.query(`
-    {
-      entityStakePools(first: 5) {
-        id
-        underlyingAddress
-        underlyingName
-        interestrate
-      }      
-    }
-`).then(result => {
-    console.log("query entityStakePools")
-    console.log(result);
-});
+// client.query(`
+//     {
+//       entityStakePools(first: 5) {
+//         id
+//         underlyingAddress
+//         underlyingName
+//         interestrate
+//       }
+//     }
+// `).then(result => {
+//     console.log("query entityStakePools")
+//     console.log(result);
+// });
 
 // type EntityFee @entity {
 //     id: ID!
@@ -394,19 +444,55 @@ client.query(`
 //         amount: BigInt!
 //         value: BigInt!
 // }
-client.query(`
+// client.query(`
+//     {
+//       entityFees(first: 5) {
+//         id
+//         timestamp
+//         token
+//         amount
+//         value
+//       }
+//     }
+// `).then(result => {
+//     console.log("query entityFees")
+//     console.log(result);
+// });
+
+async function getTradeFee() {
+    let querystr = `
     {
-      entityFees(first: 5) {
+       entityFees(first: 1000, orderBy: timestamp, orderDirection: asc) {
         id
         timestamp
         token
         amount
         value
-      }      
+      } 
+    }`
+    let result = await client.query(querystr)
+    let fees = result.entityFees;
+    //console.log(fees);
+    let allfees = new Map();
+    for(let i=0;i<fees.length;i++) {
+        let item = fees[i];
+        let tk = new web3.eth.Contract(tokenabi,item.token);
+        let name = await tk.methods.symbol().call();
+        let fee = {
+            TimeStamp: item.timestamp,
+            Token: name,
+            Amount: item.amount,
+            Value: item.value
+        }
+        if(allfees[name]==undefined) {
+            allfees[name] = [];
+        }
+        allfees[name].push(fee);
     }
-`).then(result => {
-    console.log("query entityFees")
-    console.log(result);
-});
+
+    console.log(allfees);
+    return allfees
+}
+
 
 
