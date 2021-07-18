@@ -79,7 +79,9 @@ type EntityPrice @entity {
   id: ID!
   timestamp: BigInt
   pool: Bytes!
+  leverSettlement: Bytes!
   leverageprice: BigInt!
+  hedgeSettlement: Bytes!
   hedgeprice: BigInt!
 }
 

@@ -275,8 +275,8 @@ export function handleBlock(block: ethereum.Block): void {
    // log.error("step 1",[]);
 
     if(totalTvlentity==null){
-      //  let factorysc = leverageFactorysc.bind(dataSource.address());
-        let factorysc = leverageFactorysc.bind(Address.fromString(FACTORY_ADDR));
+        let factorysc = leverageFactorysc.bind(dataSource.address());
+      //  let factorysc = leverageFactorysc.bind(Address.fromString(FACTORY_ADDR));
         let oracleaddr = factorysc.phxOracle();
         if (oracleaddr==Address.fromString("0x0000000000000000000000000000000000000000")) {
             return;
@@ -391,8 +391,14 @@ export function handleBlock(block: ethereum.Block): void {
             let priceEntity = new EntityPrice(pool.toHex()+id.toHex().substr(2));
             priceEntity.timestamp = block.timestamp;
             priceEntity.pool = pool
-            priceEntity.leverageprice = prices.value0;
-            priceEntity.hedgeprice = prices.value1;
+
+            let tkprice = oracelsc.getPrice(leverinfo.value0);
+            priceEntity.leverSettlement = leverinfo.value0;
+            priceEntity.leverageprice = prices.value0.times(tkprice);
+
+            tkprice = oracelsc.getPrice(hedgeinfo.value0);
+            priceEntity.hedgeSettlement = hedgeinfo.value0;
+            priceEntity.hedgeprice = prices.value1.times(tkprice);
             priceEntity.save();
         }
 

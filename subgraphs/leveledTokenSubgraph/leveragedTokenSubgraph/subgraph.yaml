@@ -6,7 +6,7 @@ dataSources:
   name: leverageFactory
   network: rinkeby
   source:
-    address: '0xdb6136017fe722044a332df2f2ffee7c26b06d75'
+    address: '0xe3f94b86ceadd68e1a5ba062100b89344b2e54b7'
     abi: leverageFactory
     startBlock: 8878482
   mapping:

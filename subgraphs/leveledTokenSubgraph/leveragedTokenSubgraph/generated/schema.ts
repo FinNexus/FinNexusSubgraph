@@ -945,6 +945,15 @@ export class EntityPrice extends Entity {
     this.set("pool", Value.fromBytes(value));
   }
 
+  get leverSettlement(): Bytes {
+    let value = this.get("leverSettlement");
+    return value.toBytes();
+  }
+
+  set leverSettlement(value: Bytes) {
+    this.set("leverSettlement", Value.fromBytes(value));
+  }
+
   get leverageprice(): BigInt {
     let value = this.get("leverageprice");
     return value.toBigInt();
@@ -952,6 +961,15 @@ export class EntityPrice extends Entity {
 
   set leverageprice(value: BigInt) {
     this.set("leverageprice", Value.fromBigInt(value));
+  }
+
+  get hedgeSettlement(): Bytes {
+    let value = this.get("hedgeSettlement");
+    return value.toBytes();
+  }
+
+  set hedgeSettlement(value: Bytes) {
+    this.set("hedgeSettlement", Value.fromBytes(value));
   }
 
   get hedgeprice(): BigInt {
