@@ -570,8 +570,8 @@ export class EntityTradeVol extends Entity {
     }
   }
 
-  get pool(): Bytes | null {
-    let value = this.get("pool");
+  get token(): Bytes | null {
+    let value = this.get("token");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -579,11 +579,11 @@ export class EntityTradeVol extends Entity {
     }
   }
 
-  set pool(value: Bytes | null) {
+  set token(value: Bytes | null) {
     if (value === null) {
-      this.unset("pool");
+      this.unset("token");
     } else {
-      this.set("pool", Value.fromBytes(value as Bytes));
+      this.set("token", Value.fromBytes(value as Bytes));
     }
   }
 
