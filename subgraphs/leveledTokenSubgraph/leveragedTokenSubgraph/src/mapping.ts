@@ -386,7 +386,7 @@ export function handleBlock(block: ethereum.Block): void {
                 feeentity.value = feeentity.amount.times(tkprice);
                 feeentity.save();
             }
-
+            //already in usd
             let prices = lpsc.buyPrices();
             let priceEntity = new EntityPrice(pool.toHex()+id.toHex().substr(2));
             priceEntity.timestamp = block.timestamp;
