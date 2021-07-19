@@ -8,7 +8,7 @@ dataSources:
   source:
     address: '0xe3f94b86ceadd68e1a5ba062100b89344b2e54b7'
     abi: leverageFactory
-    startBlock: 8878482
+    startBlock: 8940030
   mapping:
     kind: ethereum/events
     apiVersion: 0.0.4

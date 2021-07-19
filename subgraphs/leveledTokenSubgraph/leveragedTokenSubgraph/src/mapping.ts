@@ -62,7 +62,7 @@ import {EntityLeveragePool,
 
 let ONE_DAY_SECONDS = 3600*24;
 //let ONE_DAY_SECONDS = 1;
-let FACTORY_ADDR = "0xdb6136017fe722044a332df2f2ffee7c26b06d75";
+let FACTORY_ADDR = "0xe3f94b86ceadd68e1a5ba062100b89344b2e54b7";
 
 export function handleCreateLeveragePool(event: CreateLeveragePool): void {
     //begin monitor pool event
@@ -276,7 +276,7 @@ export function handleBlock(block: ethereum.Block): void {
 
     if(totalTvlentity==null){
         let factorysc = leverageFactorysc.bind(dataSource.address());
-      //  let factorysc = leverageFactorysc.bind(Address.fromString(FACTORY_ADDR));
+        //let factorysc = leverageFactorysc.bind(Address.fromString(FACTORY_ADDR));
         let oracleaddr = factorysc.phxOracle();
         if (oracleaddr==Address.fromString("0x0000000000000000000000000000000000000000")) {
             return;
@@ -390,8 +390,8 @@ export function handleBlock(block: ethereum.Block): void {
             let prices = lpsc.buyPrices();
             let priceEntity = new EntityPrice(pool.toHex()+id.toHex().substr(2));
             priceEntity.timestamp = block.timestamp;
-            priceEntity.pool = pool
-
+            priceEntity.pool = pool;
+           // BigInt.fromI32(1);//
             let tkprice = oracelsc.getPrice(leverinfo.value0);
             priceEntity.leverSettlement = leverinfo.value0;
             priceEntity.leverageprice = prices.value0.times(tkprice);
