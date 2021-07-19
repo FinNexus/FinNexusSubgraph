@@ -18,10 +18,26 @@ const client = new Lokka({
 
 const PRICE_DECIMAL = new BN("1000000");
 const EIGHTEEN_DECIMAL = new BN("1000000000000000000");
+const EIGHT_DECIMAL = new BN("100000000");
 const NETWORTH_DECIMAL = new BN("100000000");
 
 const underLying = ["", "btc", "eth", "mkr", "snx", "link"];
 const optype = ["call", "put"];
+
+function getDecimalBN(decimal) {
+    var decimalBN = "1";
+    for(var i=0;i<decimal;i++) {
+        decimalBN = decimalBN + "0";
+    }
+
+    let tokenDecimal = new BN(decimalBN);
+    let priceDecimal = EIGHTEEN_DECIMAL.div(tokenDecimal).mul(EIGHT_DECIMAL);
+
+    //let allDecimal = priceDecimal.mul(tokenDecimal);
+    //console.log(decimal,decimalBN,priceDecimal.toString(10));
+
+    return priceDecimal;
+}
 
 function getDate(unixtime) {
     var a = new Date(unixtime * 1000);
@@ -518,19 +534,23 @@ async function getLeverHedgeTokenPrice() {
     }`
     let result = await client.query(querystr)
     let prices = result.entityPrices;
-    //console.log(prices);
+    console.log(prices);
     let allprices = new Map();
     for(let i=0;i<prices.length;i++) {
         let item = prices[i];
         let name = pools[item.pool].PoolName;
         let tk = new web3.eth.Contract(tokenabi,item.leverSettlement);
         let leverdecimal = await tk.methods.decimals().call();
+        leverdecimal = getDecimalBN(leverdecimal)
+
         tk = new web3.eth.Contract(tokenabi,item.hedgeSettlement);
         let hedgedecimal = await tk.methods.decimals().call();
+        hedgedecimal = getDecimalBN(hedgedecimal);
+
         let price = {
             TimeStamp: item.timestamp,
-            Leverageprice: new BN(item.leverageprice).div(PRICE_DECIMAL.mul(new BN(leverdecimal))).toNumber().toFixed(2),
-            Hedgeprice: new BN(item.hedgeprice).div(PRICE_DECIMAL.mul(new BN(hedgedecimal))).toNumber().toFixed(2)
+            Leverageprice: (new BN(item.leverageprice).div(PRICE_DECIMAL)).div(leverdecimal).toNumber().toFixed(2),
+            Hedgeprice: (new BN(item.hedgeprice).div(PRICE_DECIMAL)).div(leverdecimal).toNumber().toFixed(2)
         }
         if(allprices[name]==undefined) {
             allprices[name] = [];
