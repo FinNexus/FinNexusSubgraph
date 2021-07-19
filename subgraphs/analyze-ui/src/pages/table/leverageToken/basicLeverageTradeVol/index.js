@@ -2,33 +2,54 @@ import React from 'react';
 import { BTable } from 'bcomponents';
 
 const columns = [{
-  title: 'id',
-  dataIndex: 'id',
-  key: 'id',
+  title: 'Token Name',
+  dataIndex: 'TokenName',
+  key: 'TokenName',
 }, {
-  title: '姓名',
-  dataIndex: 'name',
-  key: 'name',
-  sorter: true,
+  title: 'Date',
+  dataIndex: 'Date',
+  key: 'Date',
 }, {
-  title: 'Email',
-  dataIndex: 'email',
-  key: 'email',
-  sorter: true,
+  title: 'Buy Bull Amount',
+  dataIndex: 'BuyLeverAmount',
+  key: 'BuyLeverAmount',
 }, {
-  title: '创建时间',
-  dataIndex: 'createTime',
-  key: 'createTime',
-  sorter: true,
+  title: 'Buy Bull Value',
+  dataIndex: 'BuyLeverValue',
+  key: 'BuyLeverValue',
+},{
+  title: 'Sell Bull Amount',
+  dataIndex: 'SellLeverAmount',
+  key: 'SellLeverAmount',
+},{
+  title: 'Sell Bull Value',
+  dataIndex: 'SellLeverValue',
+  key: 'SellLeverValue',
+},{
+  title: 'Buy Bear Amount',
+  dataIndex: 'BuyHedgeAmount',
+  key: 'BuyHedgeAmount',
+},{
+  title: 'Buy Bear Value',
+  dataIndex: 'BuyHedgeValue',
+  key: 'Buy Hedge Value',
+},{
+  title: 'Sell Bear Amount',
+  dataIndex: 'SellHedgeAmount',
+  key: 'SellHedgeAmount',
+},{
+  title: 'Sell Bear Value',
+  dataIndex: 'SellHedgeValue',
+  key: 'SellHedgeValue',
 }]
 
 
 @BTable.tableEffectHoc({
-  url: '/api/table/list',
+  url: '/api/table/listLeverageTradeVol',
   columns: columns
 })
-class BasicTable extends React.Component {
 
+class BasicTable extends React.Component {
   render() {
     return (
       <div style={{marginBottom: '20px'}}>
