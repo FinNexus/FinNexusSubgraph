@@ -68,8 +68,10 @@ function getDate(unixtime) {
     return time;
 };
 
-function GetValueOrZero(val) {
-  return val==null? new BN(0).toString(10): val.toString(10);
+function GetValueOrZero(val,decim) {
+  val = val==null? new BN(0).toString(10): val.toString(10);
+  val = (new Decimal(val).div(new Decimal(decim.toString(10)))).toNumber().toFixed(3)
+  return val;
 }
 
 // type EntityLeveragePool @entity {
@@ -199,17 +201,21 @@ export async function getEntityTradeItems() {
         let item = tradeItems[i];
         let tk = new web3.eth.Contract(tokenabi,item.settlement);
         let settleName = await tk.methods.symbol().call();
+        let decimal = await tk.methods.decimals().call();
+        let tokenDecimal = new Decimal(getDecimalBN(decimal).toString(10));
+        let priceDecimal = new Decimal(getPriceDecimalBN(decimal).toString(10));
 
         let tradeitem = {
             Date: getDate(item.TimeStamp),
+            Pool: item.pool,
             Owner: item.from,
             Status: item.status,
             Settlement: settleName,
             Underlying: pools[item.pool].UnderlyingName,
             Leveragetype: item.leveragetype,
-            Amount: new BN(item.amount).div(EIGHTEEN_DECIMAL),
-            Value: new BN(item.value).div(EIGHTEEN_DECIMAL.mul(PRICE_DECIMAL)),
-            Price: new BN(item.price).div(PRICE_DECIMAL)
+            Amount: (new Decimal(item.amount).div(new Decimal(EIGHTEEN_DECIMAL.toString(10)))).toNumber().toFixed(3),
+            Value: (new Decimal(item.value).div(tokenDecimal).div(tokenDecimal)).toNumber().toFixed(3),
+            Price: (new Decimal(item.price).div(priceDecimal)).toNumber().toFixed(3)
         }
         allTradeItems[item.id].push(tradeitem);
     }
@@ -281,12 +287,13 @@ export async function getTvls() {
         let tk = new web3.eth.Contract(tokenabi,item.token);
         let name = await tk.methods.symbol().call();
         let decimal = await tk.methods.decimals().call();
-        //console.log(name,decimal)
+        let tokenDecimal = new Decimal(getDecimalBN(decimal).toString(10));
+        let priceDecimal = new Decimal(getPriceDecimalBN(decimal).toString(10));
         let tvl = {
             TokenName: name,
             Date:getDate(item.timestamp),
-            Amount: new BN(item.amount).div(new BN(decimal)),
-            UsdValue: new BN(item.value).div(new BN(decimal).mul(PRICE_DECIMAL))
+            Amount: (new Decimal(item.amount).div(tokenDecimal)).toNumber().toFixed(3),
+            UsdValue: (new Decimal(item.value).div(priceDecimal)).toNumber().toFixed(3)
         }
 
         if(alltvls[name]==undefined) {
@@ -346,7 +353,7 @@ export async function getApys() {
         let apy = {
             Date:getDate(item.timestamp),
             Token: name,
-            Apy: new BN(item.apy).div(new BN("10000"))
+            Apy: (new Decimal(item.apy).div(new Decimal("10000"))).toNumber().toFixed(2)
         }
         if(allapys[name]==undefined) {
             allapys[name] = [];
@@ -423,17 +430,22 @@ export async function getTradeVol() {
         let item = vols[i];
         let tk = new web3.eth.Contract(tokenabi,item.token);
         let name = await tk.methods.symbol().call();
+
+        let decimal = await tk.methods.decimals().call();
+        let tokenDecimal = getDecimalBN(decimal);
+        let priceDecimal = getPriceDecimalBN(decimal);
+
         let vol = {
             TokenName: name,
             TimeStamp: getDate(item.timestamp),
-            BuyLeverAmount: GetValueOrZero(item.buyLeverAmount),
-            BuyLeverValue: GetValueOrZero(item.buyLeverValue),
-            SellLeverAmount: GetValueOrZero(item.sellLeverAmount),
-            SellLeverValue: GetValueOrZero(item.sellLeverValue),
-            BuyHedgeAmount: GetValueOrZero(item.buyHedgeAmount),
-            BuyHedgeValue: GetValueOrZero(item.buyHedgeValue),
-            SellHedgeAmount: GetValueOrZero(item.sellHedgeAmount),
-            SellHedgeValue: GetValueOrZero(item.sellHedgeValue)
+            BuyLeverAmount: GetValueOrZero(item.buyLeverAmount,tokenDecimal),
+            BuyLeverValue: GetValueOrZero(item.buyLeverValue,priceDecimal),
+            SellLeverAmount: GetValueOrZero(item.sellLeverAmount,tokenDecimal),
+            SellLeverValue: GetValueOrZero(item.sellLeverValue,priceDecimal),
+            BuyHedgeAmount: GetValueOrZero(item.buyHedgeAmount,tokenDecimal),
+            BuyHedgeValue: GetValueOrZero(item.buyHedgeValue,priceDecimal),
+            SellHedgeAmount: GetValueOrZero(item.sellHedgeAmount,tokenDecimal),
+            SellHedgeValue: GetValueOrZero(item.sellHedgeValue,priceDecimal)
         }
 
         if(allvols[name]==undefined) {
@@ -517,7 +529,7 @@ export async function getTradeFee() {
             TimeStamp: getDate(item.timestamp),
             Token: name,
             Amount: new Decimal(item.amount).div(new Decimal(tokenDecimal.toString(10))).toNumber().toFixed(3),
-            Value: new BN(item.value).div(priceDecimal).div(tokenDecimal).toNumber().toFixed(2)
+            Value: new Decimal(item.value).div(new Decimal(priceDecimal.toString(10))).div(new Decimal(tokenDecimal.toString(10))).toNumber().toFixed(3)
         }
       console.log(name,decimal,tokenDecimal.toString(10),priceDecimal.toString(10),fee.Amount)
         if(allfees[name]==undefined) {

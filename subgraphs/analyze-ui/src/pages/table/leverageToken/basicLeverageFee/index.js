@@ -7,8 +7,8 @@ const columns = [{
   key: 'TokenName',
 }, {
   title: 'Date',
-  dataIndex: 'TimeStamp',
-  key: 'TimeStamp',
+  dataIndex: 'Date',
+  key: 'Date',
 }, {
   title: 'Amount',
   dataIndex: 'Amount',

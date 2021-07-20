@@ -53,7 +53,7 @@ export default {
             });
           }
         }
-        console.log(retArray);
+       // console.log(retArray);
         time(() => {
           res.send(responseJson({
             rows: retArray,
@@ -135,6 +135,39 @@ export default {
               Date: ret[key][i].TimeStamp,
               Amount: ret[key][i].Amount,
               Value: ret[key][i].Value
+            });
+          }
+        }
+        //console.log(retArray);
+        time(() => {
+          res.send(responseJson({
+            rows: retArray,
+            count: retArray.length,
+          }));
+        })
+      })
+  },
+
+  'GET /api/table/listTradeItems': (req, res) => {
+    //const { pageNum, pageIndex, search } = req.query;
+    leverquery.getEntityTradeItems().then(
+      (ret) => {
+        let retArray = [];
+        for (const key in ret) {
+          // console.log('key', key, 'ret', ret);
+          for(var i=0;i<ret[key].length;i++) {
+            let item = ret[key][i];
+            retArray.push({
+              Pool: item.Pool,
+              Date: item.Date,
+              Owner: item.Owner,
+              Status: item.Status,
+              Settlement: item.Settlement,
+              Underlying: item.Underlying,
+              Leveragetype: item.Leveragetype,
+              Amount: item.Amount,
+              Value: item.Value,
+              Price: item.Price
             });
           }
         }
