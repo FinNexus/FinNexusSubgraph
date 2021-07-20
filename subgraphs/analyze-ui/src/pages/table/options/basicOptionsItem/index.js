@@ -2,29 +2,50 @@ import React from 'react';
 import { BTable } from 'bcomponents';
 
 const columns = [{
-  title: 'id',
-  dataIndex: 'id',
-  key: 'id',
+  title: 'Option Id',
+  dataIndex: 'OptionId',
+  key: 'OptionId',
 }, {
-  title: '姓名',
-  dataIndex: 'name',
-  key: 'name',
-  sorter: true,
+  title: 'Date',
+  dataIndex: 'Date',
+  key: 'Date',
 }, {
-  title: 'Email',
-  dataIndex: 'email',
-  key: 'email',
-  sorter: true,
+  title: 'Status',
+  dataIndex: 'Status',
+  key: 'Status',
 }, {
-  title: '创建时间',
-  dataIndex: 'createTime',
-  key: 'createTime',
-  sorter: true,
+  title: 'Underlying',
+  dataIndex: 'Underlying',
+  key: 'Underlying',
+}, {
+  title: 'Type',
+  dataIndex: 'Type',
+  key: 'Type',
+}, {
+  title: 'Amount',
+  dataIndex: 'Amount',
+  key: 'Amount',
+}, {
+  title: 'Usd Value',
+  dataIndex: 'UsdValue',
+  key: 'UsdValue',
+}, {
+  title: 'Strike Price',
+  dataIndex: 'StrikePrice',
+  key: 'StrikePrice',
+}, {
+  title: 'Premium',
+  dataIndex: 'Premium',
+  key: 'Premium',
+}, {
+  title: 'PL',
+  dataIndex: 'PL',
+  key: 'PL',
 }]
 
 
 @BTable.tableEffectHoc({
-  url: '/api/table/list',
+  url: '/api/table/listOptionItem',
   columns: columns
 })
 class BasicTable extends React.Component {

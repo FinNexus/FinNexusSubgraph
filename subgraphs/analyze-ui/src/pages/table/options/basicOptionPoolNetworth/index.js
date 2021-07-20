@@ -2,29 +2,22 @@ import React from 'react';
 import { BTable } from 'bcomponents';
 
 const columns = [{
-  title: 'id',
-  dataIndex: 'id',
-  key: 'id',
+  title: 'Pool',
+  dataIndex: 'Pool',
+  key: 'Pool',
 }, {
-  title: '姓名',
-  dataIndex: 'name',
-  key: 'name',
-  sorter: true,
+  title: 'Date',
+  dataIndex: 'Date',
+  key: 'Date',
 }, {
-  title: 'Email',
-  dataIndex: 'email',
-  key: 'email',
-  sorter: true,
-}, {
-  title: '创建时间',
-  dataIndex: 'createTime',
-  key: 'createTime',
-  sorter: true,
+  title: 'NetWorth',
+  dataIndex: 'NetWorth',
+  key: 'NetWorth',
 }]
 
 
 @BTable.tableEffectHoc({
-  url: '/api/table/list',
+  url: '/api/table/listPoolNetWorth',
   columns: columns
 })
 class BasicTable extends React.Component {

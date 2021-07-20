@@ -24,7 +24,7 @@ const NETWORTH_DECIMAL = new BN("100000000");
 const underLying = ["", "btc", "eth", "mkr", "snx", "link"];
 const optype = ["call", "put"];
 
-function getDecimalBN(decimal) {
+export function getDecimalBN(decimal) {
   var decimalBN = "1";
   for(var i=0;i<decimal;i++) {
     decimalBN = decimalBN + "0";
@@ -32,7 +32,7 @@ function getDecimalBN(decimal) {
 
   return new BN(decimalBN);
 }
-function getPriceDecimalBN(decimal) {
+export function getPriceDecimalBN(decimal) {
     var decimalBN = "1";
     for(var i=0;i<decimal;i++) {
         decimalBN = decimalBN + "0";
@@ -47,7 +47,7 @@ function getPriceDecimalBN(decimal) {
     return priceDecimal;
 }
 
-function getDate(unixtime) {
+export function getDate(unixtime) {
     var a = new Date(unixtime * 1000);
     var months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
     var year = a.getFullYear();
@@ -68,7 +68,7 @@ function getDate(unixtime) {
     return time;
 };
 
-function GetValueOrZero(val,decim) {
+export function GetValueOrZero(val,decim) {
   val = val==null? new BN(0).toString(10): val.toString(10);
   val = (new Decimal(val).div(new Decimal(decim.toString(10)))).toNumber().toFixed(3)
   return val;

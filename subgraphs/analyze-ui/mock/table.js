@@ -181,6 +181,175 @@ export default {
       })
   },
 
+  'GET /api/table/listOptionTVL': (req, res) => {
+    //const { pageNum, pageIndex, search } = req.query;
+    optionQuery.getTvls().then(
+      (ret) => {
+        let retArray = [];
+        for (const key in ret) {
+          // console.log('key', key, 'ret', ret);
+          for(var i=0;i<ret[key].length;i++) {
+            let item = ret[key][i];
+            retArray.push({
+              Token: item.Token,
+              Date: item.Date,
+              Amount: item.Amount,
+              UsdValue: item.UsdValue,
+            });
+          }
+        }
+        //console.log(retArray);
+        time(() => {
+          res.send(responseJson({
+            rows: retArray,
+            count: retArray.length,
+          }));
+        })
+      })
+  },
+
+  'GET /api/table/listPoolNetWorth': (req, res) => {
+    //const { pageNum, pageIndex, search } = req.query;
+    optionQuery.getNetWorths().then(
+      (ret) => {
+        let retArray = [];
+        for (const key in ret) {
+          // console.log('key', key, 'ret', ret);
+          for(var i=0;i<ret[key].length;i++) {
+            let item = ret[key][i];
+            retArray.push({
+              Pool: item.Pool,
+              Date: item.Date,
+              NetWorth: item.NetWorth
+            });
+          }
+        }
+        //console.log(retArray);
+        time(() => {
+          res.send(responseJson({
+            rows: retArray,
+            count: retArray.length,
+          }));
+        })
+      })
+  },
+
+  'GET /api/table/listOptionActiveVol': (req, res) => {
+    //const { pageNum, pageIndex, search } = req.query;
+    optionQuery.getActiveOptions().then(
+      (ret) => {
+        let retArray = [];
+        for (const key in ret) {
+          // console.log('key', key, 'ret', ret);
+          for(var i=0;i<ret[key].length;i++) {
+            let item = ret[key][i];
+            retArray.push({
+              Underlying: item.Underlying,
+              CallAmount: item.CallAmount,
+              CallUsdValue: item.CallUsdValue,
+              PutAmount: item.PutAmount,
+              PutUsdValue: item.PutUsdValue,
+            });
+          }
+        }
+        //console.log(retArray);
+        time(() => {
+          res.send(responseJson({
+            rows: retArray,
+            count: retArray.length,
+          }));
+        })
+      })
+  },
+
+  'GET /api/table/listOptionPremium': (req, res) => {
+    //const { pageNum, pageIndex, search } = req.query;
+    optionQuery.getEntityPremiums().then(
+      (ret) => {
+        let retArray = [];
+        for (const key in ret) {
+          // console.log('key', key, 'ret', ret);
+          for(var i=0;i<ret[key].length;i++) {
+            let item = ret[key][i];
+            retArray.push({
+              TokenName: item.TokenName,
+              Date: item.Date,
+              CallAmount: item.CallAmount,
+              CallUsdValue: item.CallUsdValue,
+              PutAmount: item.PutAmount,
+              PutUsdValue: item.PutUsdValue,
+            });
+          }
+        }
+        //console.log(retArray);
+        time(() => {
+          res.send(responseJson({
+            rows: retArray,
+            count: retArray.length,
+          }));
+        })
+      })
+  },
+  'GET /api/table/listOptionFee': (req, res) => {
+    //const { pageNum, pageIndex, search } = req.query;
+    optionQuery.getEntityFees().then(
+      (ret) => {
+        let retArray = [];
+        for (const key in ret) {
+          // console.log('key', key, 'ret', ret);
+          for(var i=0;i<ret[key].length;i++) {
+            let item = ret[key][i];
+            retArray.push({
+              TokenName: item.TokenName,
+              Date: item.Date,
+              CallAmount: item.CallAmount,
+              CallUsdValue: item.CallUsdValue,
+              PutAmount: item.PutAmount,
+              PutUsdValue: item.PutUsdValue,
+            });
+          }
+        }
+        //console.log(retArray);
+        time(() => {
+          res.send(responseJson({
+            rows: retArray,
+            count: retArray.length,
+          }));
+        })
+      })
+  },
+  'GET /api/table/listOptionItem': (req, res) => {
+    //const { pageNum, pageIndex, search } = req.query;
+    optionQuery.getEntityOptionItems().then(
+      (ret) => {
+        let retArray = [];
+        for (const key in ret) {
+          // console.log('key', key, 'ret', ret);
+          for(var i=0;i<ret[key].length;i++) {
+            let item = ret[key][i];
+            retArray.push({
+              OptionId:item.OptionId,
+              Date: item.Date,
+              Status: item.Status,
+              Underlying:item.Underlying,
+              Type: item.Type,
+              Amount: item.Amount,
+              UsdValue: item.UsdValue,
+              StrikePrice: item.StrikePrice,
+              Premium: item.Premium,
+              PL: item.PL
+            });
+          }
+        }
+        //console.log(retArray);
+        time(() => {
+          res.send(responseJson({
+            rows: retArray,
+            count: retArray.length,
+          }));
+        })
+      })
+  },
   'POST /api/table': (req, res) => {
     res.send(responseJson('添加成功!'));
   },

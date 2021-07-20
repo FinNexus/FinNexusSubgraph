@@ -57,7 +57,7 @@ const adminMenu = [
       url: '/table/options/basicOptionPoolNetworth',
     },{
       id: 23,
-      name: 'Active Option Value',
+      name: 'Active Option Volume',
       enName: 'Basic Table',
       url: '/table/options/basicOptionActiveVol',
     },{
