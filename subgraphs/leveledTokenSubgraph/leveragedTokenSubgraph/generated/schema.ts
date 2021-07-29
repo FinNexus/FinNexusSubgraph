@@ -222,6 +222,40 @@ export class EntityTradeItem extends Entity {
     }
   }
 
+  get settlementAmount(): BigInt | null {
+    let value = this.get("settlementAmount");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set settlementAmount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("settlementAmount");
+    } else {
+      this.set("settlementAmount", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get settlementPrice(): BigInt | null {
+    let value = this.get("settlementPrice");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set settlementPrice(value: BigInt | null) {
+    if (value === null) {
+      this.unset("settlementPrice");
+    } else {
+      this.set("settlementPrice", Value.fromBigInt(value as BigInt));
+    }
+  }
+
   get leverageToken(): Bytes | null {
     let value = this.get("leverageToken");
     if (value === null || value.kind == ValueKind.NULL) {

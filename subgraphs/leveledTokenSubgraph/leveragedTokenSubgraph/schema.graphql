@@ -16,6 +16,8 @@ type EntityTradeItem @entity {
   timestamp: BigInt!
   status: String
   settlement: Bytes
+  settlementAmount: BigInt
+  settlementPrice: BigInt
   leverageToken: Bytes
   leveragetype: String
   value: BigInt!

@@ -131,11 +131,16 @@ export function handleBuyHedge(event: BuyHedge): void {
      entity.status = "Buying";
      entity.leveragetype = "Bear";
      entity.pool = event.address;
+
      entity.settlement = info.value0;
+     entity.settlementAmount = event.params.payAmount;
+     let wholevalue = event.params.hedgeAmount.times(event.params.tokenPrice)
+     entity.settlementPrice =  wholevalue.div(event.params.payAmount);
+
      entity.leverageToken = info.value2;
      entity.price = event.params.tokenPrice;
      entity.amount = event.params.hedgeAmount;
-     entity.value = entity.price.times(entity.amount);
+     entity.value = wholevalue;
      entity.save();
 
      let trdid = event.params.Coin.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex().substr(2);
@@ -143,8 +148,8 @@ export function handleBuyHedge(event: BuyHedge): void {
      if(tradevolentity==null) {
         return;
      } else {
-        tradevolentity.buyHedgeAmount = tradevolentity.buyHedgeAmount.plus(entity.amount);
-        tradevolentity.buyHedgeValue = tradevolentity.buyHedgeValue.plus(entity.value);
+        tradevolentity.buyHedgeAmount = tradevolentity.buyHedgeAmount.plus(event.params.payAmount);
+        tradevolentity.buyHedgeValue = tradevolentity.buyHedgeValue.plus(wholevalue);
         tradevolentity.save();
      }
   }
@@ -170,10 +175,16 @@ export function handleBuyLeverage(event: BuyLeverage): void {
         entity.leveragetype = "Bull";
         entity.pool = event.address;
         entity.settlement = info.value0;
+
+        entity.settlement = info.value0;
+        entity.settlementAmount = event.params.payAmount;
+        let wholevalue = event.params.leverageAmount.times(event.params.tokenPrice)
+        entity.settlementPrice =  wholevalue.div(event.params.payAmount);
+
         entity.leverageToken = info.value2;
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.leverageAmount;
-        entity.value = entity.price.times(entity.amount);
+        entity.value = wholevalue;
         entity.save();
 
         let trdid = event.params.Coin.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex().substr(2);
@@ -181,8 +192,8 @@ export function handleBuyLeverage(event: BuyLeverage): void {
         if(tradevolentity==null) {
             return;
         } else {
-            tradevolentity.buyLeverAmount = tradevolentity.buyLeverAmount.plus(entity.amount);
-            tradevolentity.buyLeverValue = tradevolentity.buyLeverValue.plus(entity.value);
+            tradevolentity.buyLeverAmount = tradevolentity.buyLeverAmount.plus(event.params.payAmount);
+            tradevolentity.buyLeverValue = tradevolentity.buyLeverValue.plus(wholevalue);
             tradevolentity.save();
         }
     }
@@ -207,10 +218,15 @@ export function handleSellHedge(event: SellHedge): void {
         entity.leveragetype = "Bear";
         entity.pool = event.address;
         entity.settlement = info.value0;
+
+        entity.settlementAmount = event.params.amount;
+        let wholevalue = event.params.hedgeAmount.times(event.params.tokenPrice)
+        entity.settlementPrice =  wholevalue.div(event.params.amount);
+
         entity.leverageToken = info.value2;
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.hedgeAmount;
-        entity.value = entity.price.times(entity.amount);
+        entity.value = wholevalue;
         entity.save();
 
         let trdid = event.params.Coin.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex().substr(2);
@@ -218,8 +234,8 @@ export function handleSellHedge(event: SellHedge): void {
         if(tradevolentity==null) {
             return;
         } else {
-            tradevolentity.sellHedgeAmount = tradevolentity.sellHedgeAmount.plus(entity.amount);
-            tradevolentity.sellHedgeValue = tradevolentity.sellHedgeValue.plus(entity.value);
+            tradevolentity.sellHedgeAmount = tradevolentity.sellHedgeAmount.plus(event.params.amount);
+            tradevolentity.sellHedgeValue = tradevolentity.sellHedgeValue.plus(wholevalue);
             tradevolentity.save();
         }
     }
@@ -245,10 +261,15 @@ export function handleSellLeverage(event: SellLeverage): void {
         entity.leveragetype = "Bull";
         entity.pool = event.address;
         entity.settlement = info.value0;
+
+        entity.settlementAmount = event.params.amount;
+        let wholevalue = event.params.leverageAmount.times(event.params.tokenPrice)
+        entity.settlementPrice =  wholevalue.div(event.params.amount);
+
         entity.leverageToken = info.value2;
         entity.price = event.params.tokenPrice;
         entity.amount = event.params.leverageAmount;
-        entity.value = entity.price.times(entity.amount);
+        entity.value = wholevalue;
         entity.save();
 
         let trdid = event.params.Coin.toHex() + (event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS))).toHex().substr(2);
@@ -256,8 +277,8 @@ export function handleSellLeverage(event: SellLeverage): void {
         if(tradevolentity==null) {
             return;
         } else {
-            tradevolentity.sellLeverAmount = tradevolentity.sellLeverAmount.plus(entity.amount);
-            tradevolentity.sellLeverValue = tradevolentity.sellLeverValue.plus(entity.value);
+            tradevolentity.sellLeverAmount = tradevolentity.sellLeverAmount.plus(event.params.amount);
+            tradevolentity.sellLeverValue = tradevolentity.sellLeverValue.plus(wholevalue);
             tradevolentity.save();
         }
     }
