@@ -11,7 +11,7 @@ const responseJson = (data, code = 0) => {
 const time = (fun) => {
   setTimeout(() => {
     fun && fun();
-  }, 300);
+  }, 3000);
 };
 
 export default {

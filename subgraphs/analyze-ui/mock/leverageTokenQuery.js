@@ -206,7 +206,7 @@ export async function getEntityTradeItems() {
         let priceDecimal = new Decimal(getPriceDecimalBN(decimal).toString(10));
 
         let tradeitem = {
-            Date: getDate(item.TimeStamp),
+            Date: getDate(item.timestamp),
             Pool: item.pool,
             Owner: item.from,
             Status: item.status,
@@ -217,6 +217,11 @@ export async function getEntityTradeItems() {
             Value: (new Decimal(item.value).div(tokenDecimal).div(tokenDecimal)).toNumber().toFixed(3),
             Price: (new Decimal(item.price).div(priceDecimal)).toNumber().toFixed(3)
         }
+
+        if(allTradeItems[item.id]==undefined) {
+          allTradeItems[item.id] = [];
+        }
+
         allTradeItems[item.id].push(tradeitem);
     }
     //console.log(alltvls);
@@ -270,7 +275,7 @@ export async function getEntityTradeItems() {
 export async function getTvls() {
     let querystr = `
     {
-       entityTVLs(first: 1000, orderBy: timestamp, orderDirection: asc) {
+       entityTVLs(first: 1000, orderBy: timestamp, orderDirection: desc) {
             id
             timestamp
             token
@@ -293,7 +298,7 @@ export async function getTvls() {
             TokenName: name,
             Date:getDate(item.timestamp),
             Amount: (new Decimal(item.amount).div(tokenDecimal)).toNumber().toFixed(3),
-            UsdValue: (new Decimal(item.value).div(priceDecimal)).toNumber().toFixed(3)
+            UsdValue: (new Decimal(item.value).div(tokenDecimal).div(priceDecimal)).toNumber().toFixed(3)
         }
 
         if(alltvls[name]==undefined) {
@@ -332,7 +337,7 @@ export async function getTvls() {
 export async function getApys() {
     let querystr = `
     {
-       entityInterestAPYs(first: 1000, orderBy: timestamp, orderDirection: asc) {
+       entityInterestAPYs(first: 1000, orderBy: timestamp, orderDirection: desc) {
             id
             timestamp
             pool
@@ -407,7 +412,7 @@ export async function getApys() {
 export async function getTradeVol() {
     let querystr = `
     {
-       entityTradeVols(first: 1000, orderBy: timestamp, orderDirection: asc) {
+       entityTradeVols(first: 1000, orderBy: timestamp, orderDirection: desc) {
         id
         timestamp
         token
