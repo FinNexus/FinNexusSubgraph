@@ -371,7 +371,7 @@ export function handleBlock(block: ethereum.Block): void {
                 feeentity.amount = tk.balanceOf(feercvr);
                 if(prefeeentity!=null)  {
                   let diff = tk.balanceOf(feercvr).minus(prefeeentity.amount);
-                  if(diff.gt(BigInt.fromI32(0))) {
+                  if(diff.ge(BigInt.fromI32(0))) {
                       //get today's fee income
                       feeentity.amount = diff;
                   }
