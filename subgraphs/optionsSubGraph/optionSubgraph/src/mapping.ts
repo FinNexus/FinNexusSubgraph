@@ -169,6 +169,8 @@ export function handleAddFee(event: AddFee): void {
     let entityBuyOptionItem = EntityBuyOptionItem.load(event.transaction.hash.toHex());
     if(entityBuyOptionItem==null){
         entityBuyOptionItem = new EntityBuyOptionItem(event.transaction.hash.toHex());
+        entityBuyOptionItem.CreatedTime =event.block.timestamp;
+        entityBuyOptionItem.Amount = BigInt.fromI32(0);
     }
 
     entityBuyOptionItem.Fee = event.params.payback;
@@ -178,6 +180,7 @@ export function handleAddFee(event: AddFee): void {
 }
 
 export function handleExerciseOption(event: ExerciseOption): void {
+
     let entityExcerciseOptionHashId = EntityExcerciseOptionHashId.load(event.address.toHex()+event.params.optionId.toHex())
     if(entityExcerciseOptionHashId == null) {
         entityExcerciseOptionHashId = new EntityExcerciseOptionHashId(event.address.toHex()+event.params.optionId.toHex())
@@ -316,6 +319,7 @@ export function handleBlock(block: ethereum.Block): void {
 
                 //poolid+optionid as key
                 let entityoption = EntityOptionItem.load(pooloptionid);
+
                 if(entityoption==null) {
                     let entityBuyIdHash = EntityBuyOptionHashId.load(optionPoolAssress.toHex()+k.toHex());
                     if (entityBuyIdHash == null) {
@@ -332,7 +336,13 @@ export function handleBlock(block: ethereum.Block): void {
                     entityBuyOptionItem.save();
 
                     let entityexcercisehash = EntityExcerciseOptionHashId.load(managerAddess.toHex()+k.toHex());
-                    let entityexcerciseitem = EntityExcerciseOptionItem.load(entityexcercisehash.id);
+                    let entityexcerciseitem:EntityExcerciseOptionItem;
+
+                    if(entityexcercisehash!=null) {
+                        entityexcerciseitem = <EntityExcerciseOptionItem>(EntityExcerciseOptionItem.load(entityexcercisehash.ExcerciseHash));
+                    } else {
+                        entityexcerciseitem = null;
+                    }
 
                     let entityOptionItem = EntityOptionItem.load(pooloptionid);
                     if(entityOptionItem==null) {
@@ -372,6 +382,7 @@ export function handleBlock(block: ethereum.Block): void {
 
                     entityOptionItem.save();
 
+
                     let entityPremium = EntityPremium.load(extrainfo.value0.toHex()+id);
                     if(entityPremium!=null) {
                         if (optinfo.value2 == 0) {
@@ -399,9 +410,13 @@ export function handleBlock(block: ethereum.Block): void {
 
                         entityFee.save();
                     }
+
+
                 } else {
                     break;
                 }
+
+
 
             }//for option length
 
