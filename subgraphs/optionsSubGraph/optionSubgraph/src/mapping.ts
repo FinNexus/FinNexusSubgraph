@@ -67,7 +67,7 @@ let ONE_DAY_SECONDS = BigInt.fromI32(3600*24);
 
 function createTemplateBind(): void {
     //for test, resturn immediately
-    return;
+    //return;
 
     let managerAddr = "0xaF33Bda2DA6c29104c528c26dcA8b5BCE86EE56F";
     let colAddr = "0x356EBBbAaceb72Ca35EeB9f11a13529909e6C6c7";
@@ -97,7 +97,7 @@ function createTemplateBind(): void {
 }
 
 export function handleCreateOptionsManager(event: CreateOptionsManager): void {
-
+/*
     let entityOptionManager = EntityOptionManager.load(event.params.optionsManager.toHex());
     if (entityOptionManager == null) {
         entityOptionManager = new EntityOptionManager(event.params.optionsManager.toHex());
@@ -118,7 +118,7 @@ export function handleCreateOptionsManager(event: CreateOptionsManager): void {
         entityCollateralPool.save();
         CollateralPoolTemplate.create(event.params.collateralPool);
     }
-
+*/
 }
 
 export function handleBuyOption(event: BuyOption): void {
@@ -178,7 +178,6 @@ export function handleAddFee(event: AddFee): void {
 }
 
 export function handleExerciseOption(event: ExerciseOption): void {
-
     let entityExcerciseOptionHashId = EntityExcerciseOptionHashId.load(event.address.toHex()+event.params.optionId.toHex())
     if(entityExcerciseOptionHashId == null) {
         entityExcerciseOptionHashId = new EntityExcerciseOptionHashId(event.address.toHex()+event.params.optionId.toHex())
@@ -275,7 +274,7 @@ export function handleBlock(block: ethereum.Block): void {
 
             //no option,not test
             let optionlen = optionpoolsc.getOptionInfoLength().toI32();
-            for(let j=optionlen-1;j>=0;j--) {
+            for(let j=optionlen;j>0;j--) {
                 let k = BigInt.fromI32(j);
                 let pooloptionid = BigInt.fromI32(i).toHex() +k.toHex();
                 //(optionsId 0,info.owner 1,

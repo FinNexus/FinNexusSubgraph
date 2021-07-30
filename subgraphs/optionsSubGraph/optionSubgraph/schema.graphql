@@ -83,10 +83,10 @@ type EntityActiveOption @entity {
   id: ID! #token + timeid as id
   TimeStamp: BigInt!
   Underlying: BigInt!
-  CallAmount: BigInt!
-  CallUsdValue: BigInt!
-  PutAmount: BigInt!
-  PutUsdValue: BigInt!
+  CallAmount: BigInt
+  CallUsdValue: BigInt
+  PutAmount: BigInt
+  PutUsdValue: BigInt
 }
 
 type EntityPremium @entity {

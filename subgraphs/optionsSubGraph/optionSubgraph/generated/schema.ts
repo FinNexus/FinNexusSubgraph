@@ -907,40 +907,72 @@ export class EntityActiveOption extends Entity {
     this.set("Underlying", Value.fromBigInt(value));
   }
 
-  get CallAmount(): BigInt {
+  get CallAmount(): BigInt | null {
     let value = this.get("CallAmount");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set CallAmount(value: BigInt) {
-    this.set("CallAmount", Value.fromBigInt(value));
+  set CallAmount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("CallAmount");
+    } else {
+      this.set("CallAmount", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get CallUsdValue(): BigInt {
+  get CallUsdValue(): BigInt | null {
     let value = this.get("CallUsdValue");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set CallUsdValue(value: BigInt) {
-    this.set("CallUsdValue", Value.fromBigInt(value));
+  set CallUsdValue(value: BigInt | null) {
+    if (value === null) {
+      this.unset("CallUsdValue");
+    } else {
+      this.set("CallUsdValue", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get PutAmount(): BigInt {
+  get PutAmount(): BigInt | null {
     let value = this.get("PutAmount");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set PutAmount(value: BigInt) {
-    this.set("PutAmount", Value.fromBigInt(value));
+  set PutAmount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("PutAmount");
+    } else {
+      this.set("PutAmount", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get PutUsdValue(): BigInt {
+  get PutUsdValue(): BigInt | null {
     let value = this.get("PutUsdValue");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set PutUsdValue(value: BigInt) {
-    this.set("PutUsdValue", Value.fromBigInt(value));
+  set PutUsdValue(value: BigInt | null) {
+    if (value === null) {
+      this.unset("PutUsdValue");
+    } else {
+      this.set("PutUsdValue", Value.fromBigInt(value as BigInt));
+    }
   }
 }
 
