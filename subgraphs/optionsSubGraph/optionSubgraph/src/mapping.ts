@@ -67,7 +67,7 @@ let ONE_DAY_SECONDS = BigInt.fromI32(3600*24);
 
 function createTemplateBind(): void {
     //for test, resturn immediately
-    return;
+   // return;
 
     let managerAddr = "0xaF33Bda2DA6c29104c528c26dcA8b5BCE86EE56F";
     let colAddr = "0x356EBBbAaceb72Ca35EeB9f11a13529909e6C6c7";
@@ -97,7 +97,7 @@ function createTemplateBind(): void {
 }
 
 export function handleCreateOptionsManager(event: CreateOptionsManager): void {
-
+/*
     let entityOptionManager = EntityOptionManager.load(event.params.optionsManager.toHex());
     if (entityOptionManager == null) {
         entityOptionManager = new EntityOptionManager(event.params.optionsManager.toHex());
@@ -118,7 +118,7 @@ export function handleCreateOptionsManager(event: CreateOptionsManager): void {
         entityCollateralPool.save();
         CollateralPoolTemplate.create(event.params.collateralPool);
     }
-
+*/
 }
 
 export function handleBuyOption(event: BuyOption): void {
@@ -194,6 +194,8 @@ export function handleExerciseOption(event: ExerciseOption): void {
     entityExcerciseOptionItem.Optionid = event.params.optionId;
     entityExcerciseOptionItem.ExerciseAmount = event.params.amount;
     entityExcerciseOptionItem.ExerciseBack = event.params.sellValue;
+
+
     entityExcerciseOptionItem.save();
 
 }
@@ -340,6 +342,8 @@ export function handleBlock(block: ethereum.Block): void {
 
                     if(entityexcercisehash!=null) {
                         entityexcerciseitem = <EntityExcerciseOptionItem>(EntityExcerciseOptionItem.load(entityexcercisehash.ExcerciseHash));
+                        entityexcerciseitem.BuyPay = extrainfo.value3.times(entityexcerciseitem.ExerciseAmount);
+                        entityexcerciseitem.save();
                     } else {
                         entityexcerciseitem = null;
                     }
@@ -384,6 +388,7 @@ export function handleBlock(block: ethereum.Block): void {
 
 
                     let entityPremium = EntityPremium.load(extrainfo.value0.toHex()+id);
+
                     if(entityPremium!=null) {
                         if (optinfo.value2 == 0) {
                             entityPremium.CallUsdValue = entityPremium.CallUsdValue.plus(premium);
@@ -398,7 +403,9 @@ export function handleBlock(block: ethereum.Block): void {
                         entityPremium.save();
                     }
 
+
                     let entityFee = EntityFee.load(extrainfo.value0.toHex()+id);
+
                     if(entityFee!=null) {
                         if (optinfo.value2 == 0) {
                             entityFee.CallUsdValue = entityFee.CallUsdValue.plus(feeusd);

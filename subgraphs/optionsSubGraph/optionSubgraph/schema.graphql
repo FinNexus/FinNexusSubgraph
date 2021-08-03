@@ -42,7 +42,7 @@ type EntityExcerciseOptionItem @entity {
   Optionid: BigInt!
   ExerciseAmount: BigInt! #web3.utils.fromWei(new BN(sellAmount)),
   ExerciseBack: BigInt!  #web3.utils.fromWei(new BN(sellPay))/100000000+"(USD)",
-  BuyPay: BigInt! #web3.utils.fromWei(new BN(sellAmount).mul(new BN(buyOptPrice)))/100000000 + "(USD)"
+  BuyPay: BigInt #web3.utils.fromWei(new BN(sellAmount).mul(new BN(buyOptPrice)))/100000000 + "(USD)"
 }
 
 type EntityOptionItem @entity {

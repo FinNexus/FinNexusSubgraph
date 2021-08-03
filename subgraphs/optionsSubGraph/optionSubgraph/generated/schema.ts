@@ -491,13 +491,21 @@ export class EntityExcerciseOptionItem extends Entity {
     this.set("ExerciseBack", Value.fromBigInt(value));
   }
 
-  get BuyPay(): BigInt {
+  get BuyPay(): BigInt | null {
     let value = this.get("BuyPay");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set BuyPay(value: BigInt) {
-    this.set("BuyPay", Value.fromBigInt(value));
+  set BuyPay(value: BigInt | null) {
+    if (value === null) {
+      this.unset("BuyPay");
+    } else {
+      this.set("BuyPay", Value.fromBigInt(value as BigInt));
+    }
   }
 }
 
