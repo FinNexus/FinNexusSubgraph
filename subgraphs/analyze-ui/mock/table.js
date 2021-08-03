@@ -53,7 +53,7 @@ export default {
             });
           }
         }
-       // console.log(retArray);
+        console.log(retArray);
         time(() => {
           res.send(responseJson({
             rows: retArray,

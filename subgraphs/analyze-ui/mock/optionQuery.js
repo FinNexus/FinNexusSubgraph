@@ -2,7 +2,7 @@ const { createClient } = require('graphqurl');
 const Decimal = require("decimal.js");
 const BN = require("bn.js");
 var Web3 = require('web3');
-var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
+var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/326fb0397704475abffcfa9ca9c0ee5a"));
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
 
 var { abi } = require('./erc20token.json');
@@ -82,7 +82,7 @@ export async function getTvls() {
     }`
     let result = await client.query(querystr)
     let tvls = result.entityPoolTLVs;
-    console.log(tvls)
+    //console.log(tvls)
     let alltvls = new Map();
     for(let i=0;i<tvls.length;i++) {
         let item = tvls[i];
@@ -217,9 +217,9 @@ export async function getActiveOptions() {
         let activeopt = {
             Underlying: underLyingName,
             CallAmount: getValueOrZero(item.CallAmount,EIGHTEEN_DECIMAL),
-            CallUsdValue: getValueOrZero(item.CallUsdValue,getPriceDecimalBN(18)),
+            CallUsdValue: getValueOrZero(item.CallUsdValue,getPriceDecimalBN(2)),
             PutAmount: getValueOrZero(item.PutAmount,EIGHTEEN_DECIMAL),
-            PutUsdValue: getValueOrZero(item.PutUsdValue,getPriceDecimalBN(18)),
+            PutUsdValue: getValueOrZero(item.PutUsdValue,getPriceDecimalBN(2)),
         }
 
         if(allActiveOptions[underLyingName]==undefined) {
@@ -290,9 +290,9 @@ export async function getEntityPremiums() {
             TokenName: name,
             Date: getDate(item.TimeStamp),
             CallAmount: getValueOrZero(item.CallAmount,getDecimalBN(decimal)),
-            CallUsdValue: getValueOrZero(item.CallUsdValue,getPriceDecimalBN(decimal)),
+            CallUsdValue: getValueOrZero(item.CallUsdValue,getPriceDecimalBN(decimal-6)),
             PutAmount: getValueOrZero(item.PutAmount,getDecimalBN(decimal)),
-            PutUsdValue: getValueOrZero(item.PutUsdValue,getPriceDecimalBN(decimal)),
+            PutUsdValue: getValueOrZero(item.PutUsdValue,getPriceDecimalBN(decimal-6)),
         }
 
         if(allPremiums[name]==undefined) {
@@ -359,9 +359,9 @@ export async function getEntityFees() {
             TokenName: name,
             Date: getDate(item.TimeStamp),
             CallAmount: getValueOrZero(item.CallAmount,getDecimalBN(decimal)),
-            CallUsdValue: getValueOrZero(item.CallUsdValue,getPriceDecimalBN(decimal)),
+            CallUsdValue: getValueOrZero(item.CallUsdValue,getPriceDecimalBN(decimal-6)),
             PutAmount: getValueOrZero(item.PutAmount,getDecimalBN(decimal)),
-            PutUsdValue: getValueOrZero(item.PutUsdValue,getPriceDecimalBN(decimal)),
+            PutUsdValue: getValueOrZero(item.PutUsdValue,getPriceDecimalBN(decimal-6)),
         }
 
         if(allFees[name]==undefined) {
@@ -412,7 +412,7 @@ export async function getEntityFees() {
 export async function getEntityOptionItems() {
     let querystr = `
     {
-       entityOptionItems(first: 1000,orderby: id, orderDirection: asc) {
+       entityOptionItems(first: 1000,orderby: Date, orderDirection: desc) {
             id
             Date
             Status
@@ -434,16 +434,16 @@ export async function getEntityOptionItems() {
         let item = optionItems[i];
         let name = underLying[parseInt(item.UnderlyingAssets)];
         let option = {
-            OptionId:item.id,
-            Date: getDate(item.TimeStamp),
+            OptionId:item.id.substr(3),
+            Date: getDate(item.Date),
             Status: item.Status,
             Underlying: name,
             Type: optype[parseInt(item.Type)],
             Amount: getValueOrZero(item.Amount,EIGHTEEN_DECIMAL),
-            UsdValue: getValueOrZero(item.UsdValue,EIGHTEEN_DECIMAL),
+            UsdValue: getValueOrZero(item.UsdValue,getDecimalBN(24)),
             StrikePrice: getValueOrZero(item.StrikePrice,PRICE_DECIMAL),
-            Premium: getValueOrZero(item.Premium,PRICE_DECIMAL),
-            PL: getValueOrZero(item.Premium,PRICE_DECIMAL)
+            Premium: getValueOrZero(item.Premium,getDecimalBN(24)),
+            PL: getValueOrZero(item.Premium,getDecimalBN(24))
         }
 
         if(allOptionItems[name]==undefined) {
