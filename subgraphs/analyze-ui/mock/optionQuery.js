@@ -69,11 +69,10 @@ client.query(`
    // console.log(result);
 });
 */
-
 export async function getTvls() {
     let querystr = `
     {
-       entityPoolTLVs(first: 1000, orderBy: TimeStamp, orderDirection: asc) {
+       entityPoolTLVs(first: 1000, orderBy: TimeStamp, orderDirection: desc) {
             id
             TimeStamp
             Token
@@ -135,7 +134,7 @@ export async function getTvls() {
 export async function getNetWorths() {
     let querystr = `
     {
-      entityNetWorths(first: 1000,orderby: TimeStamp,orderDirection: asc) {
+      entityNetWorths(first: 1000,orderby: TimeStamp,orderDirection: desc) {
         id
         TimeStamp
         Pool
