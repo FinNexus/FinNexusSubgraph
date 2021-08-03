@@ -348,9 +348,9 @@ export function handleBlock(block: ethereum.Block): void {
                         entityexcerciseitem = null;
                     }
 
-                    let entityOptionItem = EntityOptionItem.load(pooloptionid);
+                    let entityOptionItem = EntityOptionItem.load(BigInt.fromI32(i).toString());
                     if(entityOptionItem==null) {
-                        entityOptionItem = new EntityOptionItem(pooloptionid);
+                        entityOptionItem = new EntityOptionItem(BigInt.fromI32(i).toString());
                     }
 
                     entityOptionItem.Date = entityBuyOptionItem.CreatedTime;
