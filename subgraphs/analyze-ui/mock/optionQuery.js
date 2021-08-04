@@ -412,7 +412,7 @@ export async function getEntityFees() {
 export async function getEntityOptionItems() {
     let querystr = `
     {
-       entityOptionItems(first: 1000,orderby: Date, orderDirection: desc) {
+       entityOptionItems(first: 1000,orderby: id, orderDirection: desc) {
             id
             Date
             Status

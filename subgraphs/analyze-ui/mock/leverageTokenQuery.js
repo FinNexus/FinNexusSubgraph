@@ -213,9 +213,9 @@ export async function getEntityTradeItems() {
             Settlement: settleName,
             Underlying: pools[item.pool].UnderlyingName,
             Leveragetype: item.leveragetype,
-            Amount: (new Decimal(item.amount).div(new Decimal(EIGHTEEN_DECIMAL.toString(10)))).toNumber().toFixed(3),
-            Value: (new Decimal(item.value).div(tokenDecimal).div(tokenDecimal)).toNumber().toFixed(3),
-            Price: (new Decimal(item.price).div(priceDecimal)).toNumber().toFixed(3)
+            Amount: GetValueOrZero(item.amount,EIGHTEEN_DECIMAL),
+            Value: GetValueOrZero(item.value,tokenDecimal.mul(priceDecimal)),
+            Price: GetValueOrZero(item.price,priceDecimal)
         }
 
         if(allTradeItems[item.id]==undefined) {
@@ -444,13 +444,13 @@ export async function getTradeVol() {
             TokenName: name,
             TimeStamp: getDate(item.timestamp),
             BuyLeverAmount: GetValueOrZero(item.buyLeverAmount,tokenDecimal),
-            BuyLeverValue: GetValueOrZero(item.buyLeverValue,priceDecimal),
+            BuyLeverValue: GetValueOrZero(item.buyLeverValue,priceDecimal.mul(tokenDecimal)),
             SellLeverAmount: GetValueOrZero(item.sellLeverAmount,tokenDecimal),
-            SellLeverValue: GetValueOrZero(item.sellLeverValue,priceDecimal),
+            SellLeverValue: GetValueOrZero(item.sellLeverValue,priceDecimal.mul(tokenDecimal)),
             BuyHedgeAmount: GetValueOrZero(item.buyHedgeAmount,tokenDecimal),
-            BuyHedgeValue: GetValueOrZero(item.buyHedgeValue,priceDecimal),
+            BuyHedgeValue: GetValueOrZero(item.buyHedgeValue,priceDecimal.mul(tokenDecimal)),
             SellHedgeAmount: GetValueOrZero(item.sellHedgeAmount,tokenDecimal),
-            SellHedgeValue: GetValueOrZero(item.sellHedgeValue,priceDecimal)
+            SellHedgeValue: GetValueOrZero(item.sellHedgeValue,priceDecimal.mul(tokenDecimal))
         }
 
         if(allvols[name]==undefined) {

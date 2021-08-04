@@ -101,7 +101,7 @@ export default {
             retArray.push({
               TokenName: item.TokenName,
               Date: item.TimeStamp,
-              BuyLeverAmount: item.BuyLeverValue,
+              BuyLeverAmount: item.BuyLeverAmount,
               BuyLeverValue: item.BuyLeverValue,
               SellLeverAmount: item.SellLeverAmount,
               SellLeverValue: item.SellLeverValue,
