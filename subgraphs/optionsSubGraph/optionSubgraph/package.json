@@ -1,13 +1,13 @@
 {
-  "name": "optionManager",
+  "name": "phxOptions",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Jeffqg123/optionManager",
-    "create-local": "graph create --node http://localhost:8020/ Jeffqg123/optionManager",
-    "remove-local": "graph remove --node http://localhost:8020/ Jeffqg123/optionManager",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 Jeffqg123/optionManager"
+    "deploy:polygon": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Jeffqg123/phx-polygon-option MainnetPolygonSubgraph.yaml",
+    "deploy:rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Jeffqg123/phxOptions",
+    "create-local": "graph create --node http://localhost:8020/ Jeffqg123/phxOptions",
+    "remove-local": "graph remove --node http://localhost:8020/ Jeffqg123/phxOptions"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.20.1",
