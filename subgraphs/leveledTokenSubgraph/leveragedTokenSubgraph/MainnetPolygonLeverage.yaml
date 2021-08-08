@@ -1,0 +1,179 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+- kind: ethereum/contract
+  name: leverageFactory
+  network: matic
+  source:
+    address: '0x3ff9dfae26fa6e47c8e44fc2332067be7ffc73de'
+    abi: leverageFactory
+    startBlock: 17615533
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.4
+    language: wasm/assemblyscript
+    entities:
+    - EntityLeverageFactory
+    - EntityLeveragePool
+    - EntityStakePool
+    - EntityTradeItem
+    - EntityTotalTVL
+    - EntityTVL
+    - EntityInterestAPY
+    - EntityTradeVol
+    - EntityStakePool
+    - EntityFee
+    - CreateLeveragePool
+    - CreateStakePool
+    abis:
+    - name: leverageFactory
+      file: ./abis/leverageFactory.json
+    - name: leveragePool
+      file: ./abis/leveragePool.json
+    - name: stakePool
+      file: ./abis/stakePool.json
+    - name: erc20
+      file: ./abis/erc20token.json
+    - name: phxoracle
+      file: ./abis/phxoracle.json
+
+    eventHandlers:
+    - event: CreateLeveragePool(indexed address,indexed address,indexed address,uint256,uint256)
+      handler: handleCreateLeveragePool
+    - event: CreateStakePool(indexed address,indexed address,uint256)
+      handler: handleCreateStakePool
+    blockHandlers:
+    - handler: handleBlock
+    file: ./src/mapping.ts
+
+templates:
+- kind: ethereum/contract
+  name: leveragePool
+  network: matic
+  source:
+    abi: leveragePool
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.4
+    language: wasm/assemblyscript
+    file: ./src/mapping.ts
+    entities:
+    - EntityLeverageFactory
+    - EntityLeveragePool
+    - EntityStakePool
+    - EntityTradeItem
+    - EntityTotalTVL
+    - EntityTVL
+    - EntityInterestAPY
+    - EntityTradeVol
+    - EntityStakePool
+    - EntityFee
+    - BuyHedge
+    - BuyLeverage
+    - Liquidate
+    - Rebalance
+    - Redeem
+    - SellHedge
+    - SellLeverage
+    - Swap
+    abis:
+    - name: leveragePool
+      file: ./abis/leveragePool.json
+    - name: stakePool
+      file: ./abis/stakePool.json
+    - name: erc20
+      file: ./abis/erc20token.json
+    - name: phxoracle
+      file: ./abis/phxoracle.json
+    eventHandlers:
+    - event: BuyHedge(indexed address,indexed address,uint256,uint256,uint256)
+      handler: handleBuyHedge
+    - event: BuyLeverage(indexed address,indexed address,uint256,uint256,uint256)
+      handler: handleBuyLeverage
+    - event: Liquidate(indexed address,indexed address,uint256,uint256,uint256)
+      handler: handleLiquidate
+    - event: Rebalance(indexed address,indexed address,uint256,uint256)
+      handler: handleRebalance
+    - event: Redeem(indexed address,indexed address,uint256)
+      handler: handleRedeem
+    - event: SellHedge(indexed address,indexed address,uint256,uint256,uint256)
+      handler: handleSellHedge
+    - event: SellLeverage(indexed address,indexed address,uint256,uint256,uint256)
+      handler: handleSellLeverage
+    - event: Swap(indexed address,indexed address,uint256,uint256)
+      handler: handleSwap
+
+- kind: ethereum/contract
+  name: stakePool
+  network: matic
+  source:
+    abi: stakePool
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.4
+    language: wasm/assemblyscript
+    file: ./src/mapping.ts
+    entities:
+    - EntityLeverageFactory
+    - EntityLeveragePool
+    - EntityStakePool
+    - EntityTradeItem
+    - EntityTotalTVL
+    - EntityTVL
+    - EntityInterestAPY
+    - EntityTradeVol
+    - EntityStakePool
+    - EntityFee
+    - EntityPrice
+    abis:
+    - name: stakePool
+      file: ./abis/stakePool.json
+    - name: stakePool
+      file: ./abis/stakePool.json
+    - name: erc20
+      file: ./abis/erc20token.json
+    - name: phxoracle
+      file: ./abis/phxoracle.json
+    eventHandlers:
+    - event: Borrow(indexed address,indexed address,uint256,uint256)
+      handler: handleBorrow
+    - event: Interest(indexed address,indexed address,uint256)
+      handler: handleInterest
+    - event: Redeem(indexed address,indexed address,uint256)
+      handler: handleRedeem
+    - event: Repay(indexed address,indexed address,uint256,uint256)
+      handler: handleRepay
+    - event: Stake(indexed address,indexed address,uint256,uint256)
+      handler: handleStake
+    - event: Unstake(indexed address,indexed address,uint256,uint256)
+      handler: handleUnstake
+
+- kind: ethereum/contract
+  name: erc20
+  network: matic
+  source:
+    abi: erc20
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.4
+    language: wasm/assemblyscript
+    file: ./src/mapping.ts
+    entities:
+    - EntityLeverageFactory
+    - CreateLeveragePool,
+    - CreateStakePool
+    - BuyHedge,
+    - BuyLeverage,
+    - SellHedge,
+    - SellLeverage,
+    - EntityLeveragePool
+    - EntityStakePool
+    - phxoracle
+    abis:
+    - name: erc20
+      file: ./abis/erc20token.json
+    eventHandlers:
+    - event: Transfer(indexed address,indexed address,uint256)
+      handler: handleTransfer
+
