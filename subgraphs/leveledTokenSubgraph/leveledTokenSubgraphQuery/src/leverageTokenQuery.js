@@ -562,7 +562,117 @@ async function getLeverHedgeTokenPrice() {
     return allprices;
 }
 
-getLeverHedgeTokenPrice();
+//getLeverHedgeTokenPrice();
+
+
+//////////////////////////////////////////////////////////////////////////////
+const Decimal = require("decimal");
+
+function getDecimalBN(decimal) {
+    var decimalBN = "1";
+    for(var i=0;i<decimal;i++) {
+        decimalBN = decimalBN + "0";
+    }
+    return new BN(decimalBN);
+}
+
+function getPriceDecimalBN(decimal) {
+    var decimalBN = "1";
+    for(var i=0;i<decimal;i++) {
+        decimalBN = decimalBN + "0";
+    }
+
+    let tokenDecimal = new BN(decimalBN);
+    let priceDecimal = EIGHTEEN_DECIMAL.div(tokenDecimal).mul(EIGHT_DECIMAL);
+
+    //let allDecimal = priceDecimal.mul(tokenDecimal);
+    //console.log(decimal,decimalBN,priceDecimal.toString(10));
+
+    return priceDecimal;
+}
+
+function getDate(unixtime) {
+    var a = new Date(unixtime * 1000);
+    var months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    date=date>=10?""+date:"0"+date;
+
+    var hour = a.getHours();
+    hour=hour>=10?""+hour:"0"+hour;
+
+    var min = a.getMinutes()
+    min=min>=10?""+min:"0"+min;
+
+    var sec = a.getSeconds();
+    sec=sec>=10?""+sec:"0"+sec;
+
+    var time = date + '-' + month + '-' + year + ' ' + hour + ':' + min + ':' + sec;
+    return time;
+};
+
+function GetValueOrZero(val,decim) {
+    val = val==null? new BN(0).toString(10): val.toString(10);
+    console.log(val);
+    console.log(decim.toString(10));
+
+    val = (new Decimal(val).div(new Decimal(decim.toString(10)))).toNumber().toFixed(3)
+    return val;
+}
+
+async function getEntityTradeItem(txhash) {
+    let querystr = `
+    {
+        entityTradeItems(first: 10,where:{id:"`+ txhash + `"}) {
+            id
+            pool
+            from
+            timestamp
+            status
+            settlement
+            settlementAmount
+            settlementPrice
+            leverageToken
+            leveragetype
+            value
+            price
+            amount
+        }
+    }`
+
+    console.log(querystr);
+
+    let result = await client.query(querystr);
+    let item = result.entityTradeItems[0];
+    console.log(item);
+
+    let tk = new web3.eth.Contract(tokenabi,item.settlement);
+    let settleName = await tk.methods.symbol().call();
+    let decimal = await tk.methods.decimals().call();
+
+    let tokenDecimal = getDecimalBN(decimal);
+    let priceDecimal = getPriceDecimalBN(decimal);
+
+    let wholedec = priceDecimal.mul(tokenDecimal);
+    console.log(wholedec.toString(10))
+
+    console.log(getDecimalBN(decimal).toString(10),getPriceDecimalBN(decimal).toString(10))
+
+    let val = GetValueOrZero(new BN(item.value),priceDecimal);
+    val = GetValueOrZero(val,tokenDecimal);
+
+    let tradeitem = {
+        Settlement: settleName,
+        Value: val,
+        SettlementAmount: GetValueOrZero(item.settlementAmount,tokenDecimal)
+    }
+
+    console.log(tradeitem)
+}
+
+let testid = "0xc776b393a4ca3ffee13956d2a1e0ad7e48af91df109ef7b09e525d00e8cb10e8";
+getEntityTradeItem(testid);
 
 
 
