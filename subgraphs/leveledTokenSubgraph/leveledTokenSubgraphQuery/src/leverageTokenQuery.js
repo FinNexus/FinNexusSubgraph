@@ -567,7 +567,6 @@ async function getLeverHedgeTokenPrice() {
 
 //////////////////////////////////////////////////////////////////////////////
 const Decimal = require("decimal");
-
 function getDecimalBN(decimal) {
     var decimalBN = "1";
     for(var i=0;i<decimal;i++) {
@@ -662,17 +661,22 @@ async function getEntityTradeItem(txhash) {
     let val = GetValueOrZero(new BN(item.value),priceDecimal);
     val = GetValueOrZero(val,tokenDecimal);
 
-    let tradeitem = {
+    let Volume = {
         Settlement: settleName,
         Value: val,
         SettlementAmount: GetValueOrZero(item.settlementAmount,tokenDecimal)
     }
 
-    console.log(tradeitem)
+    return Volume;
 }
 
-let testid = "0xc776b393a4ca3ffee13956d2a1e0ad7e48af91df109ef7b09e525d00e8cb10e8";
-getEntityTradeItem(testid);
+async function test() {
+    let testid = "0xc776b393a4ca3ffee13956d2a1e0ad7e48af91df109ef7b09e525d00e8cb10e8";
+    let Volume = await getEntityTradeItem(testid);
+    console.log(Volume);
+}
+
+test();
 
 
 
