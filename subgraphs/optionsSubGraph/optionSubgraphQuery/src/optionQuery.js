@@ -13,7 +13,7 @@ const Transport = require('lokka-transport-http').Transport;
 
 const client = new Lokka({
     // transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/leveragedpoolsubgraph')
-    transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/phx-polygon-mainnet-leverage')
+    transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/phx-polygon-option')
 });
 var web3 = new Web3(new Web3.providers.HttpProvider("https://rpc-mainnet.maticvigil.com/"));
 
