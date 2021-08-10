@@ -1,7 +1,7 @@
 const { createClient } = require('graphqurl');
 const BN = require("bn.js");
 var Web3 = require('web3');
-var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
+//var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
 
 var { abi } = require('./erc20token.json');
@@ -10,9 +10,12 @@ var tokenabi = abi;
 //npm i --save lokka lokka-transport-http
 const Lokka = require('lokka').Lokka;
 const Transport = require('lokka-transport-http').Transport;
+
 const client = new Lokka({
-    transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/phxoptions')
+    // transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/leveragedpoolsubgraph')
+    transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/phx-polygon-mainnet-leverage')
 });
+var web3 = new Web3(new Web3.providers.HttpProvider("https://rpc-mainnet.maticvigil.com/"));
 
 const PRICE_DECIMAL = new BN("100000000");
 const EIGHTEEN_DECIMAL = new BN("1000000000000000000");
@@ -304,21 +307,21 @@ async function getEntityPremiums() {
 //     PutAmount: BigInt
 //     PutUsdValue: BigInt
 // }
-client.query(`
-    {
-      entityFees(first: 1000) {
-        id
-        TimeStamp
-        Token
-        CallAmount
-        CallUsdValue
-        PutAmount
-        PutUsdValue
-      }      
-    }
-`).then(result => {
-    //console.log(result);
-});
+// client.query(`
+//     {
+//       entityFees(first: 1000) {
+//         id
+//         TimeStamp
+//         Token
+//         CallAmount
+//         CallUsdValue
+//         PutAmount
+//         PutUsdValue
+//       }
+//     }
+// `).then(result => {
+//     //console.log(result);
+// });
 
 async function getEntityFees() {
     let querystr = `
@@ -442,5 +445,21 @@ async function getEntityOptionItems() {
 }
 
 getEntityOptionItems();
+
+// type EntityTradeItem @entity {
+//     id: ID!
+//         pool: Bytes!
+//         from: Bytes!
+//         timestamp: BigInt!
+//         status: String
+//     settlement: Bytes
+//     settlementAmount: BigInt
+//     settlementPrice: BigInt
+//     leverageToken: Bytes
+//     leveragetype: String
+//     value: BigInt!
+//         price: BigInt!
+//         amount: BigInt!
+// }
 
 
