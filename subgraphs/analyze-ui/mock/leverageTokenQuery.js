@@ -2,8 +2,7 @@ const { createClient } = require('graphqurl');
 const Decimal = require("decimal.js");
 const BN = require("bn.js");
 var Web3 = require('web3');
-var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
-//var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
+
 
 var { abi } = require('./erc20token.json');
 var tokenabi = abi;
@@ -12,9 +11,16 @@ var tokenabi = abi;
 const Lokka = require('lokka').Lokka;
 const Transport = require('lokka-transport-http').Transport;
 
+// const client = new Lokka({
+//     transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/leveragedpoolsubgraph')
+// });
+//var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
+//var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
+
 const client = new Lokka({
-    transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/leveragedpoolsubgraph')
+  transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/phx-polygon-mainnet-leverage')
 });
+var web3 = new Web3(new Web3.providers.HttpProvider("https://rpc-mainnet.maticvigil.com/"));
 
 const PRICE_DECIMAL = new BN("1000000");
 const EIGHTEEN_DECIMAL = new BN("1000000000000000000");
@@ -517,7 +523,7 @@ export async function getTradeFee() {
         value
       } 
     }`
-    let result = await client.query(querystr)
+    let result = await client.query(querystr);
     let fees = result.entityFees;
     //console.log(fees);
     let allfees = new Map();

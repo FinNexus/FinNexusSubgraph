@@ -2,8 +2,6 @@ const { createClient } = require('graphqurl');
 const Decimal = require("decimal.js");
 const BN = require("bn.js");
 var Web3 = require('web3');
-var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/326fb0397704475abffcfa9ca9c0ee5a"));
-//var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
 
 var { abi } = require('./erc20token.json');
 var tokenabi = abi;
@@ -11,9 +9,17 @@ var levertool = require('./leverageTokenQuery');
 //npm i --save lokka lokka-transport-http
 const Lokka = require('lokka').Lokka;
 const Transport = require('lokka-transport-http').Transport;
+
+// const client = new Lokka({
+//     transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/phxoptions')
+// });
+//var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/326fb0397704475abffcfa9ca9c0ee5a"));
+//var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
+
 const client = new Lokka({
-    transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/phxoptions')
+  transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/phx-polygon-option')
 });
+var web3 = new Web3(new Web3.providers.HttpProvider("https://rpc-mainnet.maticvigil.com/"));
 
 const PRICE_DECIMAL = new BN("100000000");
 const EIGHTEEN_DECIMAL = new BN("1000000000000000000");
@@ -82,21 +88,26 @@ export async function getTvls() {
     }`
     let result = await client.query(querystr)
     let tvls = result.entityPoolTLVs;
-    //console.log(tvls)
+    //console.log(tvls);
+
     let alltvls = new Map();
     for(let i=0;i<tvls.length;i++) {
         let item = tvls[i];
         let tk = new web3.eth.Contract(tokenabi,item.Token);
         let name = await tk.methods.symbol().call();
         let decimal = await tk.methods.decimals().call();
-        let tokenDecimal = new Decimal(getDecimalBN(decimal).toString(10));
-        let priceDecimal = new Decimal(getPriceDecimalBN(decimal).toString(10));
+        let tokenDecimal = getDecimalBN(decimal);
+        let priceDecimal = getPriceDecimalBN(decimal);
+
+        let val = getValueOrZero(item.UsdValue,priceDecimal);
+        val = getValueOrZero(val,tokenDecimal);
+        //console.log(item.Amount.toString(),tokenDecimal.toString());
 
         let tvl = {
             Token: name,
             Date:getDate(item.TimeStamp),
-            Amount: getValueOrZero(item.Amount,tokenDecimal),
-            UsdValue: getValueOrZero(item.Amount,priceDecimal)
+            Amount: getValueOrZero(item.Amout,tokenDecimal),
+            UsdValue: val
         }
 
         if(alltvls[name]==undefined) {
