@@ -2,8 +2,9 @@ const { createClient } = require('graphqurl');
 
 const BN = require("bn.js");
 var Web3 = require('web3');
-var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
+//var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/75c431806c0d49ee9868d4fdcef025bd"));
+var web3 = new Web3(new Web3.providers.HttpProvider("https://rpc-mainnet.maticvigil.com/"));
 
 var { abi } = require('./erc20token.json');
 var tokenabi = abi;
@@ -13,7 +14,8 @@ const Lokka = require('lokka').Lokka;
 const Transport = require('lokka-transport-http').Transport;
 
 const client = new Lokka({
-    transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/leveragedpoolsubgraph')
+   // transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/leveragedpoolsubgraph')
+    transport: new Transport('https://api.thegraph.com/subgraphs/name/jeffqg123/phx-polygon-mainnet-leverage')
 });
 
 const PRICE_DECIMAL = new BN("1000000");
@@ -671,7 +673,7 @@ async function getEntityTradeItem(txhash) {
 }
 
 async function test() {
-    let testid = "0xc776b393a4ca3ffee13956d2a1e0ad7e48af91df109ef7b09e525d00e8cb10e8";
+    let testid = "0x088ed96ab6a61fe8dc80bc0b115ed31d4fad4ede6cc238708e523b80913c3d81";
     let Volume = await getEntityTradeItem(testid);
     console.log(Volume);
 }
