@@ -63,7 +63,8 @@ import {EntityLeveragePool,
 let ONE_DAY_SECONDS = 3600*24;
 //let ONE_DAY_SECONDS = 1;
 let FACTORY_ADDR = "0xe3f94b86ceadd68e1a5ba062100b89344b2e54b7";
-
+let ZERO_ADDRESS = Address.fromString("0x0000000000000000000000000000000000000000");
+let NATIVE_TK_NAME = "Matic";
 export function handleCreateLeveragePool(event: CreateLeveragePool): void {
     //begin monitor pool event
     leveragePoolTemplate.create(event.params.leveragePool);
@@ -81,11 +82,19 @@ export function handleCreateLeveragePool(event: CreateLeveragePool): void {
          let tk = erc20.bind(event.params.tokenB);
 
          poolEntity.underlyingAddress = event.params.tokenB;
-         poolEntity.underlyingName = tk.symbol();
+         if( poolEntity.underlyingAddress==ZERO_ADDRESS) {
+             poolEntity.underlyingName = NATIVE_TK_NAME;
+         } else {
+             poolEntity.underlyingName = tk.symbol();
+         }
 
          let info = leveragesc.getHedgeInfo();
-         let rk = erc20.bind(info.value2);
-         poolEntity.name = rk.name();
+         if(info.value2==ZERO_ADDRESS) {
+             poolEntity.name = NATIVE_TK_NAME;
+         } else {
+             let rk = erc20.bind(info.value2);
+             poolEntity.name = rk.name();
+         }
 
          poolEntity.save();
     }
@@ -105,8 +114,12 @@ export function handleCreateStakePool(event: CreateStakePool): void {
     if (poolEntity == null){
         poolEntity = new EntityStakePool(event.params.stakePool.toHex());
         poolEntity.underlyingAddress = event.params.token;
-        let tk = erc20.bind(event.params.token);
-        poolEntity.underlyingName = tk.symbol();
+        if( event.params.token==ZERO_ADDRESS) {
+            poolEntity.underlyingName = NATIVE_TK_NAME;
+        } else {
+            let tk = erc20.bind(event.params.token);
+            poolEntity.underlyingName = tk.symbol();
+        }
         poolEntity.interestrate = event.params.interestrate;
         poolEntity.save();
     }
@@ -309,6 +322,7 @@ export function handleBlock(block: ethereum.Block): void {
         totalTvlentity.value = BigInt.fromI32(0)
 
         let stakepools = factorysc.getAllStakePool();
+
         for (let i=0;i<stakepools.length;i++) {
             let pool = stakepools[i];
             let stkpool = stakePool.bind(pool);
@@ -348,6 +362,8 @@ export function handleBlock(block: ethereum.Block): void {
             }
 
         }
+
+
 
         let leveragepools = factorysc.getAllLeveragePool();
         for (let i=0;i<leveragepools.length;i++) {
