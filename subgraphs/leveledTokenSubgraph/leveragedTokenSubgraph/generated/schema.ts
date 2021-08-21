@@ -904,22 +904,47 @@ export class EntityFee extends Entity {
     }
   }
 
-  get amount(): BigInt {
+  get amount(): BigInt | null {
     let value = this.get("amount");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set amount(value: BigInt) {
-    this.set("amount", Value.fromBigInt(value));
+  set amount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("amount");
+    } else {
+      this.set("amount", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get value(): BigInt {
+  get value(): BigInt | null {
     let value = this.get("value");
-    return value.toBigInt();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set value(value: BigInt) {
-    this.set("value", Value.fromBigInt(value));
+  set value(value: BigInt | null) {
+    if (value === null) {
+      this.unset("value");
+    } else {
+      this.set("value", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get feeReciever(): Bytes {
+    let value = this.get("feeReciever");
+    return value.toBytes();
+  }
+
+  set feeReciever(value: Bytes) {
+    this.set("feeReciever", Value.fromBytes(value));
   }
 }
 

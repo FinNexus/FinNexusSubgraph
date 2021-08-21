@@ -382,20 +382,15 @@ export function handleBlock(block: ethereum.Block): void {
                 feeentity = new EntityFee(feeid);
                 feeentity.timestamp = block.timestamp;
                 feeentity.token = feeToken;
-                let tk = erc20.bind(feeToken);
-                let feercvr = lpsc.feeAddress();
-                feeentity.amount = tk.balanceOf(feercvr);
+                feeentity.feeReciever = lpsc.feeAddress();
+                feeentity.save();
+
                 if(prefeeentity!=null)  {
-                  let diff = tk.balanceOf(feercvr).minus(prefeeentity.amount);
-                  if(diff.ge(BigInt.fromI32(0))) {
-                      //get today's fee income
-                      feeentity.amount = diff;
-                  }
+                    let tkprice = oracelsc.getPrice(feeToken);
+                    prefeeentity.value = prefeeentity.amount.times(tkprice);
+                    prefeeentity.save();
                 }
 
-                let tkprice = oracelsc.getPrice(feeToken);
-                feeentity.value = feeentity.amount.times(tkprice);
-                feeentity.save();
             }
 
             let hedgeinfo = lpsc.getHedgeInfo();
@@ -409,19 +404,15 @@ export function handleBlock(block: ethereum.Block): void {
                 feeentity = new EntityFee(feeid);
                 feeentity.timestamp = block.timestamp;
                 feeentity.token = feeToken;
-                let tk = erc20.bind(feeToken);
-                let feercvr = lpsc.feeAddress();
-                feeentity.amount = tk.balanceOf(feercvr);
-                if(prefeeentity!=null)  {
-                    let diff = tk.balanceOf(feercvr).minus(prefeeentity.amount);
-                    if(diff.gt(BigInt.fromI32(0))) {
-                        //get today's fee income
-                        feeentity.amount = diff;
-                    }
-                }
-                let tkprice = oracelsc.getPrice(feeToken);
-                feeentity.value = feeentity.amount.times(tkprice);
+                feeentity.feeReciever = lpsc.feeAddress();
                 feeentity.save();
+
+                if(prefeeentity!=null)  {
+                    let tkprice = oracelsc.getPrice(feeToken);
+                    prefeeentity.value = prefeeentity.amount.times(tkprice);
+                    prefeeentity.save();
+                }
+
             }
             //already in usd
             let prices = lpsc.buyPrices();
@@ -442,12 +433,25 @@ export function handleBlock(block: ethereum.Block): void {
     }
 }
 
+export function handleRedeem(event: Redeem): void {
+    let id = event.block.timestamp.div(BigInt.fromI32(ONE_DAY_SECONDS));
+    let token = event.params.token;
+    let reciever = event.params.recieptor;
+
+    let feeid = token.toHex() + id.toHex().substr(2);
+    let feeentity = EntityFee.load(feeid);
+    if(feeentity!=null&&feeentity.feeReciever==reciever) {
+        feeentity.amount = feeentity.amount.plus(event.params.amount);
+        feeentity.save();
+    }
+}
+
 export function handleBorrow(event: Borrow): void {}
 export function handleLiquidate(event: Liquidate): void {}
 
 export function handleRebalance(event: Rebalance): void {}
 
-export function handleRedeem(event: Redeem): void {}
+
 
 export function handleSwap(event: Swap): void {}
 

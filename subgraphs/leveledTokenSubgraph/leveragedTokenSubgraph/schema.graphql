@@ -73,8 +73,9 @@ type EntityFee @entity {
   id: ID!
   timestamp: BigInt
   token: Bytes
-  amount: BigInt!
-  value: BigInt!
+  amount: BigInt
+  value: BigInt
+  feeReciever: Bytes!
 }
 
 type EntityPrice @entity {
