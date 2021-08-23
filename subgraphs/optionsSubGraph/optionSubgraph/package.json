@@ -4,7 +4,8 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy:polygon": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Jeffqg123/phx-polygon-option MainnetPolygonSubgraph.yaml",
+    "deploy:bsc": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Jeffqg123/bsc-option BscMainnetSubgraph.yaml",
+    "deploy:polygon": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Jeffqg123/phx-polygon-option PolygonMainnetSubgraph.yaml",
     "deploy:rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Jeffqg123/phxOptions",
     "create-local": "graph create --node http://localhost:8020/ Jeffqg123/phxOptions",
     "remove-local": "graph remove --node http://localhost:8020/ Jeffqg123/phxOptions"
